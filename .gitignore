@@ -1,0 +1,58 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+bin/
+obj/
+TestResults/
+
+# NuGet
+*.nupkg
+packages/
+.nuget/
+
+# Rider
+.idea/
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userprefs
+*.pidb
+
+# Auto-generated files
+*.g.cs
+*.g.i.cs
+
+# WinUI 3 specific
+# PackageOutput directory for MSIX packaging
+PackageOutput/
+
+# VS Code settings
+.vscode/
+
+# Dotnet watch files
+.dotnet/
+
+# Publish output
+publish/
+
+# IIS Express
+.IISExpress/
+
+# Resharper files
+_ReSharper*/
+
+# Others
+*.dbmdl
+*.bak
+*.log
