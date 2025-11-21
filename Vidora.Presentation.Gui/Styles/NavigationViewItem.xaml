@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--Override-->
+    <SolidColorBrush x:Key="NavigationViewSelectionIndicatorForeground" Color="Red"/>
+    <Style TargetType="NavigationViewItem">
+        <Setter Property="MinHeight" Value="50"/>
+        <Setter Property="FontSize" Value="14"/>
+    </Style>
+</ResourceDictionary>
