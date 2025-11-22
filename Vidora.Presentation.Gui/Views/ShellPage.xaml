@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Vidora.Presentation.Gui.Views.ShellPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Vidora.Presentation.Gui.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Loaded="OnLoaded">
+
+    <Grid>
+        <TitleBar
+            x:Name="AppTitleBar"
+            Canvas.ZIndex="1"
+            VerticalAlignment="Top">
+            <TitleBar.LeftHeader>
+                <Image
+                    x:Name="AppLogo"
+                    IsHitTestVisible="False"
+                    Margin="52,5,0,0"
+                    Height="14"
+                    VerticalAlignment="Center"
+                    Stretch="Uniform"
+                    Source="/Assets/AppLogo.png"/>
+            </TitleBar.LeftHeader>
+        </TitleBar>
+
+        <NavigationView
+            x:Name="AppNavigationView"
+            OpenPaneLength="200"
+            Margin="0,-1,0,0"
+            IsSettingsVisible="False"
+            IsPaneToggleButtonVisible="False"
+            IsBackButtonVisible="Collapsed"
+            PaneDisplayMode="LeftMinimal"
+            >
+
+            <NavigationView.MenuItems>
+            </NavigationView.MenuItems>
+
+            <NavigationView.FooterMenuItems>
+            </NavigationView.FooterMenuItems>
+
+            <NavigationView.Content>
+                <Frame x:Name="NavigationContentFrame"/>
+            </NavigationView.Content>
+        </NavigationView>
+    </Grid>
+</Page>

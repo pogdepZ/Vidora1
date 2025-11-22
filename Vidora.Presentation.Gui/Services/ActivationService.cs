@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Vidora.Presentation.Gui.Activation;
 using Vidora.Presentation.Gui.Contracts.Services;
+using Vidora.Presentation.Gui.Views;
 
 namespace Vidora.Presentation.Gui.Services;
 
@@ -19,9 +20,10 @@ public class ActivationService : IActivationService
         // Execute tasks before activation.
         await InitializeAsync();
 
+
         // Set the MainWindow Content.
         if (App.MainWindow.Content == null)
-            App.MainWindow.Content = new Microsoft.UI.Xaml.Controls.Frame();
+            App.MainWindow.Content = App.GetService<ShellPage>();
 
         // Handle activation via ActivationHandlers.
         await HandleActivationAsync(activationArgs);

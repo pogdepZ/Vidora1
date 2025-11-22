@@ -5,6 +5,8 @@ using Microsoft.UI.Xaml;
 using Vidora.Presentation.Gui.Activation;
 using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Services;
+using Vidora.Presentation.Gui.ViewModels;
+using Vidora.Presentation.Gui.Views;
 
 
 namespace Vidora.Presentation.Gui;
@@ -20,6 +22,14 @@ public static class DependencyInjection
 
         // Services
         services.AddSingleton<IActivationService, ActivationService>();
+
+        // Views
+        services.AddTransient<ShellPage>();
+        services.AddTransient<SplashPage>();
+
+        // ViewModels
+        services.AddTransient<ShellViewModel>();
+        services.AddTransient<SplashViewModel>();
 
         // Config
 
