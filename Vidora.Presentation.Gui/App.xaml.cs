@@ -6,6 +6,7 @@ using Vidora.Core;
 using Vidora.Infrastructure.Api;
 using Vidora.Infrastructure.Storage;
 using Vidora.Infrastructure.Persistence;
+using Vidora.Presentation.Gui.Contracts.Services;
 
 namespace Vidora.Presentation.Gui;
 
@@ -43,8 +44,8 @@ public partial class App : Application
         return service;
     }
 
-    protected override void OnLaunched(LaunchActivatedEventArgs args)
+    protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
-        MainWindow.Activate();
+        await App.GetService<IActivationService>().ActivateAsync(args);
     }
 }
