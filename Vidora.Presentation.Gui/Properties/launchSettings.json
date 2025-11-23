@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Vidora.Presentation.Gui (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Vidora.Presentation.Gui (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

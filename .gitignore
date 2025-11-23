@@ -9,6 +9,8 @@
 bin/
 obj/
 TestResults/
+[Bb]uild/
+[Ll]og/
 
 # NuGet
 *.nupkg
@@ -17,6 +19,7 @@ packages/
 
 # Rider
 .idea/
+*.DotSettings.user
 
 # Windows image file caches
 Thumbs.db
@@ -32,10 +35,16 @@ ehthumbs.db
 # Auto-generated files
 *.g.cs
 *.g.i.cs
+*.designer.cs
 
 # WinUI 3 specific
 # PackageOutput directory for MSIX packaging
 PackageOutput/
+AppPackages/
+*.msix
+*.msixbundle
+*.appx
+*.appxbundle
 
 # VS Code settings
 .vscode/
@@ -45,14 +54,23 @@ PackageOutput/
 
 # Publish output
 publish/
+artifacts/
 
 # IIS Express
 .IISExpress/
 
 # Resharper files
 _ReSharper*/
+*.[Rr]e[Ss]harper
 
-# Others
+# Entity Framework / SQL
 *.dbmdl
 *.bak
 *.log
+*.ldf
+*.mdf
+
+# Secrets / environment
+*.env.*
+!.env.example
+secrets.json
