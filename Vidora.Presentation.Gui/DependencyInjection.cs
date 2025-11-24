@@ -22,10 +22,14 @@ public static class DependencyInjection
 
         // Services
         services.AddSingleton<IActivationService, ActivationService>();
+        services.AddSingleton<INavigationViewService, NavigationViewService>();
+        services.AddSingleton<INavigationService, NavigationService>();
+        services.AddSingleton<IPageService, PageService>();
 
         // Views
         services.AddTransient<ShellPage>();
         services.AddTransient<SplashPage>();
+
 
         // ViewModels
         services.AddTransient<ShellViewModel>();

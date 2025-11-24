@@ -3,7 +3,6 @@ using Microsoft.UI.Xaml.Controls;
 using Vidora.Presentation.Gui.Helpers;
 using Vidora.Presentation.Gui.ViewModels;
 
-
 namespace Vidora.Presentation.Gui.Views;
 
 public sealed partial class ShellPage : Page
@@ -12,6 +11,7 @@ public sealed partial class ShellPage : Page
     public ShellPage()
     {
         InitializeComponent();
+        ViewModel.NavigationViewService.Initialize(AppNavigationView);
 
         App.MainWindow.ExtendsContentIntoTitleBar = true;
         App.MainWindow.SetTitleBar(AppTitleBar);
@@ -20,7 +20,5 @@ public sealed partial class ShellPage : Page
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         TitleBarHelper.UpdateTitleBar(RequestedTheme);
-
-        NavigationContentFrame.Navigate(typeof(SplashPage));
     }
 }
