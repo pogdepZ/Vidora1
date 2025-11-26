@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Threading.Tasks;
+using Vidora.Core.UseCases;
 using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
 
@@ -18,7 +19,13 @@ public class SplashViewModel : ObservableRecipient, INavigationAware
         await Task.Delay(2000);
         App.MainWindow.DispatcherQueue.TryEnqueue(async () =>
         {
-            await _navigationService.NavigateToAsync<LoginViewModel>(clearNavigation: true);
+            var uc = App.GetService<AutoLoginUseCase>();
+            var result = await uc.ExecuteAsync();
+
+            if (result.IsFailure)
+            {
+                await _navigationService.NavigateToAsync<LoginViewModel>(clearNavigation: true);
+            }
         });
     }
 
