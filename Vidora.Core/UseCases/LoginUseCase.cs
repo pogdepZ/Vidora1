@@ -3,6 +3,7 @@ using CSharpFunctionalExtensions;
 using System.Threading.Tasks;
 using Vidora.Core.Contracts.Requests;
 using Vidora.Core.Contracts.Responses;
+using Vidora.Core.Contracts.Services;
 using Vidora.Core.Entities;
 using Vidora.Core.Interfaces.Api;
 using Vidora.Core.ValueObjects;
@@ -12,10 +13,12 @@ namespace Vidora.Core.UseCases;
 public class LoginUseCase
 {
     private readonly IAuthApiService _authService;
+    private readonly ISessionStateService _sessionState;
     private readonly IMapper _mapper;
-    public LoginUseCase(IAuthApiService authService, IMapper mapper)
+    public LoginUseCase(IAuthApiService authService, ISessionStateService sessionState, IMapper mapper)
     {
         _authService = authService;
+        _sessionState = sessionState;
         _mapper = mapper;
     }
 
@@ -38,6 +41,7 @@ public class LoginUseCase
 
         // Save Sesion
         var newSession = _mapper.Map<Session>(apiResponse.Value);
+        _sessionState.SetSession(newSession);
 
         // Return
         return Result.Success<LoginResponse>(apiResponse.Value);

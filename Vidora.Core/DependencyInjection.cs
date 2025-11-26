@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Vidora.Core.Contracts.Services;
 using Vidora.Core.Mapping;
+using Vidora.Core.Services;
 using Vidora.Core.UseCases;
 
 namespace Vidora.Core;
@@ -13,6 +15,7 @@ public static class DependencyInjection
         services.AddTransient<LoginUseCase>();
 
         // Services
+        services.AddSingleton<ISessionStateService, SessionStateService>();
 
         // Mapping
         services.AddAutoMapper(typeof(LoginProfile).Assembly);

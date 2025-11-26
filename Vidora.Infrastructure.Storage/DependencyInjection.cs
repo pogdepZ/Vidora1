@@ -12,6 +12,7 @@ public static class DependencyInjection
         // TODO: Configure Infrastructure.Local services here
         services.AddSingleton<ILocalSettingsService, LocalSettingsService>();
         services.AddSingleton<ISecureVaultService, SecureVaultService>();
+        services.AddSingleton<ISessionStorageService, SessionStorageService>();
 
         return services;
     }

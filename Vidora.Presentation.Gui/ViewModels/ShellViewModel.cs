@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using Vidora.Core.Contracts.Services;
+using Vidora.Core.Events;
 using Vidora.Presentation.Gui.Contracts.Services;
 
 namespace Vidora.Presentation.Gui.ViewModels;
@@ -45,16 +47,35 @@ public partial class ShellViewModel : ObservableRecipient
     public INavigationViewService NavigationViewService { get; }
     private readonly IPageService _pageService;
     private readonly INavigationService _navigationService;
+    private readonly ISessionStateService _sessionState;
     public ShellViewModel(
         INavigationViewService navigationViewService,
         IPageService pageService,
-        INavigationService navigationService
+        INavigationService navigationService,
+        ISessionStateService sessionService
         )
     {
         NavigationViewService = navigationViewService;
+
         _pageService = pageService;
+
         _navigationService = navigationService;
         _navigationService.Navigated += OnNavigated;
+
+        _sessionState = sessionService;
+        _sessionState.SessionChanged += OnSessionChanged;
+    }
+
+    private async void OnSessionChanged(object? sender, SessionChangeEventArgs e)
+    {
+        switch (e.Reason)
+        {
+            case SessionChangeReason.ManualLogout:
+            case SessionChangeReason.ForcedLogout:
+            case SessionChangeReason.SessionExpired:
+                await _navigationService.NavigateToAsync<LoginViewModel>(clearNavigation: true);
+                break;
+        }
     }
 
     private void OnNavigated(object sender, NavigationEventArgs e)
@@ -65,6 +86,20 @@ public partial class ShellViewModel : ObservableRecipient
         if (selectedItem != null)
         {
             SelectedItem = selectedItem;
+        }
+
+        if (e.SourcePageType == _pageService.GetPageType<LoginViewModel>() ||
+            e.SourcePageType == _pageService.GetPageType<SplashViewModel>())
+        {
+            IsBackButtonVisible = false;
+            IsPaneToggleButtonVisible = false;
+            PaneDisplayMode = NavigationViewPaneDisplayMode.LeftMinimal;
+        }
+        else
+        {
+            IsBackButtonVisible = true;
+            IsPaneToggleButtonVisible = true;
+            PaneDisplayMode = NavigationViewPaneDisplayMode.LeftCompact;
         }
     }
 }
