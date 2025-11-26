@@ -29,11 +29,13 @@ public static class DependencyInjection
         // Views
         services.AddTransient<ShellPage>();
         services.AddTransient<SplashPage>();
+        services.AddTransient<LoginPage>();
 
 
         // ViewModels
         services.AddTransient<ShellViewModel>();
         services.AddTransient<SplashViewModel>();
+        services.AddTransient<LoginViewModel>();
 
         // Config
 
