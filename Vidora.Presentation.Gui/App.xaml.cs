@@ -4,7 +4,7 @@ using System;
 
 using Vidora.Core;
 using Vidora.Infrastructure.Api;
-using Vidora.Infrastructure.Storage;
+using Vidora.Infrastructure.Platform;
 using Vidora.Infrastructure.Persistence;
 using Vidora.Presentation.Gui.Contracts.Services;
 
@@ -28,7 +28,7 @@ public partial class App : Application
                     .AddCore(context.Configuration)
                     .AddPresentation(context.Configuration)
                     .AddInfrastructureApi(context.Configuration)
-                    .AddInfrastructureStorage(context.Configuration)
+                    .AddInfrastructurePlatform(context.Configuration)
                     .AddInfrastructurePersistence(context.Configuration);
             })
             .Build();

@@ -1,7 +1,7 @@
 ﻿using Vidora.Core.Interfaces.Storage;
 using Windows.Security.Credentials;
 
-namespace Vidora.Infrastructure.Storage.Services;
+namespace Vidora.Infrastructure.Platform.Services;
 
 public class SecureVaultService : ISecureVaultService
 {
