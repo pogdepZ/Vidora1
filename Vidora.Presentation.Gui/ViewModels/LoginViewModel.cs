@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
+using Vidora.Core.Contracts.Requests;
+using Vidora.Core.UseCases;
 using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
 
@@ -29,13 +31,31 @@ public partial class LoginViewModel : ObservableRecipient, INavigationAware
         set => SetProperty(ref _isRememberMe, value);
     }
 
-    public LoginViewModel()
+
+    private readonly LoginUseCase _loginUseCase;
+    public LoginViewModel(LoginUseCase loginUseCase)
     {
+        _loginUseCase = loginUseCase;
     }
 
     [RelayCommand]
     public async Task LoginAsync()
     {
+        var request = new LoginRequest(
+            Email: _email,
+            Password: _password
+            );
+
+        await Task.Delay(1000);
+        var result = await _loginUseCase.ExecuteAsync(request);
+
+        if (result.IsFailure)
+        {
+            Password = string.Empty;
+            System.Diagnostics.Debug.WriteLine(result.Error);
+            return;
+        }
+
         System.Diagnostics.Debug.WriteLine("Login success");
     }
 
