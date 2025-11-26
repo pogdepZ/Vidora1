@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Helpers;
+using Vidora.Presentation.Gui.ViewModels;
 
 namespace Vidora.Presentation.Gui.Services;
 
@@ -49,6 +50,7 @@ public class NavigationViewService : INavigationViewService
     {
         if (args.IsSettingsInvoked)
         {
+            await _navigationService.NavigateToAsync<SettingsViewModel>();
         }
         else
         {

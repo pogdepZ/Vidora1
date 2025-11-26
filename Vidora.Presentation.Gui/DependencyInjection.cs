@@ -30,12 +30,14 @@ public static class DependencyInjection
         services.AddTransient<ShellPage>();
         services.AddTransient<SplashPage>();
         services.AddTransient<LoginPage>();
+        services.AddTransient<SettingsPage>();
 
 
         // ViewModels
         services.AddTransient<ShellViewModel>();
         services.AddTransient<SplashViewModel>();
         services.AddTransient<LoginViewModel>();
+        services.AddTransient<SettingsViewModel>();
 
         // Config
 

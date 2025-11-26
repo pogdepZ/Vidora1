@@ -16,6 +16,8 @@ public class PageService : IPageService
     {
         Configure<SplashViewModel, SplashPage>();
         Configure<LoginViewModel, LoginPage>();
+
+        Configure<SettingsViewModel, SettingsPage>();
     }
 
     public Type GetPageType<TViewModel>()

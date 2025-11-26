@@ -70,6 +70,10 @@ public partial class ShellViewModel : ObservableRecipient
     {
         switch (e.Reason)
         {
+            case SessionChangeReason.AutoRestore:
+            case SessionChangeReason.ManualLogin:
+                await _navigationService.NavigateToAsync<SettingsViewModel>(clearNavigation: true);
+                break;
             case SessionChangeReason.ManualLogout:
             case SessionChangeReason.ForcedLogout:
             case SessionChangeReason.SessionExpired:
@@ -82,10 +86,17 @@ public partial class ShellViewModel : ObservableRecipient
     {
         IsBackEnabled = _navigationService.CanGoBack;
 
-        var selectedItem = NavigationViewService.GetSelectedItem(e.SourcePageType);
-        if (selectedItem != null)
+        if (e.SourcePageType == _pageService.GetPageType<SettingsViewModel>())
         {
-            SelectedItem = selectedItem;
+            SelectedItem = NavigationViewService.SettingsItem;
+        }
+        else
+        {
+            var selectedItem = NavigationViewService.GetSelectedItem(e.SourcePageType);
+            if (selectedItem != null)
+            {
+                SelectedItem = selectedItem;
+            }
         }
 
         if (e.SourcePageType == _pageService.GetPageType<LoginViewModel>() ||
