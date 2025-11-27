@@ -18,6 +18,7 @@ public static class DependencyInjection
 
         // Services
         services.AddSingleton<ISessionStateService, SessionStateService>();
+        services.AddTransient<IUserCredentialsService, UserCredentialsService>();
 
         // Mapping
         services.AddAutoMapper(typeof(LoginProfile).Assembly);

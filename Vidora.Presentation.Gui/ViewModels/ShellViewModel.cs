@@ -72,11 +72,17 @@ public partial class ShellViewModel : ObservableRecipient
         {
             case SessionChangeReason.AutoRestore:
             case SessionChangeReason.ManualLogin:
+                IsBackButtonVisible = true;
+                IsPaneToggleButtonVisible = true;
+                PaneDisplayMode = NavigationViewPaneDisplayMode.LeftCompact;
                 await _navigationService.NavigateToAsync<SettingsViewModel>(clearNavigation: true);
                 break;
             case SessionChangeReason.ManualLogout:
             case SessionChangeReason.ForcedLogout:
             case SessionChangeReason.SessionExpired:
+                IsBackButtonVisible = false;
+                IsPaneToggleButtonVisible = false;
+                PaneDisplayMode = NavigationViewPaneDisplayMode.LeftMinimal;
                 await _navigationService.NavigateToAsync<LoginViewModel>(clearNavigation: true);
                 break;
         }
@@ -97,20 +103,6 @@ public partial class ShellViewModel : ObservableRecipient
             {
                 SelectedItem = selectedItem;
             }
-        }
-
-        if (e.SourcePageType == _pageService.GetPageType<LoginViewModel>() ||
-            e.SourcePageType == _pageService.GetPageType<SplashViewModel>())
-        {
-            IsBackButtonVisible = false;
-            IsPaneToggleButtonVisible = false;
-            PaneDisplayMode = NavigationViewPaneDisplayMode.LeftMinimal;
-        }
-        else
-        {
-            IsBackButtonVisible = true;
-            IsPaneToggleButtonVisible = true;
-            PaneDisplayMode = NavigationViewPaneDisplayMode.LeftCompact;
         }
     }
 }

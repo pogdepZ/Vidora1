@@ -2,8 +2,8 @@
 using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
 using Vidora.Core.Contracts.Requests;
+using Vidora.Core.Contracts.Services;
 using Vidora.Core.UseCases;
-using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
 
 namespace Vidora.Presentation.Gui.ViewModels;
@@ -31,16 +31,32 @@ public partial class LoginViewModel : ObservableRecipient, INavigationAware
         set => SetProperty(ref _isRememberMe, value);
     }
 
+    private string _savedEmail = string.Empty;
+    private string _savedPassword = string.Empty;
+    private bool _isUsingSavedCredentials =>
+        !string.IsNullOrEmpty(_savedPassword) && _password == _savedPassword && _email == _savedEmail;
 
     private readonly LoginUseCase _loginUseCase;
-    public LoginViewModel(LoginUseCase loginUseCase)
+    private readonly IUserCredentialsService _credentialsService;
+    public LoginViewModel(LoginUseCase loginUseCase, IUserCredentialsService credentialsService)
     {
         _loginUseCase = loginUseCase;
+        _credentialsService = credentialsService;
     }
 
     [RelayCommand]
     public async Task LoginAsync()
     {
+        if (_isUsingSavedCredentials)
+        {
+            var verified = await _credentialsService.VerifyIdentityAsync();
+            if (!verified)
+            {
+                Password = string.Empty;
+                return;
+            }
+        }
+
         var request = new LoginRequest(
             Email: _email,
             Password: _password
@@ -52,8 +68,18 @@ public partial class LoginViewModel : ObservableRecipient, INavigationAware
         if (result.IsFailure)
         {
             Password = string.Empty;
+            _savedPassword = string.Empty;
             System.Diagnostics.Debug.WriteLine(result.Error);
             return;
+        }
+
+        if (_isRememberMe)
+        {
+            await _credentialsService.SaveCredentialsAsync(_email, _password);
+        }
+        else
+        {
+            await _credentialsService.ClearCredentialsAsync();
         }
 
         System.Diagnostics.Debug.WriteLine("Login success");
@@ -61,7 +87,16 @@ public partial class LoginViewModel : ObservableRecipient, INavigationAware
 
     public async Task OnNavigatedToAsync(object? param)
     {
+        var creds = await _credentialsService.GetCredentialsAsync(requireVerification: false);
+        if (creds is not null)
+        {
+            Email = creds.Email;
+            Password = creds.Password;
+            IsRememberMe = true;
 
+            _savedEmail = creds.Email;
+            _savedPassword = creds.Password;
+        }
     }
     public async Task OnNavigatedFromAsync()
     {

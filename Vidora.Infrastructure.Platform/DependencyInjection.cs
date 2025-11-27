@@ -13,6 +13,7 @@ public static class DependencyInjection
         services.AddSingleton<ILocalSettingsService, LocalSettingsService>();
         services.AddSingleton<ISecureVaultService, SecureVaultService>();
         services.AddSingleton<ISessionStorageService, SessionStorageService>();
+        services.AddSingleton<IIdentityVerificationService, IdentityVerificationService>();
 
         return services;
     }
