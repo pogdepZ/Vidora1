@@ -1,14 +1,23 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using AutoMapper;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using Vidora.Core.Contracts.Services;
 using Vidora.Core.Events;
 using Vidora.Presentation.Gui.Contracts.Services;
+using Vidora.Presentation.Gui.Models;
 
 namespace Vidora.Presentation.Gui.ViewModels;
 
 public partial class ShellViewModel : ObservableRecipient
 {
+    private Role? _currentUserRole;
+    public Role? CurrentUserRole
+    {
+        get => _currentUserRole;
+        set => SetProperty(ref _currentUserRole, value);
+    }
+
     private object? _selectedItem;
     public object? SelectedItem
     {
@@ -48,11 +57,13 @@ public partial class ShellViewModel : ObservableRecipient
     private readonly IPageService _pageService;
     private readonly INavigationService _navigationService;
     private readonly ISessionStateService _sessionState;
+    private readonly IMapper _mapper;
     public ShellViewModel(
         INavigationViewService navigationViewService,
         IPageService pageService,
         INavigationService navigationService,
-        ISessionStateService sessionService
+        ISessionStateService sessionService,
+        IMapper mapper
         )
     {
         NavigationViewService = navigationViewService;
@@ -64,6 +75,8 @@ public partial class ShellViewModel : ObservableRecipient
 
         _sessionState = sessionService;
         _sessionState.SessionChanged += OnSessionChanged;
+
+        _mapper = mapper;
     }
 
     private async void OnSessionChanged(object? sender, SessionChangeEventArgs e)
@@ -86,6 +99,8 @@ public partial class ShellViewModel : ObservableRecipient
                 await _navigationService.NavigateToAsync<LoginViewModel>(clearNavigation: true);
                 break;
         }
+
+        CurrentUserRole = _mapper.Map<Role?>(_sessionState.CurrentUser?.Role);
     }
 
     private void OnNavigated(object sender, NavigationEventArgs e)

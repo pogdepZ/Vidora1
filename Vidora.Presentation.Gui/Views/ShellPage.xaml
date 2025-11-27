@@ -7,6 +7,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:helpers="using:Vidora.Presentation.Gui.Helpers"
+    xmlns:behaviors="using:Vidora.Presentation.Gui.Behaviors"
+    xmlns:Interactivity="using:Microsoft.Xaml.Interactivity"
     mc:Ignorable="d"
     Loaded="OnLoaded">
 
@@ -38,7 +40,54 @@
             IsPaneToggleButtonVisible="{x:Bind ViewModel.IsPaneToggleButtonVisible, Mode=OneWay}"
             PaneDisplayMode="{x:Bind ViewModel.PaneDisplayMode, Mode=OneWay}">
 
+            <Interactivity:Interaction.Behaviors>
+                <behaviors:NavigationViewRoleFilterBehavior CurrentRole="{x:Bind ViewModel.CurrentUserRole, Mode=OneWay}" />
+            </Interactivity:Interaction.Behaviors>
+
             <NavigationView.MenuItems>
+                <NavigationViewItem
+                    helpers:RoleRequiredAttachedProperty.RoleRequired="User"
+                    helpers:NavigationAttachedProperty.NavigateTo="HomeViewModel"
+                    Content="Home">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE80F;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+
+                <NavigationViewItem
+                    helpers:RoleRequiredAttachedProperty.RoleRequired="User"
+                    helpers:NavigationAttachedProperty.NavigateTo="SeriesViewModel"
+                    Content="Series">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEE40;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+
+                <NavigationViewItem
+                    helpers:RoleRequiredAttachedProperty.RoleRequired="User"
+                    helpers:NavigationAttachedProperty.NavigateTo="MoviesViewModel"
+                    Content="Movies">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8B2;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+
+                <NavigationViewItem
+                    helpers:RoleRequiredAttachedProperty.RoleRequired="User"
+                    helpers:NavigationAttachedProperty.NavigateTo="MyActivityViewModel"
+                    Content="My Activity">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xECC5;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem
+                    helpers:RoleRequiredAttachedProperty.RoleRequired="User"
+                    helpers:NavigationAttachedProperty.NavigateTo="ProfileViewModel"
+                    Content="Profile">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE779;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
 
             <NavigationView.FooterMenuItems>
