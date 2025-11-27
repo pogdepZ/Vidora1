@@ -29,6 +29,14 @@
             </TitleBar.LeftHeader>
         </TitleBar>
 
+        <InfoBar
+            x:Name="AppInfoBar"
+            Canvas.ZIndex="2"
+            IsOpen="False"
+            Margin="0,50,0,0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"/>
+
         <NavigationView
             x:Name="AppNavigationView"
             OpenPaneLength="200"

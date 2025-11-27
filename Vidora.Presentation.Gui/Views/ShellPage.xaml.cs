@@ -11,6 +11,7 @@ public sealed partial class ShellPage : Page
     public ShellPage()
     {
         InitializeComponent();
+        ViewModel.InfoBarService.Initialize(AppInfoBar);
         ViewModel.NavigationViewService.Initialize(AppNavigationView);
 
         App.MainWindow.ExtendsContentIntoTitleBar = true;
