@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.WinUI;
 using System.Threading.Tasks;
 using Vidora.Core.UseCases;
 using Vidora.Presentation.Gui.Contracts.Services;
@@ -17,7 +18,7 @@ public class SplashViewModel : ObservableRecipient, INavigationAware
     public async Task OnNavigatedToAsync(object parameter)
     {
         await Task.Delay(2000);
-        App.MainWindow.DispatcherQueue.TryEnqueue(async () =>
+        await App.MainWindow.DispatcherQueue.EnqueueAsync(async () =>
         {
             var uc = App.GetService<AutoLoginUseCase>();
             var result = await uc.ExecuteAsync();

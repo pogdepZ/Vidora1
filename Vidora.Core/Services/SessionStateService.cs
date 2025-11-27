@@ -57,6 +57,7 @@ public class SessionStateService : ISessionStateService
 
         CurrentSession.CurrentUser = updatedUser;
         _sessionStorage.SaveSession(CurrentSession);
+        SessionChanged?.Invoke(this, new SessionChangeEventArgs(SessionChangeReason.UserUpdated));
     }
 
     public void UpdateAccessToken(AuthToken newAccessToken)
@@ -67,6 +68,7 @@ public class SessionStateService : ISessionStateService
         }
         CurrentSession.AccessToken = newAccessToken;
         _sessionStorage.SaveSession(CurrentSession);
+        SessionChanged?.Invoke(this, new SessionChangeEventArgs(SessionChangeReason.TokenRefreshed));
     }
 
 
