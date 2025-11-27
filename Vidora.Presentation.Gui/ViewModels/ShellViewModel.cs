@@ -53,12 +53,15 @@ public partial class ShellViewModel : ObservableRecipient
         set => SetProperty(ref _paneDisplayMode, value);
     }
 
+    public IInfoBarService InfoBarService { get; }
     public INavigationViewService NavigationViewService { get; }
+
     private readonly IPageService _pageService;
     private readonly INavigationService _navigationService;
     private readonly ISessionStateService _sessionState;
     private readonly IMapper _mapper;
     public ShellViewModel(
+        IInfoBarService infoBarService,
         INavigationViewService navigationViewService,
         IPageService pageService,
         INavigationService navigationService,
@@ -67,6 +70,7 @@ public partial class ShellViewModel : ObservableRecipient
         )
     {
         NavigationViewService = navigationViewService;
+        InfoBarService = infoBarService;
 
         _pageService = pageService;
 
@@ -119,5 +123,7 @@ public partial class ShellViewModel : ObservableRecipient
                 SelectedItem = selectedItem;
             }
         }
+
+        InfoBarService.CloseIfOpen();
     }
 }

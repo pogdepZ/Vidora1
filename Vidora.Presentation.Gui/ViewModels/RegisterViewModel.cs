@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
 using System.Threading.Tasks;
 using Vidora.Core.Contracts.Requests;
 using Vidora.Core.UseCases;
@@ -49,10 +48,15 @@ public partial class RegisterViewModel : ObservableRecipient, INavigationAware
 
     private readonly RegisterUseCase _registerUseCase;
     private readonly INavigationService _navigationService;
-    public RegisterViewModel(RegisterUseCase registerUseCase, INavigationService navigationService)
+    private readonly IInfoBarService _infoBarService;
+    public RegisterViewModel(
+        RegisterUseCase registerUseCase,
+        INavigationService navigationService,
+        IInfoBarService infoBarService)
     {
         _registerUseCase = registerUseCase;
         _navigationService = navigationService;
+        _infoBarService = infoBarService;
     }
 
     [RelayCommand]
@@ -60,7 +64,7 @@ public partial class RegisterViewModel : ObservableRecipient, INavigationAware
     { 
         if (_password != _confirmPassword)
         {
-            System.Diagnostics.Debug.WriteLine("Passwords do not match");
+            _infoBarService.ShowError("Passwords do not match");
             return;
         }
 
@@ -74,10 +78,9 @@ public partial class RegisterViewModel : ObservableRecipient, INavigationAware
         var result = await _registerUseCase.ExecuteAsync(request);
         if (result.IsFailure)
         {
-            System.Diagnostics.Debug.WriteLine(result.Error);
+            _infoBarService.ShowError(result.Error);
+            return;
         }
-
-        System.Diagnostics.Debug.WriteLine(result.Value.Message);
 
         await _navigationService.NavigateToAsync<LoginViewModel>(parameter: _email, clearNavigation: true);
     }
