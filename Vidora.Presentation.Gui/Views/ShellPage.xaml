@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Vidora.Presentation.Gui.Views.ShellPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Vidora.Presentation.Gui.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:helpers="using:Vidora.Presentation.Gui.Helpers"
+    xmlns:behaviors="using:Vidora.Presentation.Gui.Behaviors"
+    xmlns:Interactivity="using:Microsoft.Xaml.Interactivity"
+    mc:Ignorable="d"
+    Loaded="OnLoaded">
+
+    <Grid>
+        <TitleBar
+            x:Name="AppTitleBar"
+            Canvas.ZIndex="1"
+            IsHitTestVisible="False"
+            VerticalAlignment="Top">
+            <TitleBar.LeftHeader>
+                <Image
+                    x:Name="AppLogo"
+                    Margin="48,0,0,0"
+                    Height="14"
+                    VerticalAlignment="Center"
+                    Stretch="Uniform"
+                    Source="/Assets/AppLogo.png"/>
+            </TitleBar.LeftHeader>
+        </TitleBar>
+
+        <NavigationView
+            x:Name="AppNavigationView"
+            OpenPaneLength="200"
+            Margin="0,-1,0,0"
+            IsSettingsVisible="True"
+            SelectedItem="{x:Bind ViewModel.SelectedItem, Mode=OneWay}"
+            IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
+            IsBackButtonVisible="{x:Bind ViewModel.IsBackButtonVisible, Converter={StaticResource BoolToBackButtonVisibilityConverter}, Mode=OneWay}"
+            IsPaneToggleButtonVisible="{x:Bind ViewModel.IsPaneToggleButtonVisible, Mode=OneWay}"
+            PaneDisplayMode="{x:Bind ViewModel.PaneDisplayMode, Mode=OneWay}">
+
+            <Interactivity:Interaction.Behaviors>
+                <behaviors:NavigationViewRoleFilterBehavior CurrentRole="{x:Bind ViewModel.CurrentUserRole, Mode=OneWay}" />
+            </Interactivity:Interaction.Behaviors>
+
+            <NavigationView.MenuItems>
+                <NavigationViewItem
+                    helpers:RoleRequiredAttachedProperty.RoleRequired="User"
+                    helpers:NavigationAttachedProperty.NavigateTo="HomeViewModel"
+                    Content="Home">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE80F;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+
+                <NavigationViewItem
+                    helpers:RoleRequiredAttachedProperty.RoleRequired="User"
+                    helpers:NavigationAttachedProperty.NavigateTo="SeriesViewModel"
+                    Content="Series">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEE40;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+
+                <NavigationViewItem
+                    helpers:RoleRequiredAttachedProperty.RoleRequired="User"
+                    helpers:NavigationAttachedProperty.NavigateTo="MoviesViewModel"
+                    Content="Movies">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8B2;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+
+                <NavigationViewItem
+                    helpers:RoleRequiredAttachedProperty.RoleRequired="User"
+                    helpers:NavigationAttachedProperty.NavigateTo="MyActivityViewModel"
+                    Content="My Activity">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xECC5;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem
+                    helpers:RoleRequiredAttachedProperty.RoleRequired="User"
+                    helpers:NavigationAttachedProperty.NavigateTo="ProfileViewModel"
+                    Content="Profile">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE779;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <NavigationView.FooterMenuItems>
+            </NavigationView.FooterMenuItems>
+
+            <NavigationView.Content>
+                <Frame x:Name="NavigationContentFrame"/>
+            </NavigationView.Content>
+        </NavigationView>
+    </Grid>
+</Page>

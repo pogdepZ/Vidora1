@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Vidora.Presentation.Gui (Package)": {
+      "commandName": "MsixPackage",
+      "alwaysReinstallApp": true
+    },
+    "Vidora.Presentation.Gui (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
