@@ -20,5 +20,7 @@ public interface ISessionStateService
 
     void RestoreSession();
     void SetSession(Session newSession, SessionChangeReason reason = SessionChangeReason.ManualLogin);
+    void UpdateUser(User updatedUser);
+    void UpdateAccessToken(AuthToken newAccessToken);
     void ClearSession(SessionChangeReason reason = SessionChangeReason.ManualLogout);
 }

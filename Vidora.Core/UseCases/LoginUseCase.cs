@@ -25,19 +25,26 @@ public class LoginUseCase
     public async Task<Result<LoginResponse>> ExecuteAsync(LoginRequest request)
     {
         // Validate
-        if (!Email.TryCreate(request.Email, out var email, out var error))
+        if (!Email.TryCreate(request.Email, out var validatedEmail, out var error))
         {
             return Result.Failure<LoginResponse>(error);
         }
-        if (!Password.TryCreate(request.Password, out var password, out error))
+        if (!Password.TryCreate(request.Password, out var validatedPassword, out error))
         {
             return Result.Failure<LoginResponse>(error);
         }
 
-        var apiRequest = new LoginRequest(email, password);
+        var apiRequest = request with {
+            Email = validatedEmail,
+            Password = validatedPassword
+        };
 
         // Call api
         var apiResponse = await _authService.LoginAsync(apiRequest);
+        if (apiResponse.IsFailure)
+        {
+            return Result.Failure<LoginResponse>(apiResponse.Error);
+        }
 
         // Save Sesion
         var newSession = _mapper.Map<Session>(apiResponse.Value);
