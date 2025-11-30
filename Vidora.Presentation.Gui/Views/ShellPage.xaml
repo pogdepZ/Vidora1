@@ -61,31 +61,28 @@
                         <FontIcon Glyph="&#xE80F;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-
                 <NavigationViewItem
                     helpers:RoleRequiredAttachedProperty.RoleRequired="User"
-                    helpers:NavigationAttachedProperty.NavigateTo="SeriesViewModel"
-                    Content="Series">
+                    helpers:NavigationAttachedProperty.NavigateTo="SearchViewModel"
+                    Content="Search">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xEE40;"/>
+                        <FontIcon Glyph="&#xE721;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-
                 <NavigationViewItem
                     helpers:RoleRequiredAttachedProperty.RoleRequired="User"
-                    helpers:NavigationAttachedProperty.NavigateTo="MoviesViewModel"
-                    Content="Movies">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE8B2;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-
-                <NavigationViewItem
-                    helpers:RoleRequiredAttachedProperty.RoleRequired="User"
-                    helpers:NavigationAttachedProperty.NavigateTo="MyActivityViewModel"
-                    Content="My Activity">
+                    helpers:NavigationAttachedProperty.NavigateTo="WatchlistViewModel"
+                    Content="Watchlist">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xECC5;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem
+                    helpers:RoleRequiredAttachedProperty.RoleRequired="User"
+                    helpers:NavigationAttachedProperty.NavigateTo="SubscriptionViewModel"
+                    Content="Subscription">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8C7;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem
@@ -96,6 +93,48 @@
                         <FontIcon Glyph="&#xE779;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                
+                <!--Admin-->
+                <NavigationViewItem
+                    helpers:RoleRequiredAttachedProperty.RoleRequired="Admin"
+                    helpers:NavigationAttachedProperty.NavigateTo="AdminDashboardViewModel"
+                    Content="Dashboard">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xF246;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem
+                    helpers:RoleRequiredAttachedProperty.RoleRequired="Admin"
+                    helpers:NavigationAttachedProperty.NavigateTo="AdminReportsViewModel"
+                    Content="Reports">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE9F9;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem
+                    helpers:RoleRequiredAttachedProperty.RoleRequired="Admin"
+                    helpers:NavigationAttachedProperty.NavigateTo="ManageMoviesViewModel"
+                    Content="Movies">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8B2;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem
+                    helpers:RoleRequiredAttachedProperty.RoleRequired="Admin"
+                    helpers:NavigationAttachedProperty.NavigateTo="ManageSubscriptionsViewModel"
+                    Content="Subcriptions">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8C7;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem
+                    helpers:RoleRequiredAttachedProperty.RoleRequired="Admin"
+                    helpers:NavigationAttachedProperty.NavigateTo="ManageUsersViewModel"
+                    Content="Users">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE716;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>                
             </NavigationView.MenuItems>
 
             <NavigationView.FooterMenuItems>
