@@ -19,8 +19,20 @@ public class PageService : IPageService
         Configure<RegisterViewModel, RegisterPage>();
 
         Configure<SettingsViewModel, SettingsPage>();
+
         Configure<HomeViewModel, HomePage>();
+        Configure<SearchViewModel, SearchPage>();
+        Configure<WatchlistViewModel, WatchlistPage>();
+        Configure<SubscriptionViewModel, SubscriptionPage>();
+        Configure<ProfileViewModel, ProfilePage>();
+        Configure<MovieDetailViewModel, MovieDetailPage>();
         Configure<VideoPlayerViewModel, VideoPlayerPage>();
+
+        Configure<AdminDashboardViewModel, AdminDashboardPage>();
+        Configure<AdminReportsViewModel, AdminReportsPage>();
+        Configure<ManageMoviesViewModel, ManageMoviesPage>();
+        Configure<ManageSubscriptionsViewModel, ManageSubscriptionsPage>();
+        Configure<ManageUsersViewModel, ManageUsersPage>();
     }
 
     public Type GetPageType<TViewModel>()

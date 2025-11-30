@@ -100,8 +100,7 @@ public partial class ShellViewModel : ObservableRecipient
                 }
                 else
                 {
-                    // TODO: admin -> dashboard
-                    await _navigationService.NavigateToAsync<SettingsViewModel>(clearNavigation: true);
+                    await _navigationService.NavigateToAsync<AdminDashboardViewModel>(clearNavigation: true);
                 }
                 break;
             case SessionChangeReason.ManualLogout:

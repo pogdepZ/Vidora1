@@ -37,7 +37,18 @@ public static class DependencyInjection
         services.AddTransient<RegisterPage>();
         services.AddTransient<SettingsPage>();
         services.AddTransient<HomePage>();
+        services.AddTransient<SearchPage>();
+        services.AddTransient<WatchlistPage>();
+        services.AddTransient<SubscriptionPage>();
+        services.AddTransient<ProfilePage>();
+        services.AddTransient<MovieDetailPage>();
         services.AddTransient<VideoPlayerPage>();
+
+        services.AddTransient<AdminDashboardPage>();
+        services.AddTransient<AdminReportsPage>();
+        services.AddTransient<ManageMoviesPage>();
+        services.AddTransient<ManageSubscriptionsPage>();
+        services.AddTransient<ManageUsersPage>();
 
 
         // ViewModels
@@ -47,7 +58,19 @@ public static class DependencyInjection
         services.AddTransient<RegisterViewModel>();
         services.AddTransient<SettingsViewModel>();
         services.AddTransient<HomeViewModel>();
+        services.AddTransient<SearchViewModel>();
+        services.AddTransient<WatchlistViewModel>();
+        services.AddTransient<SubscriptionViewModel>();
+        services.AddTransient<ProfileViewModel>();
+        services.AddTransient<MovieDetailViewModel>();
         services.AddTransient<VideoPlayerViewModel>();
+
+        services.AddTransient<AdminDashboardViewModel>();
+        services.AddTransient<AdminReportsViewModel>();
+        services.AddTransient<ManageMoviesViewModel>();
+        services.AddTransient<ManageSubscriptionsViewModel>();
+        services.AddTransient<ManageUsersViewModel>();
+
         services.AddTransient<HeroSectionItemViewModel>(); // Controls are only allowed to register viewmodels
 
 
