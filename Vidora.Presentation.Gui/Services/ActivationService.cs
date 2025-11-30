@@ -9,17 +9,19 @@ namespace Vidora.Presentation.Gui.Services;
 public class ActivationService : IActivationService
 {
     private readonly ActivationHandler<LaunchActivatedEventArgs> _defaultHandler;
-
-    public ActivationService(ActivationHandler<LaunchActivatedEventArgs> defaultHandler)
+    private readonly IThemeSelectorService _themeSelectorService;
+    public ActivationService(
+        ActivationHandler<LaunchActivatedEventArgs> defaultHandler,
+        IThemeSelectorService themeSelectorService)
     {
         _defaultHandler = defaultHandler;
+        _themeSelectorService = themeSelectorService;
     }
 
     public async Task ActivateAsync(object activationArgs)
     {
         // Execute tasks before activation.
         await InitializeAsync();
-
 
         // Set the MainWindow Content.
         if (App.MainWindow.Content == null)
@@ -45,11 +47,13 @@ public class ActivationService : IActivationService
 
     private async Task InitializeAsync()
     {
+        _themeSelectorService.Initialize();
         await Task.CompletedTask;
     }
 
     private async Task StartupAsync()
     {
+        _themeSelectorService.SetRequestedTheme();
         await Task.CompletedTask;
     }
 }
