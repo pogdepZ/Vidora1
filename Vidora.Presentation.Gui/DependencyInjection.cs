@@ -27,6 +27,8 @@ public static class DependencyInjection
         services.AddSingleton<INavigationService, NavigationService>();
         services.AddSingleton<IPageService, PageService>();
         services.AddSingleton<IInfoBarService, InfoBarService>();
+        services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
+
 
         // Views
         services.AddTransient<ShellPage>();
