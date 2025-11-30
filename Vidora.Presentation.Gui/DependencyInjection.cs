@@ -34,6 +34,8 @@ public static class DependencyInjection
         services.AddTransient<LoginPage>();
         services.AddTransient<RegisterPage>();
         services.AddTransient<SettingsPage>();
+        services.AddTransient<HomePage>();
+        services.AddTransient<VideoPlayerPage>();
 
 
         // ViewModels
@@ -42,6 +44,9 @@ public static class DependencyInjection
         services.AddTransient<LoginViewModel>();
         services.AddTransient<RegisterViewModel>();
         services.AddTransient<SettingsViewModel>();
+        services.AddTransient<HomeViewModel>();
+        services.AddTransient<VideoPlayerViewModel>();
+        services.AddTransient<HeroSectionItemViewModel>(); // Controls are only allowed to register viewmodels
 
 
         // Mapping

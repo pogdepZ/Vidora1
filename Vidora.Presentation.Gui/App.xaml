@@ -3,6 +3,7 @@
     x:Class="Vidora.Presentation.Gui.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    RequestedTheme="Dark"
     xmlns:local="using:Vidora.Presentation.Gui">
     <Application.Resources>
         <ResourceDictionary>
