@@ -28,6 +28,7 @@ public class AutoLoginUseCase
         _sessionState.RestoreSession();
         if (!_sessionState.IsSessionValid)
         {
+            _sessionState.ClearSession(SessionChangeReason.ForcedLogout);
             return Result.Failure("No valid session found. Please log in.");
         }
 
