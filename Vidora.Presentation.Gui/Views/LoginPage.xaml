@@ -54,7 +54,9 @@
                     <TextBlock 
                         Style="{StaticResource HeaderExtraLargeTextBlockStyle}"
                         Text="Sign In"/>
-                    <HyperlinkButton Grid.Column="1" Padding="0" CornerRadius="100">
+                    <HyperlinkButton
+                        Grid.Column="1" Padding="0" CornerRadius="100"
+                        NavigateUri="https://hcmus.edu.vn/">
                         <FontIcon Glyph="&#xF167;"/>
                     </HyperlinkButton>
                 </Grid>
@@ -106,7 +108,8 @@
                     <HyperlinkButton
                         FontSize="12"
                         Padding="0"
-                        Content="Sign up"/>
+                        Content="Sign up"
+                        Command="{x:Bind ViewModel.NavigateToRegisterCommand}"/>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

@@ -28,6 +28,9 @@ public class SessionStorageService : ISessionStorageService
         if (string.IsNullOrEmpty(accessRaw) || string.IsNullOrEmpty(refreshRaw))
             return null;
 
+        if (stored.RefreshToken.IsExpired)
+            return null;
+
         return new Session
         {
             CurrentUser = stored.CurrentUser,

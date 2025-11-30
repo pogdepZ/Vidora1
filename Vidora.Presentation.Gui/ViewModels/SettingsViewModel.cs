@@ -1,9 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using Vidora.Core.UseCases;
+using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
 
 namespace Vidora.Presentation.Gui.ViewModels;
@@ -17,10 +20,37 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         set => SetProperty(ref _versionDescription, value);
     }
 
+    private ElementTheme _selectedTheme;
+    public ElementTheme SelectedTheme
+    {
+        get => _selectedTheme;
+        set
+        {
+            if (SetProperty(ref _selectedTheme, value))
+            {
+                _themeSelectorService.SetTheme(value);
+            }
+        }
+    }
+
+    public List<ElementTheme> ElementThemes { get; }
+
     private readonly LogoutUseCase _logoutUseCase;
-    public SettingsViewModel(LogoutUseCase logoutUseCase)
+    private readonly IThemeSelectorService _themeSelectorService;
+    public SettingsViewModel(LogoutUseCase logoutUseCase, IThemeSelectorService themeSelectorService)
     {
         _logoutUseCase = logoutUseCase;
+        _themeSelectorService = themeSelectorService;
+        
+        SelectedTheme = _themeSelectorService.Theme;
+
+        ElementThemes =
+        [
+            ElementTheme.Light,
+            ElementTheme.Dark,
+            ElementTheme.Default
+        ];
+
         VersionDescription = GetVersionDescription();
     }
 

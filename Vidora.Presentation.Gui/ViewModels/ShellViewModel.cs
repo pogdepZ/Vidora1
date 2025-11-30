@@ -53,12 +53,15 @@ public partial class ShellViewModel : ObservableRecipient
         set => SetProperty(ref _paneDisplayMode, value);
     }
 
+    public IInfoBarService InfoBarService { get; }
     public INavigationViewService NavigationViewService { get; }
+
     private readonly IPageService _pageService;
     private readonly INavigationService _navigationService;
     private readonly ISessionStateService _sessionState;
     private readonly IMapper _mapper;
     public ShellViewModel(
+        IInfoBarService infoBarService,
         INavigationViewService navigationViewService,
         IPageService pageService,
         INavigationService navigationService,
@@ -67,6 +70,7 @@ public partial class ShellViewModel : ObservableRecipient
         )
     {
         NavigationViewService = navigationViewService;
+        InfoBarService = infoBarService;
 
         _pageService = pageService;
 
@@ -81,6 +85,8 @@ public partial class ShellViewModel : ObservableRecipient
 
     private async void OnSessionChanged(object? sender, SessionChangeEventArgs e)
     {
+        CurrentUserRole = _mapper.Map<Role?>(_sessionState.CurrentUser?.Role);
+
         switch (e.Reason)
         {
             case SessionChangeReason.AutoRestore:
@@ -88,7 +94,14 @@ public partial class ShellViewModel : ObservableRecipient
                 IsBackButtonVisible = true;
                 IsPaneToggleButtonVisible = true;
                 PaneDisplayMode = NavigationViewPaneDisplayMode.LeftCompact;
-                await _navigationService.NavigateToAsync<SettingsViewModel>(clearNavigation: true);
+                if (_currentUserRole == Role.User)
+                {
+                    await _navigationService.NavigateToAsync<HomeViewModel>(clearNavigation: true);
+                }
+                else
+                {
+                    await _navigationService.NavigateToAsync<AdminDashboardViewModel>(clearNavigation: true);
+                }
                 break;
             case SessionChangeReason.ManualLogout:
             case SessionChangeReason.ForcedLogout:
@@ -99,12 +112,12 @@ public partial class ShellViewModel : ObservableRecipient
                 await _navigationService.NavigateToAsync<LoginViewModel>(clearNavigation: true);
                 break;
         }
-
-        CurrentUserRole = _mapper.Map<Role?>(_sessionState.CurrentUser?.Role);
     }
 
     private void OnNavigated(object sender, NavigationEventArgs e)
     {
+        InfoBarService.CloseIfOpen();
+
         IsBackEnabled = _navigationService.CanGoBack;
 
         if (e.SourcePageType == _pageService.GetPageType<SettingsViewModel>())
@@ -117,6 +130,29 @@ public partial class ShellViewModel : ObservableRecipient
             if (selectedItem != null)
             {
                 SelectedItem = selectedItem;
+            }
+        }
+
+        if (CurrentUserRole != null)
+        {
+            if (e.SourcePageType == _pageService.GetPageType<VideoPlayerViewModel>())
+            {
+                PaneDisplayMode = NavigationViewPaneDisplayMode.LeftMinimal;
+                if (IsBackEnabled)
+                {
+                    IsPaneToggleButtonVisible = false;
+                }
+                else
+                {
+                    IsBackButtonVisible = false;
+                    IsPaneToggleButtonVisible = true;
+                }
+            }
+            else if (PaneDisplayMode == NavigationViewPaneDisplayMode.LeftMinimal)
+            {
+                IsBackButtonVisible = true;
+                IsPaneToggleButtonVisible = true;
+                PaneDisplayMode = NavigationViewPaneDisplayMode.LeftCompact;
             }
         }
     }

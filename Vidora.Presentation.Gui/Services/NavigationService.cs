@@ -47,16 +47,7 @@ public class NavigationService : INavigationService
 
     public async Task<bool> NavigateToAsync(string pageKey, object? parameter = null, bool clearNavigation = false)
     {
-        Type pageType;
-        try
-        {
-            pageType = _pageService.GetPageType(pageKey);
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine(ex.Message);
-            return false;
-        }
+        var pageType = _pageService.GetPageType(pageKey);
 
         var isDifferentPage = _frame?.Content?.GetType() != pageType;
         var isDifferentParameter = parameter != null && !parameter.Equals(_lastParameterUsed);

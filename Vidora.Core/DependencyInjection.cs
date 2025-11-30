@@ -15,6 +15,7 @@ public static class DependencyInjection
         services.AddTransient<LoginUseCase>();
         services.AddTransient<AutoLoginUseCase>();
         services.AddTransient<LogoutUseCase>();
+        services.AddTransient<RegisterUseCase>();
 
         // Services
         services.AddSingleton<ISessionStateService, SessionStateService>();

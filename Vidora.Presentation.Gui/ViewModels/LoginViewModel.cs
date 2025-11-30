@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Vidora.Core.Contracts.Requests;
 using Vidora.Core.Contracts.Services;
 using Vidora.Core.UseCases;
+using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
 
 namespace Vidora.Presentation.Gui.ViewModels;
@@ -38,10 +39,18 @@ public partial class LoginViewModel : ObservableRecipient, INavigationAware
 
     private readonly LoginUseCase _loginUseCase;
     private readonly IUserCredentialsService _credentialsService;
-    public LoginViewModel(LoginUseCase loginUseCase, IUserCredentialsService credentialsService)
+    private readonly INavigationService _navigationService;
+    private readonly IInfoBarService _infoBarService;
+    public LoginViewModel(
+        LoginUseCase loginUseCase,
+        IUserCredentialsService credentialsService,
+        INavigationService navigationService,
+        IInfoBarService infoBarService)
     {
         _loginUseCase = loginUseCase;
         _credentialsService = credentialsService;
+        _navigationService = navigationService;
+        _infoBarService = infoBarService;
     }
 
     [RelayCommand]
@@ -69,7 +78,7 @@ public partial class LoginViewModel : ObservableRecipient, INavigationAware
         {
             Password = string.Empty;
             _savedPassword = string.Empty;
-            System.Diagnostics.Debug.WriteLine(result.Error);
+            _infoBarService.ShowError(result.Error, durationMs: 3000);
             return;
         }
 
@@ -81,12 +90,22 @@ public partial class LoginViewModel : ObservableRecipient, INavigationAware
         {
             await _credentialsService.ClearCredentialsAsync();
         }
+    }
 
-        System.Diagnostics.Debug.WriteLine("Login success");
+    [RelayCommand]
+    public async Task NavigateToRegisterAsync()
+    {
+        await _navigationService.NavigateToAsync<RegisterViewModel>(clearNavigation: true);
     }
 
     public async Task OnNavigatedToAsync(object? param)
     {
+        if (param is string emailParam)
+        {
+            Email = emailParam;
+            return;
+        }
+
         var creds = await _credentialsService.GetCredentialsAsync(requireVerification: false);
         if (creds is not null)
         {

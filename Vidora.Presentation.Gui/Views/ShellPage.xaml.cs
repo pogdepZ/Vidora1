@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Helpers;
 using Vidora.Presentation.Gui.ViewModels;
 
@@ -11,8 +12,9 @@ public sealed partial class ShellPage : Page
     public ShellPage()
     {
         InitializeComponent();
+        ViewModel.InfoBarService.Initialize(AppInfoBar);
         ViewModel.NavigationViewService.Initialize(AppNavigationView);
-
+        
         App.MainWindow.ExtendsContentIntoTitleBar = true;
         App.MainWindow.SetTitleBar(AppTitleBar);
     }
