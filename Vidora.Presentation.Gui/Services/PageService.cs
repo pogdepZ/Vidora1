@@ -19,6 +19,8 @@ public class PageService : IPageService
         Configure<RegisterViewModel, RegisterPage>();
 
         Configure<SettingsViewModel, SettingsPage>();
+        Configure<HomeViewModel, HomePage>();
+        Configure<VideoPlayerViewModel, VideoPlayerPage>();
     }
 
     public Type GetPageType<TViewModel>()

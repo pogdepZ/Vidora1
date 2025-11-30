@@ -85,6 +85,8 @@ public partial class ShellViewModel : ObservableRecipient
 
     private async void OnSessionChanged(object? sender, SessionChangeEventArgs e)
     {
+        CurrentUserRole = _mapper.Map<Role?>(_sessionState.CurrentUser?.Role);
+
         switch (e.Reason)
         {
             case SessionChangeReason.AutoRestore:
@@ -92,7 +94,15 @@ public partial class ShellViewModel : ObservableRecipient
                 IsBackButtonVisible = true;
                 IsPaneToggleButtonVisible = true;
                 PaneDisplayMode = NavigationViewPaneDisplayMode.LeftCompact;
-                await _navigationService.NavigateToAsync<SettingsViewModel>(clearNavigation: true);
+                if (_currentUserRole == Role.User)
+                {
+                    await _navigationService.NavigateToAsync<HomeViewModel>(clearNavigation: true);
+                }
+                else
+                {
+                    // TODO: admin -> dashboard
+                    await _navigationService.NavigateToAsync<SettingsViewModel>(clearNavigation: true);
+                }
                 break;
             case SessionChangeReason.ManualLogout:
             case SessionChangeReason.ForcedLogout:
@@ -103,12 +113,12 @@ public partial class ShellViewModel : ObservableRecipient
                 await _navigationService.NavigateToAsync<LoginViewModel>(clearNavigation: true);
                 break;
         }
-
-        CurrentUserRole = _mapper.Map<Role?>(_sessionState.CurrentUser?.Role);
     }
 
     private void OnNavigated(object sender, NavigationEventArgs e)
     {
+        InfoBarService.CloseIfOpen();
+
         IsBackEnabled = _navigationService.CanGoBack;
 
         if (e.SourcePageType == _pageService.GetPageType<SettingsViewModel>())
@@ -124,6 +134,27 @@ public partial class ShellViewModel : ObservableRecipient
             }
         }
 
-        InfoBarService.CloseIfOpen();
+        if (CurrentUserRole != null)
+        {
+            if (e.SourcePageType == _pageService.GetPageType<VideoPlayerViewModel>())
+            {
+                PaneDisplayMode = NavigationViewPaneDisplayMode.LeftMinimal;
+                if (IsBackEnabled)
+                {
+                    IsPaneToggleButtonVisible = false;
+                }
+                else
+                {
+                    IsBackButtonVisible = false;
+                    IsPaneToggleButtonVisible = true;
+                }
+            }
+            else if (PaneDisplayMode == NavigationViewPaneDisplayMode.LeftMinimal)
+            {
+                IsBackButtonVisible = true;
+                IsPaneToggleButtonVisible = true;
+                PaneDisplayMode = NavigationViewPaneDisplayMode.LeftCompact;
+            }
+        }
     }
 }
