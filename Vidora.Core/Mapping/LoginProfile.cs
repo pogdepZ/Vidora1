@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using System;
-using Vidora.Core.Contracts.Responses;
+using Vidora.Core.Dtos.Responses;
 using Vidora.Core.Entities;
 using Vidora.Core.ValueObjects;
 
@@ -10,15 +10,14 @@ public class LoginProfile : Profile
 {
     public LoginProfile()
     {
-        CreateMap<LoginResponse, User>()
+        CreateMap<LoginResponseDto, User>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.UserId))
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => new Email(src.Email)))
             .ForMember(dest => dest.Role, opt => opt.MapFrom(src => ParseRole(src.Role)));
 
-        CreateMap<LoginResponse, Session>()
+        CreateMap<LoginResponseDto, Session>()
             .ForMember(dest => dest.CurrentUser, opt => opt.MapFrom(src => src))
-            .ForMember(dest => dest.AccessToken, opt => opt.MapFrom(src => new AuthToken(src.AccessToken, src.ExpiresAt)))
-            .ForMember(dest => dest.RefreshToken, opt => opt.MapFrom(src => new AuthToken(src.RefreshToken, src.RefreshExpiresAt)));
+            .ForMember(dest => dest.AccessToken, opt => opt.MapFrom(src => new AuthToken(src.AccessToken, src.ExpiresAt)));
     }
 
     private static Role ParseRole(string roleStr)

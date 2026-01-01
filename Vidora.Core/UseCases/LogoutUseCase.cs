@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using System;
 using System.Threading.Tasks;
 using Vidora.Core.Contracts.Services;
 
@@ -14,6 +15,18 @@ public class LogoutUseCase
     }
 
     public async Task<Result> ExecuteAsync()
+    {
+        try
+        {
+            return await ExecuteAsyncInternal();
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure($"Logout failed: {ex.Message}");
+        }
+    }
+
+    private async Task<Result> ExecuteAsyncInternal()
     {
         _sessionStateService.ClearSession();
 

@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Vidora.Core.Contracts.Responses;
+namespace Vidora.Core.Dtos.Responses;
 
-public record LoginResponse(
+public record LoginResponseDto(
     string UserId,
     string Email,
     string Role,

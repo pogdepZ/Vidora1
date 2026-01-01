@@ -15,10 +15,9 @@ public class SessionStateService : ISessionStateService
     public Session? CurrentSession { get; private set; }
     public User? CurrentUser => CurrentSession?.CurrentUser;
     public AuthToken? AccessToken => CurrentSession?.AccessToken;
-    public AuthToken? RefreshToken => CurrentSession?.RefreshToken;
 
-    [MemberNotNullWhen(true, nameof(CurrentSession), nameof(CurrentUser), nameof(RefreshToken))]
-    public bool IsSessionValid => CurrentSession != null && !CurrentSession.RefreshToken.IsExpired;
+    [MemberNotNullWhen(true, nameof(CurrentSession), nameof(CurrentUser), nameof(AccessToken))]
+    public bool IsAuthenticated => CurrentSession != null && !CurrentSession.AccessToken.IsExpired;
 
 
     private readonly ISessionStorageService _sessionStorage;
@@ -30,16 +29,26 @@ public class SessionStateService : ISessionStateService
     public void RestoreSession()
     {
         var restore = _sessionStorage.LoadSession();
-        if (restore != null)
+        if (restore is null)
         {
-            CurrentSession = restore;
-            SessionChanged?.Invoke(this, new SessionChangeEventArgs(SessionChangeReason.AutoRestore));
+            SessionChanged?.Invoke(this, new SessionChangeEventArgs(SessionChangeReason.ForcedLogout));
+            return;
         }
+
+        if (restore.AccessToken.IsExpired)
+        {
+            _sessionStorage.ClearSession();
+            SessionChanged?.Invoke(this, new SessionChangeEventArgs(SessionChangeReason.SessionExpired));
+            return;
+        }
+
+        CurrentSession = restore;
+        SessionChanged?.Invoke(this, new SessionChangeEventArgs(SessionChangeReason.AutoRestore));
     }
 
     public void SetSession(Session newSession, SessionChangeReason reason = SessionChangeReason.ManualLogin)
     {
-        if (IsSessionValid)
+        if (IsAuthenticated)
         {
             throw new InvalidOperationException("A session is already active. Clear the current session before storing a new one.");
         }
@@ -48,9 +57,16 @@ public class SessionStateService : ISessionStateService
         SessionChanged?.Invoke(this, new SessionChangeEventArgs(reason));
     }
 
+    public void ClearSession(SessionChangeReason reason = SessionChangeReason.ManualLogout)
+    {
+        CurrentSession = null;
+        _sessionStorage.ClearSession();
+        SessionChanged?.Invoke(this, new SessionChangeEventArgs(reason));
+    }
+
     public void UpdateUser(User updatedUser)
     {
-        if (!IsSessionValid)
+        if (!IsAuthenticated)
         {
             throw new InvalidOperationException("No valid session to update.");
         }
@@ -58,24 +74,5 @@ public class SessionStateService : ISessionStateService
         CurrentSession.CurrentUser = updatedUser;
         _sessionStorage.SaveSession(CurrentSession);
         SessionChanged?.Invoke(this, new SessionChangeEventArgs(SessionChangeReason.UserUpdated));
-    }
-
-    public void UpdateAccessToken(AuthToken newAccessToken)
-    {
-        if (!IsSessionValid)
-        {
-            throw new InvalidOperationException("No valid session to update.");
-        }
-        CurrentSession.AccessToken = newAccessToken;
-        _sessionStorage.SaveSession(CurrentSession);
-        SessionChanged?.Invoke(this, new SessionChangeEventArgs(SessionChangeReason.TokenRefreshed));
-    }
-
-
-    public void ClearSession(SessionChangeReason reason = SessionChangeReason.ManualLogout)
-    {
-        CurrentSession = null;
-        _sessionStorage.ClearSession();
-        SessionChanged?.Invoke(this, new SessionChangeEventArgs(reason));
     }
 }

@@ -1,7 +1,8 @@
 ﻿using CSharpFunctionalExtensions;
+using System;
 using System.Threading.Tasks;
-using Vidora.Core.Contracts.Requests;
-using Vidora.Core.Contracts.Responses;
+using Vidora.Core.Dtos.Requests;
+using Vidora.Core.Dtos.Responses;
 using Vidora.Core.Interfaces.Api;
 using Vidora.Core.ValueObjects;
 
@@ -15,16 +16,28 @@ public class RegisterUseCase
         _authApiService = authApiService;
     }
 
-    public async Task<Result<RegisterResponse>> ExecuteAsync(RegisterRequest request)
+    public async Task<Result<RegisterResponseDto>> ExecuteAsync(RegisterRequestDto request)
+    {
+        try
+        {
+            return await ExecuteAsyncInternal(request);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<RegisterResponseDto>($"Registration failed: {ex.Message}");
+        }
+    }
+
+    private async Task<Result<RegisterResponseDto>> ExecuteAsyncInternal(RegisterRequestDto request)
     {
         // Validate
         if (!Email.TryCreate(request.Email, out var validatedEmail, out var error))
         {
-            return Result.Failure<RegisterResponse>(error);
+            return Result.Failure<RegisterResponseDto>(error);
         }
         if (!Password.TryCreate(request.Password, out var validatedPassword, out error))
         {
-            return Result.Failure<RegisterResponse>(error);
+            return Result.Failure<RegisterResponseDto>(error);
         }
 
         var apiRequest = request with {
@@ -35,9 +48,9 @@ public class RegisterUseCase
         var apiResponse = await _authApiService.RegisterAsync(apiRequest);
         if (apiResponse.IsFailure)
         {
-            return Result.Failure<RegisterResponse>(apiResponse.Error);
+            return Result.Failure<RegisterResponseDto>(apiResponse.Error);
         }
 
-        return Result.Success<RegisterResponse>(apiResponse.Value);
+        return Result.Success<RegisterResponseDto>(apiResponse.Value);
     }
 }
