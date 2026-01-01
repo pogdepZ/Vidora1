@@ -1,6 +1,6 @@
-﻿namespace Vidora.Core.Contracts.Requests;
+﻿namespace Vidora.Core.Dtos.Requests;
 
-public record RegisterRequest(
+public record RegisterRequestDto(
     string Email,
     string Password,
     string Username,

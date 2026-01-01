@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
 using CSharpFunctionalExtensions;
+using System;
 using System.Threading.Tasks;
-using Vidora.Core.Contracts.Requests;
-using Vidora.Core.Contracts.Responses;
 using Vidora.Core.Contracts.Services;
+using Vidora.Core.Dtos.Requests;
+using Vidora.Core.Dtos.Responses;
 using Vidora.Core.Entities;
 using Vidora.Core.Interfaces.Api;
 using Vidora.Core.ValueObjects;
@@ -22,28 +23,32 @@ public class LoginUseCase
         _mapper = mapper;
     }
 
-    public async Task<Result<LoginResponse>> ExecuteAsync(LoginRequest request)
+    public async Task<Result<LoginResponseDto>> ExecuteAsync(LoginRequestDto request)
+    {
+        try
+        {
+            return await ExecuteAsyncInternal(request);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<LoginResponseDto>($"Login failed: {ex.Message}");
+        }
+    }
+
+
+    private async Task<Result<LoginResponseDto>> ExecuteAsyncInternal(LoginRequestDto request)
     {
         // Validate
-        if (!Email.TryCreate(request.Email, out var validatedEmail, out var error))
-        {
-            return Result.Failure<LoginResponse>(error);
-        }
-        if (!Password.TryCreate(request.Password, out var validatedPassword, out error))
-        {
-            return Result.Failure<LoginResponse>(error);
-        }
-
         var apiRequest = request with {
-            Email = validatedEmail,
-            Password = validatedPassword
+            Email = new Email(request.Email),
+            Password = new Password(request.Password)
         };
 
         // Call api
         var apiResponse = await _authService.LoginAsync(apiRequest);
         if (apiResponse.IsFailure)
         {
-            return Result.Failure<LoginResponse>(apiResponse.Error);
+            return Result.Failure<LoginResponseDto>(apiResponse.Error);
         }
 
         // Save Sesion
@@ -51,6 +56,6 @@ public class LoginUseCase
         _sessionState.SetSession(newSession);
 
         // Return
-        return Result.Success<LoginResponse>(apiResponse.Value);
+        return Result.Success<LoginResponseDto>(apiResponse.Value);
     }
 }
