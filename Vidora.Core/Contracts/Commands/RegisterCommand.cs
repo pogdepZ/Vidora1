@@ -1,6 +1,6 @@
-﻿namespace Vidora.Core.Contracts.Requests;
+﻿namespace Vidora.Core.Contracts.Commands;
 
-public record RegisterRequest(
+public record RegisterCommand(
     string Email,
     string Password,
     string Username,

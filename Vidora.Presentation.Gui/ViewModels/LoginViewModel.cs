@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
-using Vidora.Core.Contracts.Requests;
+using Vidora.Core.Contracts.Commands;
 using Vidora.Core.Contracts.Services;
 using Vidora.Core.UseCases;
 using Vidora.Presentation.Gui.Contracts.Services;
@@ -66,7 +66,7 @@ public partial class LoginViewModel : ObservableRecipient, INavigationAware
             }
         }
 
-        var request = new LoginRequest(
+        var request = new LoginCommand(
             Email: _email,
             Password: _password
             );

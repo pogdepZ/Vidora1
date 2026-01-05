@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -57,7 +58,20 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     [RelayCommand]
     public async Task LogoutAsync()
     {
-        // TODO: add dialog confirmation
+        var dialog = new ContentDialog
+        {
+            Title = "Confirm Logout",
+            Content = "Are you sure you want to log out?",
+            PrimaryButtonText = "Yes",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = App.MainWindow.Content.XamlRoot,
+            RequestedTheme = SelectedTheme
+        };
+
+        var result = await dialog.ShowAsync();
+        if (result != ContentDialogResult.Primary)
+            return;
 
         await _logoutUseCase.ExecuteAsync();
     }

@@ -1,7 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Controls;
+using System;
 using System.Threading.Tasks;
-using Vidora.Core.Contracts.Requests;
 using Vidora.Core.UseCases;
 using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
@@ -68,7 +69,7 @@ public partial class RegisterViewModel : ObservableRecipient, INavigationAware
             return;
         }
 
-        var request = new RegisterRequest(
+        var request = new Core.Contracts.Commands.RegisterCommand(
             Email: _email,
             Password: _password,
             Username: _username,
@@ -81,6 +82,16 @@ public partial class RegisterViewModel : ObservableRecipient, INavigationAware
             _infoBarService.ShowError(result.Error);
             return;
         }
+
+        var dialog = new ContentDialog
+        {
+            Title = "Success",
+            Content = "Registration sucessfully",
+            CloseButtonText = "OK",
+            XamlRoot = App.MainWindow.Content.XamlRoot
+        };
+
+        await dialog.ShowAsync();
 
         await _navigationService.NavigateToAsync<LoginViewModel>(parameter: _email, clearNavigation: true);
     }

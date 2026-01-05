@@ -13,14 +13,12 @@ public interface ISessionStateService
     Session? CurrentSession { get; }
     User? CurrentUser { get; }
     AuthToken? AccessToken { get; }
-    AuthToken? RefreshToken { get; }
 
-    [MemberNotNullWhen(true, nameof(CurrentSession), nameof(CurrentUser), nameof(RefreshToken))]
-    bool IsSessionValid { get; }
+    [MemberNotNullWhen(true, nameof(CurrentUser), nameof(AccessToken))]
+    bool IsAuthenticated { get; }
 
+    void UpdateUser(User updatedUser);
     void RestoreSession();
     void SetSession(Session newSession, SessionChangeReason reason = SessionChangeReason.ManualLogin);
-    void UpdateUser(User updatedUser);
-    void UpdateAccessToken(AuthToken newAccessToken);
     void ClearSession(SessionChangeReason reason = SessionChangeReason.ManualLogout);
 }

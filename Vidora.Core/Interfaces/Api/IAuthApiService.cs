@@ -1,16 +1,13 @@
 ﻿using CSharpFunctionalExtensions;
 using System.Threading.Tasks;
-using Vidora.Core.Contracts.Requests;
-using Vidora.Core.Contracts.Responses;
-using Vidora.Core.ValueObjects;
+using Vidora.Core.Contracts.Commands;
+using Vidora.Core.Contracts.Results;
 
 namespace Vidora.Core.Interfaces.Api;
 
 public interface IAuthApiService
 {
-    Task<Result<LoginResponse>> LoginAsync(LoginRequest request);
+    Task<Result<LoginResult>> LoginAsync(LoginCommand command);
 
-    Task<Result<RegisterResponse>> RegisterAsync(RegisterRequest request);
-
-    Task<Result<AuthToken>> RefreshTokenAsync(string refreshToken);
+    Task<Result<RegisterResult>> RegisterAsync(RegisterCommand command);
 }
