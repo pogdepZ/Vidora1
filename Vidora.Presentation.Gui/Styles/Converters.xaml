@@ -9,4 +9,12 @@
 
     <converters:BooleanToBackButtonVisibilityConverter x:Key="BoolToBackButtonVisibilityConverter"/>
     <converters:BooleanToBackButtonVisibilityConverter x:Key="BoolToBackButtonVisibilityConverterInvert" Invert="True"/>
+
+    <converters:BoolNegationToVisibilityConverter x:Key="BoolNegationToVisibilityConverter"/>
+    <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
+    <converters:DateTimeToStringConverter x:Key="DateTimeToStringConverter"/>
+    <converters:CurrencyConverter x:Key="CurrencyConverter"/>
+    <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+    <converters:DateTimeToDateTimeOffsetConverter x:Key="DateTimeToDateTimeOffsetConverter"/>
+    <converters:BoolNegationConverter x:Key="BoolNegationConverter"/>
 </ResourceDictionary>

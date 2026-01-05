@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Vidora.Core.Interfaces.Api;
+using Vidora.Core.Interfaces.Services;
+using Vidora.Infrastructure.Api.Configuration;
 using Vidora.Infrastructure.Api.Mapping;
 using Vidora.Infrastructure.Api.Options;
 using Vidora.Infrastructure.Api.Services;
@@ -11,18 +13,22 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructureApi(this IServiceCollection services, IConfiguration configuration)
     {
-        // TODO: Configure Infrastructure.Api services here
         // Services
         services.AddTransient<IAuthApiService, AuthApiService>();
 
+        // Cloudinary
+        services.Configure<CloudinarySettings>(configuration.GetSection(CloudinarySettings.SectionName));
+        services.AddSingleton<ICloudinaryService, CloudinaryService>();
 
-        //
+        // API Client
         services.AddSingleton<ApiClient>();
 
-        //
+        // AutoMapper
         services.AddAutoMapper(typeof(AuthMappingProfile).Assembly);
 
+        // Options
         services.Configure<ApiOptions>(configuration.GetSection(ApiOptions.SectionName));
+
         return services;
     }
 }

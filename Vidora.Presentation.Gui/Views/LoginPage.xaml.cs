@@ -8,7 +8,7 @@ namespace Vidora.Presentation.Gui.Views;
 
 public sealed partial class LoginPage : Page
 {
-    public LoginViewModel ViewModel { get; } = App.GetService<LoginViewModel>();
+    public LoginViewModel ViewModel { get; } = App.GetService<LoginViewModel>();    
     public LoginPage()
     {
         InitializeComponent();

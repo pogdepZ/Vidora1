@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using CSharpFunctionalExtensions;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Vidora.Core.Contracts.Commands;
 using Vidora.Core.Contracts.Results;
 using Vidora.Core.Contracts.Services;
 using Vidora.Core.Entities;
+using Vidora.Core.Events;
 using Vidora.Core.Interfaces.Api;
 using Vidora.Core.ValueObjects;
 
@@ -51,9 +53,22 @@ public class LoginUseCase
             return Result.Failure<LoginResult>(apiResponse.Error);
         }
 
-        // Save Sesion
-        var session = _mapper.Map<Session>(apiResponse.Value);
-        _sessionState.SetSession(session, Events.SessionChangeReason.ManualLogin);
+       
+
+
+        // Update session
+        var session = new Session
+        {
+            CurrentUser = _mapper.Map<User>(apiResponse.Value.User),
+            AccessToken = new AuthToken(
+                 apiResponse.Value.AccessToken,
+                 apiResponse.Value.ExpiresAt.AddDays(10).ToUniversalTime()
+             )
+        };
+        
+        _sessionState.SetSession(session, SessionChangeReason.ManualLogin);
+
+
 
         // Return
         return Result.Success<LoginResult>(apiResponse.Value);

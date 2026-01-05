@@ -10,4 +10,11 @@ public interface IAuthApiService
     Task<Result<LoginResult>> LoginAsync(LoginCommand command);
 
     Task<Result<RegisterResult>> RegisterAsync(RegisterCommand command);
+
+
+    Task<Result<UserProfileResult>> GetProfileAsync();
+
+
+    Task<Result<UserProfileResult>> UpdateProfileAsync(UpdateProfileCommand command);
+
 }

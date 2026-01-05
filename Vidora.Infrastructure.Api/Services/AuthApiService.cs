@@ -4,7 +4,9 @@ using System;
 using System.Threading.Tasks;
 using Vidora.Core.Contracts.Commands;
 using Vidora.Core.Contracts.Results;
+using Vidora.Core.Contracts.Services;
 using Vidora.Core.Interfaces.Api;
+using Vidora.Core.Services;
 using Vidora.Infrastructure.Api.Dtos.Requests;
 using Vidora.Infrastructure.Api.Dtos.Responses;
 using Vidora.Infrastructure.Api.Dtos.Responses.Datas;
@@ -19,10 +21,13 @@ public class AuthApiService : IAuthApiService
 {
     private readonly ApiClient _apiClient;
     private readonly IMapper _mapper;
-    public AuthApiService(ApiClient apiClient, IMapper mapper)
+    private readonly ISessionStateService _sessionService;
+
+    public AuthApiService(ApiClient apiClient, IMapper mapper, ISessionStateService sessionService)
     {
         _apiClient = apiClient;
         _mapper = mapper;
+        _sessionService = sessionService;
     }
 
     public async Task<Result<LoginResult>> LoginAsync(LoginCommand command)
@@ -74,6 +79,75 @@ public class AuthApiService : IAuthApiService
         }
 
         var result = _mapper.Map<RegisterResult>(success.Data);
+
+        return Result.Success(result);
+    }
+
+    public async Task<Result<UserProfileResult>> GetProfileAsync()
+    {
+        var tokenObject = _sessionService.AccessToken;
+
+        var accessToken = tokenObject?.Token;
+
+        if (string.IsNullOrWhiteSpace(accessToken))
+        {
+            return Result.Failure<UserProfileResult>("Access token not found. Please login again.");
+        }
+
+        var httpRes = await _apiClient.GetAsync(
+            url: "api/auth/me",
+            token: accessToken 
+        );
+
+        var apiRes = await httpRes.ReadAsync<ProfileDataResponse>();
+
+        if (apiRes is not SuccessResponse<ProfileDataResponse> success)
+        {
+            return Result.Failure<UserProfileResult>(
+                apiRes.Message ?? "Lấy thông tin người dùng thất bại"
+            );
+        }
+
+        var result = _mapper.Map<UserProfileResult>(success.Data);
+
+        return Result.Success(result);
+    }
+
+
+    public async Task<Result<UserProfileResult>> UpdateProfileAsync(UpdateProfileCommand command)
+    {
+        // 1. Lấy Token thủ công (Giống hệt GetProfileAsync)
+        var tokenObject = _sessionService.AccessToken;
+        var accessToken = tokenObject?.Token;
+
+        if (string.IsNullOrWhiteSpace(accessToken))
+        {
+            return Result.Failure<UserProfileResult>("Access token not found. Please login again.");
+        }
+
+        // 2. Map từ Command (Core) sang Request DTO (Infra)
+        var request = _mapper.Map<UpdateProfileRequest>(command);
+
+        // 3. Gọi API PUT và truyền Token thủ công
+        var httpRes = await _apiClient.PutAsync(
+            url: "api/users/profile",
+            body: request,
+            token: accessToken
+        );
+
+        // 4. Đọc phản hồi - Server trả về UpdateProfileResponse
+        var apiRes = await httpRes.ReadAsync<UpdateProfileResponse>();
+
+        // 5. Kiểm tra lỗi
+        if (apiRes is not SuccessResponse<UpdateProfileResponse> success)
+        {
+            return Result.Failure<UserProfileResult>(
+                apiRes.Message ?? "Cập nhật thông tin thất bại"
+            );
+        }
+
+        // 6. Map UpdateProfileResponse -> UserProfileResult
+        var result = _mapper.Map<UserProfileResult>(success.Data);
 
         return Result.Success(result);
     }
