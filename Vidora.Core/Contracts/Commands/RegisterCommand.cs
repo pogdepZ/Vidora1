@@ -1,6 +1,6 @@
-﻿namespace Vidora.Core.Dtos.Requests;
+﻿namespace Vidora.Core.Contracts.Commands;
 
-public record RegisterRequestDto(
+public record RegisterCommand(
     string Email,
     string Password,
     string Username,

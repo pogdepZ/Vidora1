@@ -1,8 +1,8 @@
 ﻿using CSharpFunctionalExtensions;
 using System;
 using System.Threading.Tasks;
-using Vidora.Core.Dtos.Requests;
-using Vidora.Core.Dtos.Responses;
+using Vidora.Core.Contracts.Commands;
+using Vidora.Core.Contracts.Results;
 using Vidora.Core.Interfaces.Api;
 using Vidora.Core.ValueObjects;
 
@@ -16,41 +16,33 @@ public class RegisterUseCase
         _authApiService = authApiService;
     }
 
-    public async Task<Result<RegisterResponseDto>> ExecuteAsync(RegisterRequestDto request)
+    public async Task<Result<RegisterResult>> ExecuteAsync(RegisterCommand command)
     {
         try
         {
-            return await ExecuteAsyncInternal(request);
+            return await ExecuteAsyncInternal(command);
         }
         catch (Exception ex)
         {
-            return Result.Failure<RegisterResponseDto>($"Registration failed: {ex.Message}");
+            return Result.Failure<RegisterResult>($"Registration failed: {ex.Message}");
         }
     }
 
-    private async Task<Result<RegisterResponseDto>> ExecuteAsyncInternal(RegisterRequestDto request)
+    private async Task<Result<RegisterResult>> ExecuteAsyncInternal(RegisterCommand command)
     {
         // Validate
-        if (!Email.TryCreate(request.Email, out var validatedEmail, out var error))
+        var apiRequest = command with
         {
-            return Result.Failure<RegisterResponseDto>(error);
-        }
-        if (!Password.TryCreate(request.Password, out var validatedPassword, out error))
-        {
-            return Result.Failure<RegisterResponseDto>(error);
-        }
-
-        var apiRequest = request with {
-            Email = validatedEmail,
-            Password = validatedPassword
+            Email = new Email(command.Email),
+            Password = new Password(command.Password)
         };
 
         var apiResponse = await _authApiService.RegisterAsync(apiRequest);
         if (apiResponse.IsFailure)
         {
-            return Result.Failure<RegisterResponseDto>(apiResponse.Error);
+            return Result.Failure<RegisterResult>(apiResponse.Error);
         }
-
-        return Result.Success<RegisterResponseDto>(apiResponse.Value);
+        
+        return Result.Success<RegisterResult>(apiResponse.Value);
     }
 }
