@@ -16,41 +16,36 @@ public class LocalSettingsService : ILocalSettingsService
         if (!ApplicationData.Current.LocalSettings.Values.TryGetValue(key, out var obj))
             return default;
 
-        if (obj is not string str)
+        if (obj is not string json)
             return default;
 
-        try
-        {
-            return JsonSerializer.Deserialize<T>(
-                str,
-                options: JsonHelper.SerializerOptions
-            );
-        }
-        catch (JsonException)
+        if (!JsonHelper.TryDeserialize<T>(json, out var value, options: JsonHelper.DefaultOptions))
         {
             ApplicationData.Current.LocalSettings.Values.Remove(key);
             return default;
         }
+
+        return value;
     }
 
     public void SaveSettings<T>(string key, T? value)
     {
         if (!RuntimeHelper.IsMSIX)
-            return;
+            return; 
 
-        try
-        {
-            var json = JsonSerializer.Serialize(
-                value,
-                options: JsonHelper.SerializerOptions
-            );
-
-            ApplicationData.Current.LocalSettings.Values[key] = json;
-        }
-        catch (JsonException)
+        if (value is null)
         {
             ApplicationData.Current.LocalSettings.Values.Remove(key);
+            return;
         }
+
+        if (!JsonHelper.TrySerialize(value, out var json, options: JsonHelper.DefaultOptions))
+        {
+            ApplicationData.Current.LocalSettings.Values.Remove(key);
+            return;
+        }
+
+        ApplicationData.Current.LocalSettings.Values[key] = json;
     }
 
     public void RemoveSettings(string key)

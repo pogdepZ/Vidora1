@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Vidora.Core.Interfaces.Api;
+using Vidora.Infrastructure.Api.Mapping;
+using Vidora.Infrastructure.Api.Options;
 using Vidora.Infrastructure.Api.Services;
 
 namespace Vidora.Infrastructure.Api;
@@ -14,6 +16,13 @@ public static class DependencyInjection
         services.AddTransient<IAuthApiService, AuthApiService>();
 
 
+        //
+        services.AddSingleton<ApiClient>();
+
+        //
+        services.AddAutoMapper(typeof(AuthMappingProfile).Assembly);
+
+        services.Configure<ApiOptions>(configuration.GetSection(ApiOptions.SectionName));
         return services;
     }
 }
