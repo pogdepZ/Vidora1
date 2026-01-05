@@ -11,47 +11,23 @@ namespace Vidora.Presentation.Gui.ViewModels;
 
 public partial class ShellViewModel : ObservableRecipient
 {
+    [ObservableProperty]
     private Role? _currentUserRole;
-    public Role? CurrentUserRole
-    {
-        get => _currentUserRole;
-        set => SetProperty(ref _currentUserRole, value);
-    }
 
+    [ObservableProperty]
     private object? _selectedItem;
-    public object? SelectedItem
-    {
-        get => _selectedItem;
-        set => SetProperty(ref _selectedItem, value);
-    }
 
+    [ObservableProperty]
     private bool _isBackEnabled;
-    public bool IsBackEnabled
-    {
-        get => _isBackEnabled;
-        set => SetProperty(ref _isBackEnabled, value);
-    }
 
+    [ObservableProperty]
     private bool _isBackButtonVisible = false;
-    public bool IsBackButtonVisible
-    {
-        get => _isBackButtonVisible;
-        set => SetProperty(ref _isBackButtonVisible, value);
-    }
 
+    [ObservableProperty]
     private bool _isPaneToggleButtonVisible = false;
-    public bool IsPaneToggleButtonVisible
-    {
-        get => _isPaneToggleButtonVisible;
-        set => SetProperty(ref _isPaneToggleButtonVisible, value);
-    }
 
+    [ObservableProperty]
     private NavigationViewPaneDisplayMode _paneDisplayMode = NavigationViewPaneDisplayMode.LeftMinimal;
-    public NavigationViewPaneDisplayMode PaneDisplayMode
-    {
-        get => _paneDisplayMode;
-        set => SetProperty(ref _paneDisplayMode, value);
-    }
 
     public IInfoBarService InfoBarService { get; }
     public INavigationViewService NavigationViewService { get; }
@@ -94,7 +70,7 @@ public partial class ShellViewModel : ObservableRecipient
                 IsBackButtonVisible = true;
                 IsPaneToggleButtonVisible = true;
                 PaneDisplayMode = NavigationViewPaneDisplayMode.LeftCompact;
-                if (_currentUserRole == Role.User)
+                if (CurrentUserRole == Role.User)
                 {
                     await _navigationService.NavigateToAsync<HomeViewModel>(clearNavigation: true);
                 }

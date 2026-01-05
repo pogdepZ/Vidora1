@@ -45,7 +45,7 @@
 
                 <StackPanel Orientation="Horizontal" Spacing="20">
                     <Button
-                        Command="{x:Bind ViewModel.PlayVideoCommand}"
+                        Command="{x:Bind ViewModel.ExecutePlayVideoCommand}"
                         CommandParameter="{x:Bind ViewModel.Movie.VideoUrl}"
                         Visibility="{x:Bind ViewModel.CanPlay, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
                         Style="{ThemeResource ButtonRevealStyle}">
@@ -55,7 +55,7 @@
                         </StackPanel>
                     </Button>
                     <Button
-                        Command="{x:Bind ViewModel.PlayVideoCommand}"
+                        Command="{x:Bind ViewModel.ExecutePlayVideoCommand}"
                         CommandParameter="{x:Bind ViewModel.Movie.TrailerUrl}"
                         Visibility="{x:Bind ViewModel.CanWatchTrailer, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
                         Style="{ThemeResource ButtonRevealStyle}">

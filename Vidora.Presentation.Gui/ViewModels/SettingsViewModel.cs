@@ -14,25 +14,11 @@ namespace Vidora.Presentation.Gui.ViewModels;
 
 public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 {
+    [ObservableProperty]
     private string _versionDescription = string.Empty;
-    public string VersionDescription
-    {
-        get => _versionDescription;
-        set => SetProperty(ref _versionDescription, value);
-    }
 
+    [ObservableProperty]
     private ElementTheme _selectedTheme;
-    public ElementTheme SelectedTheme
-    {
-        get => _selectedTheme;
-        set
-        {
-            if (SetProperty(ref _selectedTheme, value))
-            {
-                _themeSelectorService.SetTheme(value);
-            }
-        }
-    }
 
     public List<ElementTheme> ElementThemes { get; }
 
@@ -56,7 +42,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     }
 
     [RelayCommand]
-    public async Task LogoutAsync()
+    public async Task ExecuteLogoutAsync()
     {
         var dialog = new ContentDialog
         {
@@ -95,5 +81,10 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         }
 
         return $"{version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
+    }
+
+    partial void OnSelectedThemeChanged(ElementTheme value)
+    {
+        _themeSelectorService.SetTheme(value);
     }
 }

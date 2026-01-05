@@ -11,31 +11,19 @@ namespace Vidora.Presentation.Gui.ViewModels;
 
 public partial class LoginViewModel : ObservableRecipient, INavigationAware
 {
+    [ObservableProperty]
     private string _email = string.Empty;
-    public string Email
-    {
-        get => _email;
-        set => SetProperty(ref _email, value);
-    }
 
+    [ObservableProperty]
     private string _password = string.Empty;
-    public string Password
-    {
-        get => _password;
-        set => SetProperty(ref _password, value);
-    }
 
+    [ObservableProperty]
     private bool _isRememberMe = false;
-    public bool IsRememberMe
-    {
-        get => _isRememberMe;
-        set => SetProperty(ref _isRememberMe, value);
-    }
 
     private string _savedEmail = string.Empty;
     private string _savedPassword = string.Empty;
     private bool _isUsingSavedCredentials =>
-        !string.IsNullOrEmpty(_savedPassword) && _password == _savedPassword && _email == _savedEmail;
+        !string.IsNullOrEmpty(_savedPassword) && Password == _savedPassword && Email == _savedEmail;
 
     private readonly LoginUseCase _loginUseCase;
     private readonly IUserCredentialsService _credentialsService;
@@ -54,7 +42,7 @@ public partial class LoginViewModel : ObservableRecipient, INavigationAware
     }
 
     [RelayCommand]
-    public async Task LoginAsync()
+    public async Task ExecuteLoginAsync()
     {
         if (_isUsingSavedCredentials)
         {
@@ -67,8 +55,8 @@ public partial class LoginViewModel : ObservableRecipient, INavigationAware
         }
 
         var request = new LoginCommand(
-            Email: _email,
-            Password: _password
+            Email: Email,
+            Password: Password
             );
 
         await Task.Delay(1000);
@@ -82,9 +70,9 @@ public partial class LoginViewModel : ObservableRecipient, INavigationAware
             return;
         }
 
-        if (_isRememberMe)
+        if (IsRememberMe)
         {
-            await _credentialsService.SaveCredentialsAsync(_email, _password);
+            await _credentialsService.SaveCredentialsAsync(Email, Password);
         }
         else
         {
@@ -93,7 +81,7 @@ public partial class LoginViewModel : ObservableRecipient, INavigationAware
     }
 
     [RelayCommand]
-    public async Task NavigateToRegisterAsync()
+    public async Task ExecuteNavigateToRegisterAsync()
     {
         await _navigationService.NavigateToAsync<RegisterViewModel>(clearNavigation: true);
     }
