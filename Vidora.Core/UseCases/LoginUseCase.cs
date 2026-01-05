@@ -2,9 +2,9 @@
 using CSharpFunctionalExtensions;
 using System;
 using System.Threading.Tasks;
+using Vidora.Core.Contracts.Commands;
+using Vidora.Core.Contracts.Results;
 using Vidora.Core.Contracts.Services;
-using Vidora.Core.Dtos.Requests;
-using Vidora.Core.Dtos.Responses;
 using Vidora.Core.Entities;
 using Vidora.Core.Interfaces.Api;
 using Vidora.Core.ValueObjects;
@@ -23,39 +23,39 @@ public class LoginUseCase
         _mapper = mapper;
     }
 
-    public async Task<Result<LoginResponseDto>> ExecuteAsync(LoginRequestDto request)
+    public async Task<Result<LoginResult>> ExecuteAsync(LoginCommand command)
     {
         try
         {
-            return await ExecuteAsyncInternal(request);
+            return await ExecuteAsyncInternal(command);
         }
         catch (Exception ex)
         {
-            return Result.Failure<LoginResponseDto>($"Login failed: {ex.Message}");
+            return Result.Failure<LoginResult>($"Login failed: {ex.Message}");
         }
     }
 
 
-    private async Task<Result<LoginResponseDto>> ExecuteAsyncInternal(LoginRequestDto request)
+    private async Task<Result<LoginResult>> ExecuteAsyncInternal(LoginCommand command)
     {
         // Validate
-        var apiRequest = request with {
-            Email = new Email(request.Email),
-            Password = new Password(request.Password)
+        var apiRequest = command with {
+            Email = new Email(command.Email),
+            Password = new Password(command.Password)
         };
 
         // Call api
         var apiResponse = await _authService.LoginAsync(apiRequest);
         if (apiResponse.IsFailure)
         {
-            return Result.Failure<LoginResponseDto>(apiResponse.Error);
+            return Result.Failure<LoginResult>(apiResponse.Error);
         }
 
         // Save Sesion
-        var newSession = _mapper.Map<Session>(apiResponse.Value);
-        _sessionState.SetSession(newSession);
+        var session = _mapper.Map<Session>(apiResponse.Value);
+        _sessionState.SetSession(session, Events.SessionChangeReason.ManualLogin);
 
         // Return
-        return Result.Success<LoginResponseDto>(apiResponse.Value);
+        return Result.Success<LoginResult>(apiResponse.Value);
     }
 }

@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Threading.Tasks;
-using Vidora.Core.Dtos.Requests;
 using Vidora.Core.UseCases;
 using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
@@ -70,7 +69,7 @@ public partial class RegisterViewModel : ObservableRecipient, INavigationAware
             return;
         }
 
-        var request = new RegisterRequestDto(
+        var request = new Core.Contracts.Commands.RegisterCommand(
             Email: _email,
             Password: _password,
             Username: _username,

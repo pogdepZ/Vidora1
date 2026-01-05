@@ -22,7 +22,7 @@ public static class DependencyInjection
         services.AddTransient<IUserCredentialsService, UserCredentialsService>();
 
         // Mapping
-        services.AddAutoMapper(typeof(LoginProfile).Assembly);
+        services.AddAutoMapper(typeof(LoginMappingProfile).Assembly);
 
         return services;
     }
