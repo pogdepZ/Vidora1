@@ -16,8 +16,6 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddPresentation(this IServiceCollection services, IConfiguration configuration)
     {
-        // TODO: Configure Presentation.Gui services here
-
         // Activation
         services.AddTransient<ActivationHandler<LaunchActivatedEventArgs>, DefaultActivationHandler>();
 
@@ -40,6 +38,7 @@ public static class DependencyInjection
         services.AddTransient<SearchPage>();
         services.AddTransient<WatchlistPage>();
         services.AddTransient<SubscriptionPage>();
+        services.AddTransient<CheckoutPage>();
         services.AddTransient<ProfilePage>();
         services.AddTransient<MovieDetailPage>();
         services.AddTransient<VideoPlayerPage>();
@@ -61,6 +60,7 @@ public static class DependencyInjection
         services.AddTransient<SearchViewModel>();
         services.AddTransient<WatchlistViewModel>();
         services.AddTransient<SubscriptionViewModel>();
+        services.AddTransient<CheckoutViewModel>();
         services.AddTransient<ProfileViewModel>();
         services.AddTransient<MovieDetailViewModel>();
         services.AddTransient<VideoPlayerViewModel>();

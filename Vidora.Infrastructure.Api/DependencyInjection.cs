@@ -15,6 +15,9 @@ public static class DependencyInjection
     {
         // Services
         services.AddTransient<IAuthApiService, AuthApiService>();
+        services.AddTransient<IMovieApiService, MovieApiService>();
+        services.AddTransient<ISubscriptionApiService, SubscriptionApiService>();
+        services.AddTransient<IOrderApiService, OrderApiService>();
 
         // Cloudinary
         services.Configure<CloudinarySettings>(configuration.GetSection(CloudinarySettings.SectionName));

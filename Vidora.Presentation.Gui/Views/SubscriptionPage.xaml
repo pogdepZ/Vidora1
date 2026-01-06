@@ -4,15 +4,135 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Vidora.Presentation.Gui.Views"
+    xmlns:models="using:Vidora.Presentation.Gui.Models"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    x:Name="SubscriptionPageRoot">
 
-    <Grid>
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <ScrollViewer VerticalScrollMode="Enabled" VerticalScrollBarVisibility="Hidden">
-            <Grid>
-                <TextBlock Text="Subscription" Style="{StaticResource PageTitleTextBlockStyle}" FontSize="50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            </Grid>
+            <StackPanel Padding="24" Spacing="24">
+                <!-- Header -->
+                <TextBlock
+                    Text="Gói đăng ký"
+                    FontSize="28"
+                    FontWeight="Bold"
+                    HorizontalAlignment="Center"/>
+
+                <TextBlock
+                    Text="Chọn gói phù hợp với bạn"
+                    FontSize="14"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    HorizontalAlignment="Center"/>
+
+                <!-- Loading -->
+                <StackPanel
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="12"
+                    Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <ProgressRing IsActive="True" Width="48" Height="48"/>
+                    <TextBlock Text="Đang tải danh sách gói..." Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                </StackPanel>
+
+                <!-- Plans Grid -->
+                <ItemsRepeater
+                    ItemsSource="{x:Bind ViewModel.Plans, Mode=OneWay}"
+                    Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolNegationToVisibilityConverter}}">
+                    <ItemsRepeater.Layout>
+                        <UniformGridLayout
+                            MinItemWidth="280"
+                            MinItemHeight="220"
+                            MinColumnSpacing="16"
+                            MinRowSpacing="16"
+                            ItemsStretch="Fill"
+                            MaximumRowsOrColumns="3"/>
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="models:SubscriptionPlan">
+                            <Border
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Padding="20">
+                                <Grid RowSpacing="12">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Plan Name -->
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        Text="{x:Bind Name}"
+                                        FontSize="20"
+                                        FontWeight="Bold"/>
+
+                                    <!-- Price & Duration -->
+                                    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="4">
+                                        <TextBlock FontSize="24" FontWeight="Bold" Foreground="#E50914">
+                                            <Run Text="{x:Bind Price}"/>
+                                            <Run Text="₫"/>
+                                        </TextBlock>
+                                        <TextBlock
+                                            Text="/"
+                                            FontSize="14"
+                                            VerticalAlignment="Bottom"
+                                            Margin="0,0,0,4"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock
+                                            VerticalAlignment="Bottom"
+                                            Margin="0,0,0,4"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                            <Run Text="{x:Bind Durations}"/>
+                                            <Run Text="ngày"/>
+                                        </TextBlock>
+                                    </StackPanel>
+
+                                    <!-- Description -->
+                                    <TextBlock
+                                        Grid.Row="2"
+                                        Text="{x:Bind Description}"
+                                        TextWrapping="Wrap"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        MaxLines="3"/>
+
+                                    <!-- Action Button -->
+                                    <Grid Grid.Row="3">
+                                        <!-- Purchased Label -->
+                                        <Border
+                                            Background="#2D7D46"
+                                            CornerRadius="6"
+                                            Padding="16,10"
+                                            HorizontalAlignment="Stretch"
+                                            Visibility="{x:Bind IsPurchased, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                                <FontIcon Glyph="&#xE73E;" FontSize="14" Foreground="White"/>
+                                                <TextBlock Text="Đã mua" FontWeight="SemiBold" Foreground="White"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- Get Button -->
+                                        <Button
+                                            Command="{Binding ViewModel.GetPlanCommand, ElementName=SubscriptionPageRoot}"
+                                            CommandParameter="{x:Bind}"
+                                            Content="Đăng ký"
+                                            Style="{StaticResource AccentButtonStyle}"
+                                            HorizontalAlignment="Stretch"
+                                            Padding="16,10"
+                                            CornerRadius="6"
+                                            Visibility="{x:Bind IsPurchased, Converter={StaticResource BoolNegationToVisibilityConverter}}"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </StackPanel>
         </ScrollViewer>
     </Grid>
 </Page>

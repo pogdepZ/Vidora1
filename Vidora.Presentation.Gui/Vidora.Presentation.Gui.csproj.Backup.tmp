@@ -13,6 +13,9 @@
     <Nullable>enable</Nullable>
 	<ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
+  <ItemGroup>
+    <Page Remove="Views\MovieSearchPage.xaml" />
+  </ItemGroup>
 	
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -71,6 +74,12 @@
 	<Content Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Views\MovieSearchPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
   </ItemGroup>
 
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">

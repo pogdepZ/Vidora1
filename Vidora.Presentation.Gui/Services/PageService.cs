@@ -24,6 +24,7 @@ public class PageService : IPageService
         Configure<SearchViewModel, SearchPage>();
         Configure<WatchlistViewModel, WatchlistPage>();
         Configure<SubscriptionViewModel, SubscriptionPage>();
+        Configure<CheckoutViewModel, CheckoutPage>();
         Configure<ProfileViewModel, ProfilePage>();
         Configure<MovieDetailViewModel, MovieDetailPage>();
         Configure<VideoPlayerViewModel, VideoPlayerPage>();

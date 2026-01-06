@@ -18,6 +18,9 @@ public partial class VideoPlayerViewModel : ObservableRecipient, INavigationAwar
         set => SetProperty(ref _MediaSource, value);
     }
 
+    [ObservableProperty]
+    private string _title = string.Empty;
+
     public VideoPlayerViewModel()
     {
     }
@@ -33,6 +36,25 @@ public partial class VideoPlayerViewModel : ObservableRecipient, INavigationAwar
         if (parameter is string url && !string.IsNullOrWhiteSpace(url))
         {
             MediaSource = CreateMediaSourceFromString(url);
+            return;
+        }
+
+        // Xử lý anonymous object { Url, Title }
+        if (parameter != null)
+        {
+            var paramType = parameter.GetType();
+            var urlProp = paramType.GetProperty("Url");
+            var titleProp = paramType.GetProperty("Title");
+
+            if (urlProp != null && urlProp.GetValue(parameter) is string urlValue)
+            {
+                MediaSource = CreateMediaSourceFromString(urlValue);
+            }
+
+            if (titleProp != null && titleProp.GetValue(parameter) is string titleValue)
+            {
+                Title = titleValue;
+            }
         }
     }
 

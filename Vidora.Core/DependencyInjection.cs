@@ -11,13 +11,22 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddCore(this IServiceCollection services, IConfiguration configuration)
     {
-        // TODO: Configure Core services here
+        // UseCases
         services.AddTransient<LoginUseCase>();
         services.AddTransient<AutoLoginUseCase>();
         services.AddTransient<LogoutUseCase>();
         services.AddTransient<RegisterUseCase>();
         services.AddTransient<GetProfileUseCase>();
         services.AddTransient<UpdateProfileUseCase>();
+        services.AddTransient<SearchMovieUseCase>();
+        services.AddTransient<GetMovieDetailUseCase>();
+        services.AddTransient<GetGenresUseCase>();
+        services.AddTransient<GetSubscriptionPlansUseCase>();
+        services.AddTransient<GetMySubscriptionsUseCase>();
+        services.AddTransient<CreateOrderUseCase>();
+        services.AddTransient<GetAvailablePromosUseCase>();
+        services.AddTransient<ApplyDiscountUseCase>();
+        services.AddTransient<ConfirmPaymentUseCase>();
 
         // Services
         services.AddSingleton<ISessionStateService, SessionStateService>();
