@@ -13,6 +13,7 @@ public static class DependencyInjection
     {
         // TODO: Configure Infrastructure.Api services here
         // Services
+        services.AddTransient<IHealthApiService, HealthApiService>();
         services.AddTransient<IAuthApiService, AuthApiService>();
 
 

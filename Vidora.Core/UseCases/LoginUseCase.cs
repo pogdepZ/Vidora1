@@ -13,12 +13,12 @@ namespace Vidora.Core.UseCases;
 
 public class LoginUseCase
 {
-    private readonly IAuthApiService _authService;
+    private readonly IAuthApiService _authApiService;
     private readonly ISessionStateService _sessionState;
     private readonly IMapper _mapper;
     public LoginUseCase(IAuthApiService authService, ISessionStateService sessionState, IMapper mapper)
     {
-        _authService = authService;
+        _authApiService = authService;
         _sessionState = sessionState;
         _mapper = mapper;
     }
@@ -45,7 +45,7 @@ public class LoginUseCase
         };
 
         // Call api
-        var apiResponse = await _authService.LoginAsync(apiRequest);
+        var apiResponse = await _authApiService.LoginAsync(apiRequest);
         if (apiResponse.IsFailure)
         {
             return Result.Failure<LoginResult>(apiResponse.Error);

@@ -4,7 +4,7 @@ using Vidora.Infrastructure.Api.Dtos.Responses.Metas;
 
 namespace Vidora.Infrastructure.Api.Dtos.Responses;
 
-internal record PaginatedSucessResponse<T>(
+internal record PaginatedSuccessResponse<T>(
     IReadOnlyList<T> Data,
     Pagination Pagination,
     HttpStatusCode StatusCode,

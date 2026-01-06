@@ -22,7 +22,7 @@ public class AutoLoginUseCase
         }
         catch (Exception ex)
         {
-            return Result.Failure($"Auto login failed: {ex.Message}");
+            return Result.Failure(ex.Message);
         }
     }
 

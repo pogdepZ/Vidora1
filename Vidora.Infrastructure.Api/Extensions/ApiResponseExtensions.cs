@@ -7,6 +7,43 @@ namespace Vidora.Infrastructure.Api.Extensions;
 
 internal static class ApiResponseExtensions
 {
+    public static async Task<ApiResponse> ReadAsync(
+    this HttpResponseMessage response)
+    {
+        var statusCode = response.StatusCode;
+        var json = await response.Content.ReadAsStringAsync();
+
+        // HTTP error
+        if (!response.IsSuccessStatusCode)
+        {
+            if (JsonHelper.TryDeserialize<ErrorResponse>(json, out var error)
+                && error != null)
+            {
+                return error with { StatusCode = statusCode };
+            }
+
+            return new ErrorResponse(
+                Error: json,
+                StatusCode: statusCode,
+                Message: "Http request failed"
+            );
+        }
+
+        // Success WITHOUT data
+        if (JsonHelper.TryDeserialize<SuccessResponse>(json, out var success)
+            && success != null)
+        {
+            return success with { StatusCode = statusCode };
+        }
+
+        return new ErrorResponse(
+            Error: json,
+            StatusCode: statusCode,
+            Message: "Invalid response format"
+        );
+    }
+
+
     public static async Task<ApiResponse> ReadAsync<T>(
         this HttpResponseMessage response)
     {
@@ -86,7 +123,7 @@ internal static class ApiResponseExtensions
             );
         }
 
-        if (JsonHelper.TryDeserialize<PaginatedSucessResponse<T>>(json, out var success)
+        if (JsonHelper.TryDeserialize<PaginatedSuccessResponse<T>>(json, out var success)
             && success != null)
         {
             return success with { StatusCode = statusCode };
