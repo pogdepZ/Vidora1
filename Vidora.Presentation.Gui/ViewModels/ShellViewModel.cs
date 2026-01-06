@@ -30,17 +30,17 @@ public partial class ShellViewModel : ObservableRecipient
     private NavigationViewPaneDisplayMode _paneDisplayMode = NavigationViewPaneDisplayMode.LeftMinimal;
 
     public IInfoBarService InfoBarService { get; }
+    public INavigationService NavigationService { get; }
     public INavigationViewService NavigationViewService { get; }
 
     private readonly IPageService _pageService;
-    private readonly INavigationService _navigationService;
     private readonly ISessionStateService _sessionState;
     private readonly IMapper _mapper;
     public ShellViewModel(
         IInfoBarService infoBarService,
+        INavigationService navigationService,
         INavigationViewService navigationViewService,
         IPageService pageService,
-        INavigationService navigationService,
         ISessionStateService sessionService,
         IMapper mapper
         )
@@ -50,8 +50,8 @@ public partial class ShellViewModel : ObservableRecipient
 
         _pageService = pageService;
 
-        _navigationService = navigationService;
-        _navigationService.Navigated += OnNavigated;
+        NavigationService = navigationService;
+        NavigationService.Navigated += OnNavigated;
 
         _sessionState = sessionService;
         _sessionState.SessionChanged += OnSessionChanged;
@@ -72,11 +72,11 @@ public partial class ShellViewModel : ObservableRecipient
                 PaneDisplayMode = NavigationViewPaneDisplayMode.LeftCompact;
                 if (CurrentUserRole == Role.User)
                 {
-                    await _navigationService.NavigateToAsync<HomeViewModel>(clearNavigation: true);
+                    await NavigationService.NavigateToAsync<HomeViewModel>(clearNavigation: true);
                 }
                 else
                 {
-                    await _navigationService.NavigateToAsync<AdminDashboardViewModel>(clearNavigation: true);
+                    await NavigationService.NavigateToAsync<AdminDashboardViewModel>(clearNavigation: true);
                 }
                 break;
             case SessionChangeReason.ManualLogout:
@@ -85,16 +85,16 @@ public partial class ShellViewModel : ObservableRecipient
                 IsBackButtonVisible = false;
                 IsPaneToggleButtonVisible = false;
                 PaneDisplayMode = NavigationViewPaneDisplayMode.LeftMinimal;
-                await _navigationService.NavigateToAsync<LoginViewModel>(clearNavigation: true);
+                await NavigationService.NavigateToAsync<LoginViewModel>(clearNavigation: true);
                 break;
         }
     }
 
-    private void OnNavigated(object sender, NavigationEventArgs e)
+    private async void OnNavigated(object sender, NavigationEventArgs e)
     {
-        InfoBarService.CloseIfOpen();
+        await InfoBarService.CloseAsync();
 
-        IsBackEnabled = _navigationService.CanGoBack;
+        IsBackEnabled = NavigationService.CanGoBack;
 
         if (e.SourcePageType == _pageService.GetPageType<SettingsViewModel>())
         {

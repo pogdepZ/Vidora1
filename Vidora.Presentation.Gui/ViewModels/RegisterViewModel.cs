@@ -45,7 +45,7 @@ public partial class RegisterViewModel : ObservableRecipient, INavigationAware
     { 
         if (Password != ConfirmPassword)
         {
-            _infoBarService.ShowError("Passwords do not match");
+            await _infoBarService.ShowErrorAsync("Passwords do not match");
             return;
         }
 
@@ -59,7 +59,7 @@ public partial class RegisterViewModel : ObservableRecipient, INavigationAware
         var result = await _registerUseCase.ExecuteAsync(request);
         if (result.IsFailure)
         {
-            _infoBarService.ShowError(result.Error);
+            await _infoBarService.ShowErrorAsync(result.Error);
             return;
         }
 

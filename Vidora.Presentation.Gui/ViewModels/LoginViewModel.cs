@@ -66,7 +66,7 @@ public partial class LoginViewModel : ObservableRecipient, INavigationAware
         {
             Password = string.Empty;
             _savedPassword = string.Empty;
-            _infoBarService.ShowError(result.Error, durationMs: 3000);
+            await _infoBarService.ShowErrorAsync(result.Error, durationMs: 3000);
             return;
         }
 
