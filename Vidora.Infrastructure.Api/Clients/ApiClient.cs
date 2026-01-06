@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Vidora.Core.Helpers;
 using Vidora.Infrastructure.Api.Options;
 
-namespace Vidora.Infrastructure.Api.Services;
+namespace Vidora.Infrastructure.Api.Clients;
 
 public class ApiClient
 {
@@ -47,6 +47,14 @@ public class ApiClient
         CancellationToken ct = default)
         => SendAsync(HttpMethod.Put, url, body, token, headers, ct);
 
+    public Task<HttpResponseMessage> PatchAsync(
+        string url,
+        object? body,
+        string? token = null,
+        Action<HttpRequestHeaders>? headers = null,
+        CancellationToken ct = default)
+    => SendAsync(HttpMethod.Patch, url, body, token, headers, ct);
+
     public Task<HttpResponseMessage> DeleteAsync(
         string url,
         string? token = null,
@@ -66,7 +74,7 @@ public class ApiClient
 
         // JSON body
         if (body != null)
-            request.Content = JsonContent.Create(body, options: JsonHelper.SnakeCaseOptions);
+            request.Content = JsonContent.Create(body, options: JsonHelper.CamelCaseOptions);
 
         // Bearer token
         if (!string.IsNullOrWhiteSpace(token))

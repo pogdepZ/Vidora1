@@ -3,6 +3,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Vidora.Core.Interfaces.Api;
+using Vidora.Infrastructure.Api.Clients;
 using Vidora.Infrastructure.Api.Extensions;
 
 namespace Vidora.Infrastructure.Api.Services;

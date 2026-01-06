@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Vidora.Core.Interfaces.Api;
+using Vidora.Infrastructure.Api.Clients;
 using Vidora.Infrastructure.Api.Mapping;
 using Vidora.Infrastructure.Api.Options;
 using Vidora.Infrastructure.Api.Services;

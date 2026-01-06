@@ -19,7 +19,7 @@ public class LocalSettingsService : ILocalSettingsService
         if (obj is not string json)
             return default;
 
-        if (!JsonHelper.TryDeserialize<T>(json, out var value, options: JsonHelper.DefaultOptions))
+        if (!JsonHelper.TryDeserialize<T>(json, out var value, options: JsonHelper.CamelCaseOptions))
         {
             ApplicationData.Current.LocalSettings.Values.Remove(key);
             return default;
@@ -39,7 +39,7 @@ public class LocalSettingsService : ILocalSettingsService
             return;
         }
 
-        if (!JsonHelper.TrySerialize(value, out var json, options: JsonHelper.DefaultOptions))
+        if (!JsonHelper.TrySerialize(value, out var json, options: JsonHelper.CamelCaseOptions))
         {
             ApplicationData.Current.LocalSettings.Values.Remove(key);
             return;

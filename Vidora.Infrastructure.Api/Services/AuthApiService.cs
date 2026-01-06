@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Vidora.Core.Contracts.Commands;
 using Vidora.Core.Contracts.Results;
 using Vidora.Core.Interfaces.Api;
+using Vidora.Infrastructure.Api.Clients;
 using Vidora.Infrastructure.Api.Dtos.Requests;
 using Vidora.Infrastructure.Api.Dtos.Responses;
 using Vidora.Infrastructure.Api.Dtos.Responses.Datas;

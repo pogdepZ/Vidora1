@@ -16,7 +16,7 @@ internal static class ApiResponseExtensions
         // HTTP error
         if (!response.IsSuccessStatusCode)
         {
-            if (JsonHelper.TryDeserialize<ErrorResponse>(json, out var error)
+            if (JsonHelper.TryDeserialize<ErrorResponse>(json, out var error, JsonHelper.CamelCaseOptions)
                 && error != null)
             {
                 return error with { StatusCode = statusCode };
@@ -30,7 +30,7 @@ internal static class ApiResponseExtensions
         }
 
         // Success WITHOUT data
-        if (JsonHelper.TryDeserialize<SuccessResponse>(json, out var success)
+        if (JsonHelper.TryDeserialize<SuccessResponse>(json, out var success, JsonHelper.CamelCaseOptions)
             && success != null)
         {
             return success with { StatusCode = statusCode };
@@ -53,7 +53,7 @@ internal static class ApiResponseExtensions
         // HTTP error
         if (!response.IsSuccessStatusCode)
         {
-            if (JsonHelper.TryDeserialize<ErrorResponse>(json, out var error)
+            if (JsonHelper.TryDeserialize<ErrorResponse>(json, out var error, JsonHelper.CamelCaseOptions)
                 && error != null)
             {
                 return error with { StatusCode = statusCode };
@@ -67,7 +67,7 @@ internal static class ApiResponseExtensions
         }
 
         // HTTP success
-        if (JsonHelper.TryDeserialize<SuccessResponse<T>>(json, out var success)
+        if (JsonHelper.TryDeserialize<SuccessResponse<T>>(json, out var success, JsonHelper.CamelCaseOptions)
             && success != null)
         {
             return success with { StatusCode = statusCode };
@@ -95,7 +95,7 @@ internal static class ApiResponseExtensions
             );
         }
 
-        if (JsonHelper.TryDeserialize<ListSuccessResponse<T>>(json, out var success)
+        if (JsonHelper.TryDeserialize<ListSuccessResponse<T>>(json, out var success, JsonHelper.CamelCaseOptions)
             && success != null)
         {
             return success with { StatusCode = statusCode };
@@ -123,7 +123,7 @@ internal static class ApiResponseExtensions
             );
         }
 
-        if (JsonHelper.TryDeserialize<PaginatedSuccessResponse<T>>(json, out var success)
+        if (JsonHelper.TryDeserialize<PaginatedSuccessResponse<T>>(json, out var success, JsonHelper.CamelCaseOptions)
             && success != null)
         {
             return success with { StatusCode = statusCode };
