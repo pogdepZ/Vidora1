@@ -13,6 +13,7 @@ public static class DependencyInjection
     {
         // TODO: Configure Core services here
         services.AddTransient<CheckHealthUseCase>();
+        services.AddTransient<UpdateApiConfigUseCase>();
         services.AddTransient<LoginUseCase>();
         services.AddTransient<AutoLoginUseCase>();
         services.AddTransient<LogoutUseCase>();

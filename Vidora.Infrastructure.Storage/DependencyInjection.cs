@@ -9,10 +9,9 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // TODO: Configure Infrastructure.Platform services here
+        // TODO: Configure Infrastructure.Storage services here
         services.AddSingleton<ILocalSettingsService, LocalSettingsService>();
         services.AddSingleton<ISecureVaultService, SecureVaultService>();
-        services.AddSingleton<ISessionStorageService, SessionStorageService>();
         services.AddSingleton<IIdentityVerificationService, IdentityVerificationService>();
 
         return services;
