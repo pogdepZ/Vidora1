@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace Vidora.Presentation.Gui.Models;
 
@@ -9,11 +9,12 @@ public class Promo
     public string DiscountType { get; set; } = string.Empty;
     public decimal Value { get; set; }
     public decimal MinOrderValue { get; set; }
-    public decimal MaxDiscount { get; set; }
+    public decimal? MaxDiscount { get; set; }
     public DateTime EndDate { get; set; }
     public bool IsUsed { get; set; }
 
     public string DisplayText => DiscountType == "percentage" 
-        ? $"{Code} - Gi?m {Value}% (t?i �a {MaxDiscount:N0}�)" 
-        : $"{Code} - Gi?m {Value:N0}�";
+        ? $"{Code} - Giảm {Value}% (tối đa {MaxDiscount:N0}₫)" 
+        : $"{Code} - Giảm {Value:N0}₫";
 }
+    

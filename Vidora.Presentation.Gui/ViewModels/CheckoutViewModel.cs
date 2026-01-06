@@ -3,6 +3,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Vidora.Core.UseCases;
 using Vidora.Presentation.Gui.Contracts.Services;
@@ -48,6 +50,12 @@ public partial class CheckoutViewModel : ObservableRecipient, INavigationAware
     [ObservableProperty]
     private Promo? _selectedPromo;
 
+    [ObservableProperty]
+    private bool _hasNoPromos = true;
+
+    [ObservableProperty]
+    private bool _isPromosLoaded;
+
     public ObservableCollection<Promo> AvailablePromos { get; } = [];
 
     public CheckoutViewModel(
@@ -66,6 +74,14 @@ public partial class CheckoutViewModel : ObservableRecipient, INavigationAware
         _mapper = mapper;
         _infoBarService = infoBarService;
         _navigationService = navigationService;
+
+        // Subscribe to collection changes to update HasNoPromos
+        AvailablePromos.CollectionChanged += OnAvailablePromosChanged;
+    }
+
+    private void OnAvailablePromosChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        HasNoPromos = AvailablePromos.Count == 0;
     }
 
     public async Task OnNavigatedToAsync(object parameter)
@@ -77,7 +93,7 @@ public partial class CheckoutViewModel : ObservableRecipient, INavigationAware
         }
         else
         {
-            _infoBarService.ShowError("Không tìm thấy thông tin gói đăng k?");
+            _infoBarService.ShowError("Không tìm thấy thông tin gói đăng ký");
             await _navigationService.NavigateToAsync<SubscriptionViewModel>();
         }
     }
@@ -132,9 +148,10 @@ public partial class CheckoutViewModel : ObservableRecipient, INavigationAware
                 foreach (var promo in promosResult.Value.Promos)
                 {
                     // Only show promos that meet minimum order value
-                    if (CurrentOrder != null && CurrentOrder.OriginalPrice >= promo.MinOrderValue)
+                    if (CurrentOrder != null && CurrentOrder.OriginalAmount >= promo.MinOrderValue)
                     {
                         var mappedPromo = _mapper.Map<Promo>(promo);
+             
                         AvailablePromos.Add(mappedPromo);
                     }
                 }
@@ -143,6 +160,10 @@ public partial class CheckoutViewModel : ObservableRecipient, INavigationAware
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Error loading promos: {ex.Message}");
+        }
+        finally
+        {
+            IsPromosLoaded = true;
         }
     }
 

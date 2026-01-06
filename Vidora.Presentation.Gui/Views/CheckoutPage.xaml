@@ -107,7 +107,9 @@
                         <StackPanel Spacing="12">
                             <TextBlock Text="Mã giảm giá" FontSize="16" FontWeight="SemiBold"/>
 
-                            <Grid ColumnSpacing="12">
+                            <!-- Promo selection - only show when promos are available -->
+                            <Grid ColumnSpacing="12"
+                                  Visibility="{x:Bind ViewModel.HasNoPromos, Mode=OneWay, Converter={StaticResource BoolNegationToVisibilityConverter}}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
@@ -130,11 +132,12 @@
                                     Padding="16,8"/>
                             </Grid>
 
+                            <!-- No promo message - only show when no promos -->
                             <TextBlock
                                 Text="Không có mã giảm giá khả dụng"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                 FontStyle="Italic"
-                                Visibility="{x:Bind ViewModel.AvailablePromos.Count, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                Visibility="{x:Bind ViewModel.HasNoPromos, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
                         </StackPanel>
                     </Border>
 
@@ -163,7 +166,7 @@
 
                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Giá gốc"/>
                                 <TextBlock Grid.Row="0" Grid.Column="1">
-                                    <Run Text="{x:Bind ViewModel.CurrentOrder.OriginalPrice, Mode=OneWay}"/>
+                                    <Run Text="{x:Bind ViewModel.CurrentOrder.OriginalAmount, Mode=OneWay}"/>
                                     <Run Text="₫"/>
                                 </TextBlock>
 
@@ -181,7 +184,7 @@
 
                                 <TextBlock Grid.Row="3" Grid.Column="0" Text="Tổng thanh toán" FontWeight="Bold" FontSize="16"/>
                                 <TextBlock Grid.Row="3" Grid.Column="1" FontWeight="Bold" FontSize="16" Foreground="#E50914">
-                                    <Run Text="{x:Bind ViewModel.CurrentOrder.FinalPrice, Mode=OneWay}"/>
+                                    <Run Text="{x:Bind ViewModel.CurrentOrder.FinalAmount, Mode=OneWay}"/>
                                     <Run Text="₫"/>
                                 </TextBlock>
                             </Grid>
@@ -252,7 +255,7 @@
                                 <StackPanel Spacing="4" HorizontalAlignment="Center">
                                     <TextBlock Text="Số tiền thanh toán" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center"/>
                                     <TextBlock FontSize="28" FontWeight="Bold" Foreground="#E50914" HorizontalAlignment="Center">
-                                        <Run Text="{x:Bind ViewModel.CurrentOrder.FinalPrice, Mode=OneWay}"/>
+                                        <Run Text="{x:Bind ViewModel.CurrentOrder.FinalAmount, Mode=OneWay}"/>
                                         <Run Text="₫"/>
                                     </TextBlock>
                                 </StackPanel>

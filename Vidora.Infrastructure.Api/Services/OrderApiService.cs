@@ -107,6 +107,7 @@ public class OrderApiService : IOrderApiService
         var url = "api/orders/apply-discount";
         var body = new { orderId , discountId };
 
+
         var httpRes = await _apiClient.PutAsync(url, body, token: accessToken);
 
         var apiRes = await httpRes.ReadAsync<OrderData>();
@@ -137,7 +138,7 @@ public class OrderApiService : IOrderApiService
         }
 
         var url = $"api/orders/{orderId}/status";
-        var body = new { status = "PAID" };
+        var body = new { status = "COMPLETED" };
 
         var httpRes = await _apiClient.PutAsync(url, body, token: accessToken);
 
