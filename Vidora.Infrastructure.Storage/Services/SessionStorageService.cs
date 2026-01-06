@@ -2,7 +2,7 @@
 using Vidora.Core.Interfaces.Storage;
 using Vidora.Core.ValueObjects;
 
-namespace Vidora.Infrastructure.Platform.Services;
+namespace Vidora.Infrastructure.Storage.Services;
 
 public class SessionStorageService : ISessionStorageService
 {

@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<RootNamespace>Vidora.Infrastructure.Platform</RootNamespace>
+		<RootNamespace>Vidora.Infrastructure.Storage</RootNamespace>
 		<ImplicitUsings>disable</ImplicitUsings>
 	</PropertyGroup>
 

@@ -14,7 +14,7 @@ namespace Vidora.Presentation.Gui;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddPresentation(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
         // TODO: Configure Presentation.Gui services here
 

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Vidora.Core.Interfaces.Storage;
 using Windows.Security.Credentials.UI;
 
-namespace Vidora.Infrastructure.Platform.Services;
+namespace Vidora.Infrastructure.Storage.Services;
 
 public class IdentityVerificationService : IIdentityVerificationService
 {

@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
 using Vidora.Core.Helpers;
 using Windows.Storage;
-using Vidora.Infrastructure.Platform.Helpers;
 using Vidora.Core.Interfaces.Storage;
+using Vidora.Infrastructure.Storage.Helpers;
 
-namespace Vidora.Infrastructure.Platform.Services;
+namespace Vidora.Infrastructure.Storage.Services;
 
 public class LocalSettingsService : ILocalSettingsService
 {
