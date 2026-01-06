@@ -20,4 +20,9 @@
     <converters:DateTimeToDateTimeOffsetConverter x:Key="DateTimeToDateTimeOffsetConverter"/>
     <converters:BoolNegationConverter x:Key="BoolNegationConverter"/>
     <converters:ListStringToStringConverter x:Key="ListStringToStringConverter"/>
+    
+    <!-- Watchlist Converters -->
+    <converters:BoolToHeartGlyphConverter x:Key="BoolToHeartGlyphConverter"/>
+    <converters:BoolToHeartColorConverter x:Key="BoolToHeartColorConverter"/>
+    <converters:BoolToWatchlistTextConverter x:Key="BoolToWatchlistTextConverter"/>
 </ResourceDictionary>

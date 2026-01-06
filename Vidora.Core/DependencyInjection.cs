@@ -27,6 +27,9 @@ public static class DependencyInjection
         services.AddTransient<GetAvailablePromosUseCase>();
         services.AddTransient<ApplyDiscountUseCase>();
         services.AddTransient<ConfirmPaymentUseCase>();
+        services.AddTransient<GetWatchlistUseCase>();
+        services.AddTransient<AddToWatchlistUseCase>();
+        services.AddTransient<RemoveFromWatchlistUseCase>();
 
         // Services
         services.AddSingleton<ISessionStateService, SessionStateService>();

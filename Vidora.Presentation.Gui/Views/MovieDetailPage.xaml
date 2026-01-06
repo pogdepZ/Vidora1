@@ -105,6 +105,25 @@
                                                 <TextBlock Text="Trailer"/>
                                             </StackPanel>
                                         </Button>
+
+                                        <!-- Nút Yêu thích -->
+                                        <Button 
+                                            Command="{x:Bind ViewModel.ToggleWatchlistCommand}" 
+                                            Padding="20,10"
+                                            IsEnabled="{x:Bind ViewModel.IsTogglingWatchlist, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <ProgressRing 
+                                                    IsActive="True" 
+                                                    Width="16" Height="16"
+                                                    Visibility="{x:Bind ViewModel.IsTogglingWatchlist, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                                <FontIcon 
+                                                    Glyph="{x:Bind ViewModel.IsInWatchlist, Mode=OneWay, Converter={StaticResource BoolToHeartGlyphConverter}}" 
+                                                    FontSize="16"
+                                                    Foreground="{x:Bind ViewModel.IsInWatchlist, Mode=OneWay, Converter={StaticResource BoolToHeartColorConverter}}"
+                                                    Visibility="{x:Bind ViewModel.IsTogglingWatchlist, Mode=OneWay, Converter={StaticResource BoolNegationToVisibilityConverter}}"/>
+                                                <TextBlock Text="{x:Bind ViewModel.IsInWatchlist, Mode=OneWay, Converter={StaticResource BoolToWatchlistTextConverter}}"/>
+                                            </StackPanel>
+                                        </Button>
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>

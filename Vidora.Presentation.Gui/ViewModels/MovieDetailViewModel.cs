@@ -20,6 +20,8 @@ namespace Vidora.Presentation.Gui.ViewModels;
 public partial class MovieDetailViewModel : ObservableRecipient, INavigationAware
 {
     private readonly GetMovieDetailUseCase _getMovieDetailUseCase;
+    private readonly AddToWatchlistUseCase _addToWatchlistUseCase;
+    private readonly RemoveFromWatchlistUseCase _removeFromWatchlistUseCase;
     private readonly IMapper _mapper;
     private readonly IInfoBarService _infoBarService;
     private readonly INavigationService _navigationService;
@@ -55,6 +57,12 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
     [ObservableProperty]
     private bool _hasMovie;
 
+    [ObservableProperty]
+    private bool _isInWatchlist;
+
+    [ObservableProperty]
+    private bool _isTogglingWatchlist;
+
     // Wrapper properties for null-safe XAML bindings
     public string MovieTitle => Movie?.Title ?? "Đang tải...";
     public string MovieDescription => Movie?.Description ?? "Chưa có mô tả";
@@ -75,11 +83,15 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
 
     public MovieDetailViewModel(
         GetMovieDetailUseCase getMovieDetailUseCase,
+        AddToWatchlistUseCase addToWatchlistUseCase,
+        RemoveFromWatchlistUseCase removeFromWatchlistUseCase,
         IMapper mapper,
         IInfoBarService infoBarService,
         INavigationService navigationService)
     {
         _getMovieDetailUseCase = getMovieDetailUseCase;
+        _addToWatchlistUseCase = addToWatchlistUseCase;
+        _removeFromWatchlistUseCase = removeFromWatchlistUseCase;
         _mapper = mapper;
         _infoBarService = infoBarService;
         _navigationService = navigationService;
@@ -186,10 +198,51 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
     }
 
     [RelayCommand]
-    private void AddToWatchlist()
+    private async Task ToggleWatchlistAsync()
     {
-        _infoBarService.ShowSuccess("Đã thêm vào danh sách xem");
-        // TODO: Implement watchlist functionality
+        if (IsTogglingWatchlist || _movieId <= 0) return;
+
+        try
+        {
+            IsTogglingWatchlist = true;
+
+            if (IsInWatchlist)
+            {
+                // Xóa khỏi watchlist
+                var result = await _removeFromWatchlistUseCase.ExecuteAsync(_movieId);
+                if (result.IsSuccess)
+                {
+                    IsInWatchlist = false;
+                    _infoBarService.ShowInfo("Đã xóa khỏi danh sách yêu thích");
+                }
+                else
+                {
+                    _infoBarService.ShowError(result.Error);
+                }
+            }
+            else
+            {
+                // Thêm vào watchlist
+                var result = await _addToWatchlistUseCase.ExecuteAsync(_movieId);
+                if (result.IsSuccess)
+                {
+                    IsInWatchlist = true;
+                    _infoBarService.ShowSuccess("Đã thêm vào danh sách yêu thích");
+                }
+                else
+                {
+                    _infoBarService.ShowError(result.Error);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _infoBarService.ShowError($"Lỗi: {ex.Message}");
+        }
+        finally
+        {
+            IsTogglingWatchlist = false;
+        }
     }
 
     [RelayCommand]

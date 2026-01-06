@@ -4,15 +4,196 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Vidora.Presentation.Gui.Views"
+    xmlns:models="using:Vidora.Presentation.Gui.Models"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    x:Name="WatchlistPageRoot">
 
-    <Grid>
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <ScrollViewer VerticalScrollMode="Enabled" VerticalScrollBarVisibility="Hidden">
-            <Grid>
-                <TextBlock Text="Watchlist" Style="{StaticResource PageTitleTextBlockStyle}" FontSize="50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            </Grid>
+            <StackPanel Padding="24" Spacing="24">
+                
+                <!-- Header -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0" Spacing="4">
+                        <TextBlock Text="Phim yêu thích" FontSize="28" FontWeight="Bold"/>
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                            <Run Text="{x:Bind ViewModel.TotalMovies, Mode=OneWay}"/>
+                            <Run Text="phim"/>
+                        </TextBlock>
+                    </StackPanel>
+                    
+                    <Button 
+                        Grid.Column="1"
+                        Command="{x:Bind ViewModel.LoadWatchlistCommand}"
+                        VerticalAlignment="Center"
+                        Padding="12,8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE72C;" FontSize="14"/>
+                            <TextBlock Text="Làm mới"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <!-- Loading State -->
+                <StackPanel
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="12"
+                    Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <ProgressRing IsActive="True" Width="48" Height="48"/>
+                    <TextBlock Text="Đang tải danh sách yêu thích..." Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                </StackPanel>
+
+                <!-- Empty State -->
+                <StackPanel
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="16"
+                    Padding="48"
+                    Visibility="{x:Bind ViewModel.HasMovies, Mode=OneWay, Converter={StaticResource BoolNegationToVisibilityConverter}}">
+                    <FontIcon Glyph="&#xEB52;" FontSize="64" Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
+                    <TextBlock 
+                        Text="Chưa có phim yêu thích" 
+                        FontSize="20" 
+                        FontWeight="SemiBold"
+                        HorizontalAlignment="Center"/>
+                    <TextBlock 
+                        Text="Thêm phim vào danh sách yêu thích để xem sau" 
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Movies Grid -->
+                <ItemsRepeater
+                    ItemsSource="{x:Bind ViewModel.Movies, Mode=OneWay}"
+                    Visibility="{x:Bind ViewModel.HasMovies, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <ItemsRepeater.Layout>
+                        <UniformGridLayout
+                            MinItemWidth="280"
+                            MinItemHeight="160"
+                            MinColumnSpacing="16"
+                            MinRowSpacing="16"
+                            ItemsStretch="Fill"
+                            MaximumRowsOrColumns="4"/>
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="models:Movie">
+                            <Border
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Padding="0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <!-- Poster -->
+                                    <Border Grid.Column="0" CornerRadius="12,0,0,12">
+                                        <Image 
+                                            Source="{x:Bind PosterUrl}" 
+                                            Stretch="UniformToFill"
+                                            Width="120"
+                                            Height="160"/>
+                                    </Border>
+                                    
+                                    <!-- Info -->
+                                    <Grid Grid.Column="1" Padding="16" RowSpacing="8">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        
+                                        <!-- Title -->
+                                        <TextBlock 
+                                            Grid.Row="0"
+                                            Text="{x:Bind Title}" 
+                                            FontSize="16" 
+                                            FontWeight="SemiBold"
+                                            TextTrimming="CharacterEllipsis"
+                                            MaxLines="2"/>
+                                        
+                                        <!-- Year & Rating -->
+                                        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="12">
+                                            <TextBlock 
+                                                Text="{x:Bind ReleaseYear}"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <FontIcon Glyph="&#xE735;" FontSize="12" Foreground="#E50914"/>
+                                                <TextBlock 
+                                                    Text="{x:Bind AvgRating}"
+                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        
+                                        <!-- Description -->
+                                        <TextBlock 
+                                            Grid.Row="2"
+                                            Text="{x:Bind Description}" 
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            TextWrapping="Wrap"
+                                            TextTrimming="CharacterEllipsis"
+                                            MaxLines="2"
+                                            FontSize="12"/>
+                                        
+                                        <!-- Actions -->
+                                        <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="8">
+                                            <Button 
+                                                Command="{Binding ViewModel.ViewMovieDetailCommand, ElementName=WatchlistPageRoot}"
+                                                CommandParameter="{x:Bind}"
+                                                Style="{StaticResource AccentButtonStyle}"
+                                                Padding="12,6"
+                                                CornerRadius="6">
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <FontIcon Glyph="&#xE768;" FontSize="12"/>
+                                                    <TextBlock Text="Xem" FontSize="12"/>
+                                                </StackPanel>
+                                            </Button>
+                                            
+                                            <Button 
+                                                Command="{Binding ViewModel.RemoveFromWatchlistCommand, ElementName=WatchlistPageRoot}"
+                                                CommandParameter="{x:Bind}"
+                                                Padding="12,6"
+                                                CornerRadius="6"
+                                                ToolTipService.ToolTip="Xóa khỏi yêu thích">
+                                                <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="#E50914"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+
+                <!-- Load More Button -->
+                <Button
+                    Command="{x:Bind ViewModel.LoadMoreCommand}"
+                    HorizontalAlignment="Center"
+                    Padding="24,12"
+                    Margin="0,16,0,0"
+                    CornerRadius="8"
+                    Visibility="{x:Bind ViewModel.HasMorePages, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <ProgressRing 
+                            IsActive="True" 
+                            Width="16" Height="16"
+                            Visibility="{x:Bind ViewModel.IsLoadingMore, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                        <TextBlock Text="Tải thêm"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
         </ScrollViewer>
     </Grid>
 </Page>
