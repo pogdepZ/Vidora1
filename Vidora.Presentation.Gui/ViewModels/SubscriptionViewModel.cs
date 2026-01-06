@@ -112,4 +112,15 @@ public partial class SubscriptionViewModel : ObservableRecipient, INavigationAwa
         }
         await _navigationService.NavigateToAsync<CheckoutViewModel>(plan);
     }
+
+    [RelayCommand]
+    private async Task RenewPlanAsync(SubscriptionPlan plan)
+    {
+        if (plan == null)
+        {
+            return;
+        }
+        // Navigate to checkout for renewal - same flow as new subscription
+        await _navigationService.NavigateToAsync<CheckoutViewModel>(plan);
+    }
 }

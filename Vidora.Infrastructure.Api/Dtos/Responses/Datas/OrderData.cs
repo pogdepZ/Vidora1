@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Vidora.Infrastructure.Api.Dtos.Responses.Datas;
 
