@@ -4,9 +4,9 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Vidora.Core.Entities;
 using Vidora.Core.UseCases;
 using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
@@ -22,6 +22,7 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
     private readonly GetMovieDetailUseCase _getMovieDetailUseCase;
     private readonly AddToWatchlistUseCase _addToWatchlistUseCase;
     private readonly RemoveFromWatchlistUseCase _removeFromWatchlistUseCase;
+    private readonly RateMovieUseCase _rateMovieUseCase;
     private readonly IMapper _mapper;
     private readonly IInfoBarService _infoBarService;
     private readonly INavigationService _navigationService;
@@ -63,6 +64,25 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
     [ObservableProperty]
     private bool _isTogglingWatchlist;
 
+    // Rating properties
+    [ObservableProperty]
+    private bool _showRatingPanel;
+
+    [ObservableProperty]
+    private int _selectedRating;
+
+    [ObservableProperty]
+    private int _hoveredRating;
+
+    [ObservableProperty]
+    private bool _isSubmittingRating;
+
+    [ObservableProperty]
+    private int _userRating;
+
+    // Collection của các sao (1-10)
+    public ObservableCollection<int> Stars { get; } = new(Enumerable.Range(1, 10));
+
     // Wrapper properties for null-safe XAML bindings
     public string MovieTitle => Movie?.Title ?? "Đang tải...";
     public string MovieDescription => Movie?.Description ?? "Chưa có mô tả";
@@ -85,6 +105,7 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
         GetMovieDetailUseCase getMovieDetailUseCase,
         AddToWatchlistUseCase addToWatchlistUseCase,
         RemoveFromWatchlistUseCase removeFromWatchlistUseCase,
+        RateMovieUseCase rateMovieUseCase,
         IMapper mapper,
         IInfoBarService infoBarService,
         INavigationService navigationService)
@@ -92,6 +113,7 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
         _getMovieDetailUseCase = getMovieDetailUseCase;
         _addToWatchlistUseCase = addToWatchlistUseCase;
         _removeFromWatchlistUseCase = removeFromWatchlistUseCase;
+        _rateMovieUseCase = rateMovieUseCase;
         _mapper = mapper;
         _infoBarService = infoBarService;
         _navigationService = navigationService;
@@ -133,7 +155,7 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
             {
                 Movie = _mapper.Map<CoreMovie, GuiMovie>(result.Value.Movie);
 
-             
+
                 GenresDisplay = Movie.Genres.Count > 0
                     ? string.Join(" • ", Movie.Genres)
                     : "Chưa cập nhật";
@@ -143,7 +165,7 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
                     : "Không có thông tin diễn viên";
 
                 HasTrailer = !string.IsNullOrEmpty(Movie.TrailerUrl);
-                HasMovie = !string.IsNullOrEmpty(Movie.MovieUrl);
+                HasMovie = !string.IsNullOrEmpty(Movie.VideoUrl);
 
                 // TODO: Load watchlist status from API
                 // IsInWatchlist = result.Value.IsInWatchlist;
@@ -176,7 +198,7 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
     {
         if (Movie?.VideoUrl is not null)
         {
-            await _navigationService.NavigateToAsync<VideoPlayerViewModel>(new { Url = Movie.MovieUrl});
+            await _navigationService.NavigateToAsync<VideoPlayerViewModel>(new { Url = Movie.VideoUrl, Title = Movie.Title });
         }
         else
         {
@@ -253,5 +275,89 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
     {
         _infoBarService.ShowInfo("Đã sao chép link chia sẻ");
         // TODO: Implement share functionality
+    }
+
+    // ===== RATING COMMANDS =====
+
+    [RelayCommand]
+    private void OpenRatingPanel()
+    {
+        ShowRatingPanel = true;
+        SelectedRating = UserRating > 0 ? UserRating : 5; // Mặc định 5 sao nếu chưa đánh giá
+        HoveredRating = 0;
+    }
+
+    [RelayCommand]
+    private void CloseRatingPanel()
+    {
+        ShowRatingPanel = false;
+        HoveredRating = 0;
+    }
+
+    [RelayCommand]
+    private void HoverStar(object? parameter)
+    {
+        if (parameter is int star)
+        {
+            HoveredRating = star;
+        }
+        else if (parameter is string starStr && int.TryParse(starStr, out int parsedStar))
+        {
+            HoveredRating = parsedStar;
+        }
+    }
+
+    [RelayCommand]
+    private void LeaveStar()
+    {
+        HoveredRating = 0;
+    }
+
+    [RelayCommand]
+    private void SelectStar(object? parameter)
+    {
+        if (parameter is int star)
+        {
+            SelectedRating = star;
+        }
+        else if (parameter is string starStr && int.TryParse(starStr, out int parsedStar))
+        {
+            SelectedRating = parsedStar;
+        }
+    }
+
+    [RelayCommand]
+    private async Task SubmitRatingAsync()
+    {
+        if (IsSubmittingRating || SelectedRating <= 0 || _movieId <= 0) return;
+
+        try
+        {
+            IsSubmittingRating = true;
+
+            var result = await _rateMovieUseCase.ExecuteAsync(_movieId, SelectedRating);
+
+            if (result.IsSuccess)
+            {
+                UserRating = SelectedRating;
+                ShowRatingPanel = false;
+                _infoBarService.ShowSuccess($"Đã đánh giá {SelectedRating}/10 ⭐");
+
+                // Reload để cập nhật điểm trung bình mới
+                await LoadMovieDetailAsync();
+            }
+            else
+            {
+                _infoBarService.ShowError(result.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            _infoBarService.ShowError($"Lỗi: {ex.Message}");
+        }
+        finally
+        {
+            IsSubmittingRating = false;
+        }
     }
 }

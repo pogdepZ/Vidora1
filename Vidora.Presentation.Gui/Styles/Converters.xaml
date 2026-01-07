@@ -20,6 +20,7 @@
     <converters:DateTimeToDateTimeOffsetConverter x:Key="DateTimeToDateTimeOffsetConverter"/>
     <converters:BoolNegationConverter x:Key="BoolNegationConverter"/>
     <converters:ListStringToStringConverter x:Key="ListStringToStringConverter"/>
+    <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
     
     <!-- Watchlist Converters -->
     <converters:BoolToHeartGlyphConverter x:Key="BoolToHeartGlyphConverter"/>

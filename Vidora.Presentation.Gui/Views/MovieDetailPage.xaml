@@ -9,7 +9,7 @@
     x:Name="MovieDetailPageRoot">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <!-- 1. Loading State: Thêm FallbackValue=True để hiện loading mặc định nếu VM chưa có -->
+        <!-- 1. Loading State -->
         <Grid Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Visible}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
                 <ProgressRing IsActive="True" Width="56" Height="56"/>
@@ -35,16 +35,13 @@
 
         <!-- 3. Content Section -->
         <ScrollViewer VerticalScrollMode="Enabled" VerticalScrollBarVisibility="Auto">
-            <!-- Chỉ hiện khi IsLoading = False và HasError = False -->
             <Grid Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolNegationToVisibilityConverter}, FallbackValue=Collapsed}">
                 <Grid Visibility="{x:Bind ViewModel.HasError, Mode=OneWay, Converter={StaticResource BoolNegationToVisibilityConverter}, FallbackValue=Collapsed}">
                     <StackPanel>
                         <Grid Height="400">
-                            <!-- Image: Tránh null source -->
                             <Image Source="{x:Bind ViewModel.MoviePosterImage, Mode=OneWay}"
                                    Stretch="UniformToFill"
                                    Opacity="0.4"/>
-
 
                             <Border>
                                 <Border.Background>
@@ -70,7 +67,6 @@
                                 <Border Grid.Column="0" CornerRadius="8" Width="160" Height="240" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
                                     <Grid>
                                         <Image Source="{x:Bind ViewModel.MoviePosterImage, Mode=OneWay}" Stretch="UniformToFill"/>
-
                                     </Grid>
                                 </Border>
 
@@ -124,6 +120,30 @@
                                                 <TextBlock Text="{x:Bind ViewModel.IsInWatchlist, Mode=OneWay, Converter={StaticResource BoolToWatchlistTextConverter}}"/>
                                             </StackPanel>
                                         </Button>
+
+                                        <!-- Nút Đánh giá -->
+                                        <Button 
+                                            Command="{x:Bind ViewModel.OpenRatingPanelCommand}" 
+                                            Padding="20,10"
+                                            ToolTipService.ToolTip="Đánh giá phim">
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <FontIcon Glyph="&#xE735;" FontSize="16" Foreground="#FFD700"/>
+                                                <TextBlock Text="Đánh giá"/>
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+
+                                    <!-- Hiển thị đánh giá của user nếu đã đánh giá -->
+                                    <StackPanel 
+                                        Orientation="Horizontal" 
+                                        Spacing="8"
+                                        Visibility="{x:Bind ViewModel.UserRating, Mode=OneWay, Converter={StaticResource IntToVisibilityConverter}, FallbackValue=Collapsed}">
+                                        <TextBlock Text="Đánh giá của bạn:" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        <FontIcon Glyph="&#xE735;" FontSize="14" Foreground="#FFD700"/>
+                                        <TextBlock FontWeight="SemiBold" Foreground="#FFD700">
+                                            <Run Text="{x:Bind ViewModel.UserRating, Mode=OneWay}"/>
+                                            <Run Text="/10"/>
+                                        </TextBlock>
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>
@@ -142,7 +162,7 @@
                                            TextWrapping="Wrap" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                             </StackPanel>
 
-                            <!-- Thông tin chi tiết bên dưới -->
+                            <!-- Thông tin chi tiết -->
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -177,5 +197,165 @@
                 </Grid>
             </Grid>
         </ScrollViewer>
+
+        <!-- 4. Rating Panel Overlay -->
+        <Grid 
+            Visibility="{x:Bind ViewModel.ShowRatingPanel, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+            Background="#80000000">
+            
+            <!-- Click outside to close -->
+            <Button 
+                Command="{x:Bind ViewModel.CloseRatingPanelCommand}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Background="Transparent"
+                BorderThickness="0"/>
+
+            <!-- Rating Dialog -->
+            <Border 
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                CornerRadius="16"
+                Padding="32"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                MinWidth="480">
+                <StackPanel Spacing="24">
+                    <!-- Header -->
+                    <StackPanel Spacing="8">
+                        <TextBlock 
+                            Text="Đánh giá phim" 
+                            FontSize="24" 
+                            FontWeight="Bold"
+                            HorizontalAlignment="Center"/>
+                        <TextBlock 
+                            Text="{x:Bind ViewModel.MovieTitle, Mode=OneWay}"
+                            FontSize="14"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            HorizontalAlignment="Center"
+                            TextTrimming="CharacterEllipsis"
+                            MaxLines="1"/>
+                    </StackPanel>
+
+                    <!-- 10 Stars -->
+                    <StackPanel HorizontalAlignment="Center" Spacing="16">
+                        <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                            <!-- Star 1 -->
+                            <Button 
+                                Command="{x:Bind ViewModel.SelectStarCommand}" 
+                                CommandParameter="1"
+                                Padding="4" Background="Transparent" BorderThickness="0"
+                                PointerEntered="Star_PointerEntered" PointerExited="Star_PointerExited" Tag="1">
+                                <FontIcon Glyph="&#xE735;" FontSize="32" x:Name="Star1"/>
+                            </Button>
+                            <!-- Star 2 -->
+                            <Button 
+                                Command="{x:Bind ViewModel.SelectStarCommand}" 
+                                CommandParameter="2"
+                                Padding="4" Background="Transparent" BorderThickness="0"
+                                PointerEntered="Star_PointerEntered" PointerExited="Star_PointerExited" Tag="2">
+                                <FontIcon Glyph="&#xE735;" FontSize="32" x:Name="Star2"/>
+                            </Button>
+                            <!-- Star 3 -->
+                            <Button 
+                                Command="{x:Bind ViewModel.SelectStarCommand}" 
+                                CommandParameter="3"
+                                Padding="4" Background="Transparent" BorderThickness="0"
+                                PointerEntered="Star_PointerEntered" PointerExited="Star_PointerExited" Tag="3">
+                                <FontIcon Glyph="&#xE735;" FontSize="32" x:Name="Star3"/>
+                            </Button>
+                            <!-- Star 4 -->
+                            <Button 
+                                Command="{x:Bind ViewModel.SelectStarCommand}" 
+                                CommandParameter="4"
+                                Padding="4" Background="Transparent" BorderThickness="0"
+                                PointerEntered="Star_PointerEntered" PointerExited="Star_PointerExited" Tag="4">
+                                <FontIcon Glyph="&#xE735;" FontSize="32" x:Name="Star4"/>
+                            </Button>
+                            <!-- Star 5 -->
+                            <Button 
+                                Command="{x:Bind ViewModel.SelectStarCommand}" 
+                                CommandParameter="5"
+                                Padding="4" Background="Transparent" BorderThickness="0"
+                                PointerEntered="Star_PointerEntered" PointerExited="Star_PointerExited" Tag="5">
+                                <FontIcon Glyph="&#xE735;" FontSize="32" x:Name="Star5"/>
+                            </Button>
+                            <!-- Star 6 -->
+                            <Button 
+                                Command="{x:Bind ViewModel.SelectStarCommand}" 
+                                CommandParameter="6"
+                                Padding="4" Background="Transparent" BorderThickness="0"
+                                PointerEntered="Star_PointerEntered" PointerExited="Star_PointerExited" Tag="6">
+                                <FontIcon Glyph="&#xE735;" FontSize="32" x:Name="Star6"/>
+                            </Button>
+                            <!-- Star 7 -->
+                            <Button 
+                                Command="{x:Bind ViewModel.SelectStarCommand}" 
+                                CommandParameter="7"
+                                Padding="4" Background="Transparent" BorderThickness="0"
+                                PointerEntered="Star_PointerEntered" PointerExited="Star_PointerExited" Tag="7">
+                                <FontIcon Glyph="&#xE735;" FontSize="32" x:Name="Star7"/>
+                            </Button>
+                            <!-- Star 8 -->
+                            <Button 
+                                Command="{x:Bind ViewModel.SelectStarCommand}" 
+                                CommandParameter="8"
+                                Padding="4" Background="Transparent" BorderThickness="0"
+                                PointerEntered="Star_PointerEntered" PointerExited="Star_PointerExited" Tag="8">
+                                <FontIcon Glyph="&#xE735;" FontSize="32" x:Name="Star8"/>
+                            </Button>
+                            <!-- Star 9 -->
+                            <Button 
+                                Command="{x:Bind ViewModel.SelectStarCommand}" 
+                                CommandParameter="9"
+                                Padding="4" Background="Transparent" BorderThickness="0"
+                                PointerEntered="Star_PointerEntered" PointerExited="Star_PointerExited" Tag="9">
+                                <FontIcon Glyph="&#xE735;" FontSize="32" x:Name="Star9"/>
+                            </Button>
+                            <!-- Star 10 -->
+                            <Button 
+                                Command="{x:Bind ViewModel.SelectStarCommand}" 
+                                CommandParameter="10"
+                                Padding="4" Background="Transparent" BorderThickness="0"
+                                PointerEntered="Star_PointerEntered" PointerExited="Star_PointerExited" Tag="10">
+                                <FontIcon Glyph="&#xE735;" FontSize="32" x:Name="Star10"/>
+                            </Button>
+                        </StackPanel>
+
+                        <!-- Rating Display -->
+                        <TextBlock 
+                            HorizontalAlignment="Center"
+                            FontSize="20"
+                            FontWeight="SemiBold">
+                            <Run Text="{x:Bind ViewModel.SelectedRating, Mode=OneWay}"/>
+                            <Run Text="/10 sao" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!-- Buttons -->
+                    <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
+                        <Button 
+                            Command="{x:Bind ViewModel.CloseRatingPanelCommand}"
+                            Padding="24,10"
+                            MinWidth="100">
+                            <TextBlock Text="Hủy"/>
+                        </Button>
+                        <Button 
+                            Command="{x:Bind ViewModel.SubmitRatingCommand}"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Padding="24,10"
+                            MinWidth="140"
+                            IsEnabled="{x:Bind ViewModel.IsSubmittingRating, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <ProgressRing 
+                                    IsActive="True" 
+                                    Width="16" Height="16"
+                                    Visibility="{x:Bind ViewModel.IsSubmittingRating, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                <TextBlock Text="Gửi đánh giá" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </Page>

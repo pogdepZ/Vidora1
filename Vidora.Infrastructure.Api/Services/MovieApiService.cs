@@ -54,8 +54,6 @@ public class MovieApiService : IMovieApiService
         queryParams["page"] = command.Page.ToString();
         queryParams["limit"] = command.Limit.ToString();
 
-      
-
         var url = $"api/movies?{queryParams}";
 
         var httpRes = await _apiClient.GetAsync(url, token: accessToken);
@@ -140,5 +138,41 @@ public class MovieApiService : IMovieApiService
         };
 
         return Result.Success(result);
+    }
+
+    public async Task<Result<RateMovieResult>> RateMovieAsync(int movieId, int rating)
+    {
+        var tokenObject = _sessionService.AccessToken;
+        var accessToken = tokenObject?.Token;
+
+        if (string.IsNullOrWhiteSpace(accessToken))
+        {
+            return Result.Failure<RateMovieResult>("Access token not found. Please login again.");
+        }
+
+        if (rating < 1 || rating > 10)
+        {
+            return Result.Failure<RateMovieResult>("Đánh giá phải từ 1 đến 10 sao");
+        }
+
+        var url = $"api/movies/{movieId}/rating";
+        var body = new { number = rating };
+
+        var httpRes = await _apiClient.PutAsync(url, body, token: accessToken);
+
+        if (httpRes.IsSuccessStatusCode)
+        {
+            return Result.Success(new RateMovieResult
+            {
+                Success = true,
+                Message = $"Đã đánh giá {rating} sao",
+                UserRating = rating
+            });
+        }
+
+        var apiRes = await httpRes.ReadAsync<object>();
+        return Result.Failure<RateMovieResult>(
+            apiRes.Message ?? "Đánh giá phim thất bại"
+        );
     }
 }

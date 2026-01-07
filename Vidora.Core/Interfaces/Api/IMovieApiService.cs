@@ -10,4 +10,5 @@ public interface IMovieApiService
     Task<Result<SearchMovieResult>> SearchMoviesAsync(SearchMovieCommand command);
     Task<Result<MovieDetailResult>> GetMovieDetailAsync(int movieId);
     Task<Result<GenreListResult>> GetGenresAsync();
+    Task<Result<RateMovieResult>> RateMovieAsync(int movieId, int rating);
 }
