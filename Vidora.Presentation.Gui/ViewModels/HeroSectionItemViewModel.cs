@@ -34,4 +34,13 @@ public partial class HeroSectionItemViewModel : ObservableRecipient
             await _navigationService.NavigateToAsync<VideoPlayerViewModel>(videoUrl);
         }
     }
+
+    [RelayCommand]
+    public async Task ViewMovieDetailAsync()
+    {
+        if (Movie is not null && Movie.MovieId > 0)
+        {
+            await _navigationService.NavigateToAsync<MovieDetailViewModel>(Movie.MovieId);
+        }
+    }
 }

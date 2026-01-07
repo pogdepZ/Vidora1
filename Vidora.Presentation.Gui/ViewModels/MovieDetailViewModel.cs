@@ -165,7 +165,7 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
                     : "Không có thông tin diễn viên";
 
                 HasTrailer = !string.IsNullOrEmpty(Movie.TrailerUrl);
-                HasMovie = !string.IsNullOrEmpty(Movie.VideoUrl);
+                HasMovie = !string.IsNullOrEmpty(Movie.MovieUrl);
 
                 // TODO: Load watchlist status from API
                 // IsInWatchlist = result.Value.IsInWatchlist;
@@ -198,7 +198,7 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
     {
         if (Movie?.VideoUrl is not null)
         {
-            await _navigationService.NavigateToAsync<VideoPlayerViewModel>(new { Url = Movie.VideoUrl, Title = Movie.Title });
+            await _navigationService.NavigateToAsync<VideoPlayerViewModel>(new { Url = Movie.MovieUrl, Title = Movie.Title });
         }
         else
         {
@@ -283,7 +283,22 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
     private void OpenRatingPanel()
     {
         ShowRatingPanel = true;
-        SelectedRating = UserRating > 0 ? UserRating : 5; // Mặc định 5 sao nếu chưa đánh giá
+        // Ưu tiên: UserRating > AvgRating > 5 (mặc định)
+        if (UserRating > 0)
+        {
+            SelectedRating = UserRating;
+        }
+        else if (Movie?.AvgRating > 0)
+        {
+            // Làm tròn AvgRating thành số nguyên (1-10)
+            SelectedRating = (int)Math.Round(Movie.AvgRating);
+            // Đảm bảo nằm trong khoảng 1-10
+            SelectedRating = Math.Clamp(SelectedRating, 1, 10);
+        }
+        else
+        {
+            SelectedRating = 5; // Mặc định 5 sao
+        }
         HoveredRating = 0;
     }
 

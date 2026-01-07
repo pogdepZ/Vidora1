@@ -22,11 +22,26 @@
                 Padding="0"
                 Background="Transparent"
                 Height="100" Width="160"
-                BorderThickness="0">
-                <Image
-                    HorizontalAlignment="Right"
-                    Source="{x:Bind BannerUrl}"
-                    Stretch="UniformToFill"/>
+                BorderThickness="0"
+                Command="{Binding ViewModel.ViewMovieDetailCommand, ElementName=HomePageRoot}"
+                CommandParameter="{x:Bind}">
+                <Grid>
+                    <Image
+                        HorizontalAlignment="Right"
+                        Source="{x:Bind BannerUrl}"
+                        Stretch="UniformToFill"/>
+                    <!-- Overlay với thông tin phim khi hover -->
+                    <Border Background="#80000000" Opacity="0" x:Name="HoverOverlay">
+                        <StackPanel VerticalAlignment="Bottom" Padding="8">
+                            <TextBlock Text="{x:Bind Title}" FontWeight="SemiBold" 
+                                       Foreground="White" TextTrimming="CharacterEllipsis"/>
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon Glyph="&#xE735;" FontSize="10" Foreground="#FFD700"/>
+                                <TextBlock Text="{x:Bind AvgRating}" FontSize="11" Foreground="White"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
             </Button>
         </DataTemplate>
     </Page.Resources>

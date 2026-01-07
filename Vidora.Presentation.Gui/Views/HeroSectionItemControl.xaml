@@ -65,6 +65,7 @@
                         </StackPanel>
                     </Button>
                     <Button
+                        Command="{x:Bind ViewModel.ViewMovieDetailCommand}"
                         Style="{ThemeResource ButtonRevealStyle}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <FontIcon Glyph="&#xE946;" FontSize="12"/>

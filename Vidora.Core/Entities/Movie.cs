@@ -13,6 +13,8 @@ public class Movie
     public string? TrailerUrl { get; set; }
     public string? MovieUrl { get; set; }
     public double AvgRating { get; set; }
+    public int? UserRating { get; set; }
+    public bool IsInWatchlist { get; set; }
     public IReadOnlyList<string> Genres { get; set; } = [];
 
     // Thay đổi từ string sang MovieMember

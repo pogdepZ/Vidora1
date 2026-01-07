@@ -1,7 +1,12 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using AutoMapper;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
+using Vidora.Core.UseCases;
+using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
 using Vidora.Presentation.Gui.Models;
 
@@ -9,6 +14,10 @@ namespace Vidora.Presentation.Gui.ViewModels;
 
 public partial class HomeViewModel : ObservableRecipient, INavigationAware
 {
+    private readonly GetDashboardUseCase _getDashboardUseCase;
+    private readonly IMapper _mapper;
+    private readonly INavigationService _navigationService;
+
     private ObservableCollection<Movie> _heroItems = [];
     public ObservableCollection<Movie> HeroItems
     {
@@ -79,25 +88,122 @@ public partial class HomeViewModel : ObservableRecipient, INavigationAware
         set => SetProperty(ref _selectedContinueWatchingIndex, value);
     }
 
-
-    public HomeViewModel()
+    private bool _isLoading;
+    public bool IsLoading
     {
+        get => _isLoading;
+        set => SetProperty(ref _isLoading, value);
+    }
+
+    private bool _hasError;
+    public bool HasError
+    {
+        get => _hasError;
+        set => SetProperty(ref _hasError, value);
+    }
+
+    private string _errorMessage = string.Empty;
+    public string ErrorMessage
+    {
+        get => _errorMessage;
+        set => SetProperty(ref _errorMessage, value);
+    }
+
+    public HomeViewModel(
+        GetDashboardUseCase getDashboardUseCase,
+        IMapper mapper,
+        INavigationService navigationService)
+    {
+        _getDashboardUseCase = getDashboardUseCase;
+        _mapper = mapper;
+        _navigationService = navigationService;
     }
 
     public async Task OnNavigatedToAsync(object parameter)
     {
+        IsLoading = true;
+        HasError = false;
+        ErrorMessage = string.Empty;
 
-        HeroItems = GetSampleFilm(4);
-        TrendingItems = GetSampleFilm(10);
-        RecommendedItems = GetSampleFilm(15);
-        NewReleaseItems = GetSampleFilm(15);
-        ContinueWatchingItems = GetSampleFilm(10);
+        try
+        {
+            var result = await _getDashboardUseCase.ExecuteAsync();
+
+            if (result.IsSuccess)
+            {
+                var dashboard = result.Value;
+
+                // Get top 5 highest rated movies
+                var highestRatedMovies = _mapper.Map<IReadOnlyList<Movie>>(dashboard.HighestRatedMovies);
+                var topMovies = highestRatedMovies.Take(5).ToList();
+
+                // Use top rated movies for Hero banner (max 4)
+                HeroItems = new ObservableCollection<Movie>(topMovies.Take(4));
+
+                // Use highest rated movies for Trending section
+                TrendingItems = new ObservableCollection<Movie>(topMovies);
+
+                // Use highest rated movies for Recommended section
+                RecommendedItems = new ObservableCollection<Movie>(topMovies);
+
+                // Use highest rated movies for New Releases section
+                NewReleaseItems = new ObservableCollection<Movie>(topMovies);
+
+                // Continue Watching - can be empty or use same data
+                ContinueWatchingItems = new ObservableCollection<Movie>(topMovies);
+            }
+            else
+            {
+                HasError = true;
+                ErrorMessage = result.Error;
+                // Fallback to sample data if API fails
+                LoadSampleData();
+            }
+        }
+        catch (System.Exception ex)
+        {
+            HasError = true;
+            ErrorMessage = ex.Message;
+            // Fallback to sample data if exception occurs
+            LoadSampleData();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     public async Task OnNavigatedFromAsync()
     {
     }
 
+    [RelayCommand]
+    private async Task ViewMovieDetailAsync(Movie movie)
+    {
+        if (movie is not null)
+        {
+            await _navigationService.NavigateToAsync<MovieDetailViewModel>(movie.MovieId);
+        }
+    }
+
+    [RelayCommand]
+    private async Task PlayMovieAsync(Movie movie)
+    {
+        if (movie is not null)
+        {
+            // Navigate to video player with movie
+            await _navigationService.NavigateToAsync<VideoPlayerViewModel>(movie.MovieId);
+        }
+    }
+
+    private void LoadSampleData()
+    {
+        HeroItems = GetSampleFilm(4);
+        TrendingItems = GetSampleFilm(10);
+        RecommendedItems = GetSampleFilm(15);
+        NewReleaseItems = GetSampleFilm(15);
+        ContinueWatchingItems = GetSampleFilm(10);
+    }
 
     private ObservableCollection<Movie> GetSampleFilm(int count)
     {

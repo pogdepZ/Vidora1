@@ -12,6 +12,8 @@ internal record MovieData(
     string? TrailerUrl,
     string? MovieUrl,
     double AvgRating,
+    int? UserRating,
+    bool? IsInWatchlist,
     IReadOnlyList<string> Genres,
     IReadOnlyList<ActorData> Actors
 );

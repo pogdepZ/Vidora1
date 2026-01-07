@@ -31,6 +31,7 @@ public static class DependencyInjection
         services.AddTransient<RemoveFromWatchlistUseCase>();
         services.AddTransient<AddToWatchlistUseCase>();
         services.AddTransient<RateMovieUseCase>();
+        services.AddTransient<GetDashboardUseCase>();
 
         // Services
         services.AddSingleton<ISessionStateService, SessionStateService>();

@@ -21,7 +21,11 @@ public class MovieMappingProfile : Profile
             .ForMember(dest => dest.Genres,
                 opt => opt.MapFrom(src => src.Genres ?? new List<string>()))
             .ForMember(dest => dest.Actors,
-                opt => opt.MapFrom(src => src.Actors ?? new List<ActorData>()));
+                opt => opt.MapFrom(src => src.Actors ?? new List<ActorData>()))
+            .ForMember(dest => dest.UserRating,
+                opt => opt.MapFrom(src => src.UserRating))
+            .ForMember(dest => dest.IsInWatchlist,
+                opt => opt.MapFrom(src => src.IsInWatchlist ?? false));
 
         CreateMap<GenreData, Genre>();
 

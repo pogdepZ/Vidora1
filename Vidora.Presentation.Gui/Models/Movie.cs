@@ -17,6 +17,8 @@ public class Movie
     public string? MovieUrl { get; set; } = string.Empty;
     public double AvgRating { get; set; }
     public double Rating { get; set; }               // UI-only
+    public int? UserRating { get; set; }             // User's rating for this movie
+    public bool IsInWatchlist { get; set; }          // Whether movie is in user's watchlist
     public int DurationMinutes { get; set; }         // UI-only
     public IReadOnlyList<string> Genres { get; set; } = [];
     public IReadOnlyList<MovieMember> Actors { get; set; } = [];

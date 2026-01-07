@@ -24,12 +24,7 @@
                 <TextBlock Text="Không thể tải thông tin phim" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
                 <TextBlock Text="{x:Bind ViewModel.ErrorMessage, Mode=OneWay, FallbackValue='Lỗi không xác định'}"
                            TextWrapping="Wrap" TextAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                <Button Command="{x:Bind ViewModel.GoBackCommand}" HorizontalAlignment="Center" Padding="24,10">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <FontIcon Glyph="&#xE72B;" FontSize="14"/>
-                        <TextBlock Text="Quay lại"/>
-                    </StackPanel>
-                </Button>
+               
             </StackPanel>
         </Grid>
 
@@ -53,10 +48,7 @@
                                 </Border.Background>
                             </Border>
 
-                            <Button Command="{x:Bind ViewModel.GoBackCommand}" HorizontalAlignment="Left" VerticalAlignment="Top"
-                                    Margin="24,16" Width="40" Height="40" CornerRadius="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                                <FontIcon Glyph="&#xE72B;" FontSize="16"/>
-                            </Button>
+                           
 
                             <Grid VerticalAlignment="Bottom" Padding="32,0,32,24">
                                 <Grid.ColumnDefinitions>
@@ -345,7 +337,7 @@
                             Padding="24,10"
                             MinWidth="140"
                             IsEnabled="{x:Bind ViewModel.IsSubmittingRating, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="8"> 
                                 <ProgressRing 
                                     IsActive="True" 
                                     Width="16" Height="16"
