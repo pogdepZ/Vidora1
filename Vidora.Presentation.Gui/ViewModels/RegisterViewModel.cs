@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Threading.Tasks;
+using Vidora.Core.Exceptions;
 using Vidora.Core.UseCases;
 using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
@@ -11,40 +12,20 @@ namespace Vidora.Presentation.Gui.ViewModels;
 
 public partial class RegisterViewModel : ObservableRecipient, INavigationAware
 {
+    [ObservableProperty]
     private string _email = string.Empty;
-    public string Email
-    {
-        get => _email;
-        set => SetProperty(ref _email, value);
-    }
 
+    [ObservableProperty]
     private string _password = string.Empty;
-    public string Password
-    {
-        get => _password;
-        set => SetProperty(ref _password, value);
-    }
 
+    [ObservableProperty]
     private string _confirmPassword = string.Empty;
-    public string ConfirmPassword
-    {
-        get => _confirmPassword;
-        set => SetProperty(ref _confirmPassword, value);
-    }
 
+    [ObservableProperty]
     private string _username = string.Empty;
-    public string Username
-    {
-        get => _username;
-        set => SetProperty(ref _username, value);
-    }
 
+    [ObservableProperty]
     private string _fullName = string.Empty;
-    public string FullName
-    {
-        get => _fullName;
-        set => SetProperty(ref _fullName, value);
-    }
 
 
     private readonly RegisterUseCase _registerUseCase;
@@ -61,25 +42,28 @@ public partial class RegisterViewModel : ObservableRecipient, INavigationAware
     }
 
     [RelayCommand]
-    public async Task RegisterAsync()
+    public async Task ExecuteRegisterAsync()
     { 
-        if (_password != _confirmPassword)
+        if (Password != ConfirmPassword)
         {
-            _infoBarService.ShowError("Passwords do not match");
+            await _infoBarService.ShowErrorAsync("Passwords do not match");
             return;
         }
-
-        var request = new Core.Contracts.Commands.RegisterCommand(
-            Email: _email,
-            Password: _password,
-            Username: _username,
-            FullName: _fullName
-            );
-
-        var result = await _registerUseCase.ExecuteAsync(request);
-        if (result.IsFailure)
+        
+        try
         {
-            _infoBarService.ShowError(result.Error);
+            var request = new Core.Contracts.Commands.RegisterCommand(
+                Email: Email,
+                Password: Password,
+                Username: Username,
+                FullName: FullName
+                );
+
+            var result = await _registerUseCase.ExecuteAsync(request);
+        }
+        catch (DomainException ex)
+        {
+            await _infoBarService.ShowErrorAsync(ex.Message, durationMs: 2000);
             return;
         }
 
@@ -93,11 +77,11 @@ public partial class RegisterViewModel : ObservableRecipient, INavigationAware
 
         await dialog.ShowAsync();
 
-        await _navigationService.NavigateToAsync<LoginViewModel>(parameter: _email, clearNavigation: true);
+        await _navigationService.NavigateToAsync<LoginViewModel>(parameter: Email, clearNavigation: true);
     }
 
     [RelayCommand]
-    public async Task NavigateToLoginAsync()
+    public async Task ExecuteNavigateToLoginAsync()
     {
         await _navigationService.NavigateToAsync<LoginViewModel>(clearNavigation: true);
     }

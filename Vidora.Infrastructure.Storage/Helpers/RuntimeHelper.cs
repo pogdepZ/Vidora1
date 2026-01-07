@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Vidora.Infrastructure.Platform.Helpers;
+namespace Vidora.Infrastructure.Storage.Helpers;
 
 public class RuntimeHelper
 {

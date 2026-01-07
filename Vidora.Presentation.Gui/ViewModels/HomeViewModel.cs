@@ -9,76 +9,35 @@ namespace Vidora.Presentation.Gui.ViewModels;
 
 public partial class HomeViewModel : ObservableRecipient, INavigationAware
 {
+    [ObservableProperty]
     private ObservableCollection<Movie> _heroItems = [];
-    public ObservableCollection<Movie> HeroItems
-    {
-        get => _heroItems;
-        set => SetProperty(ref _heroItems, value);
-    }
 
+    [ObservableProperty]
     private int _selectedHeroIndex = 0;
-    public int SelectedHeroIndex
-    {
-        get => _selectedHeroIndex;
-        set => SetProperty(ref _selectedHeroIndex, value);
-    }
 
+    [ObservableProperty]
     private ObservableCollection<Movie> _trendingItems = [];
-    public ObservableCollection<Movie> TrendingItems
-    {
-        get => _trendingItems;
-        set => SetProperty(ref _trendingItems, value);
-    }
 
+    [ObservableProperty]
     private int _selectedTrendingIndex = 0;
-    public int SelectedTrendingIndex
-    {
-        get => _selectedTrendingIndex;
-        set => SetProperty(ref _selectedTrendingIndex, value);
-    }
 
+    [ObservableProperty]
     private ObservableCollection<Movie> _recommendedItems = [];
-    public ObservableCollection<Movie> RecommendedItems
-    {
-        get => _recommendedItems;
-        set => SetProperty(ref _recommendedItems, value);
-    }
 
+    [ObservableProperty]
     private int _selectedRecommendedIndex = 0;
-    public int SelectedRecommendedIndex
-    {
-        get => _selectedRecommendedIndex;
-        set => SetProperty(ref _selectedRecommendedIndex, value);
-    }
 
+    [ObservableProperty]
     private ObservableCollection<Movie> _newReleaseItems = [];
-    public ObservableCollection<Movie> NewReleaseItems
-    {
-        get => _newReleaseItems;
-        set => SetProperty(ref _newReleaseItems, value);
-    }
 
+    [ObservableProperty]
     private int _selectedNewReleaseIndex;
-    public int SelectedNewReleaseIndex
-    {
-        get => _selectedNewReleaseIndex;
-        set => SetProperty(ref _selectedNewReleaseIndex, value);
-    }
 
+    [ObservableProperty]
     private ObservableCollection<Movie> _continueWatchingItems = [];
-    public ObservableCollection<Movie> ContinueWatchingItems
-    {
-        get => _continueWatchingItems;
-        set => SetProperty(ref _continueWatchingItems, value);
-    }
 
+    [ObservableProperty]
     private int _selectedContinueWatchingIndex = 0;
-    public int SelectedContinueWatchingIndex
-    {
-        get => _selectedContinueWatchingIndex;
-        set => SetProperty(ref _selectedContinueWatchingIndex, value);
-    }
-
 
     public HomeViewModel()
     {

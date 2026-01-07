@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
+using Vidora.Core.Exceptions;
 using Vidora.Core.UseCases;
 using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
@@ -14,33 +15,24 @@ namespace Vidora.Presentation.Gui.ViewModels;
 
 public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 {
+    [ObservableProperty]
     private string _versionDescription = string.Empty;
-    public string VersionDescription
-    {
-        get => _versionDescription;
-        set => SetProperty(ref _versionDescription, value);
-    }
 
+    [ObservableProperty]
     private ElementTheme _selectedTheme;
-    public ElementTheme SelectedTheme
-    {
-        get => _selectedTheme;
-        set
-        {
-            if (SetProperty(ref _selectedTheme, value))
-            {
-                _themeSelectorService.SetTheme(value);
-            }
-        }
-    }
 
     public List<ElementTheme> ElementThemes { get; }
 
     private readonly LogoutUseCase _logoutUseCase;
+    private readonly IInfoBarService _infoBarService;
     private readonly IThemeSelectorService _themeSelectorService;
-    public SettingsViewModel(LogoutUseCase logoutUseCase, IThemeSelectorService themeSelectorService)
+    public SettingsViewModel(
+        LogoutUseCase logoutUseCase,
+        IInfoBarService infoBarService,
+        IThemeSelectorService themeSelectorService)
     {
         _logoutUseCase = logoutUseCase;
+        _infoBarService = infoBarService;
         _themeSelectorService = themeSelectorService;
         
         SelectedTheme = _themeSelectorService.Theme;
@@ -56,7 +48,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     }
 
     [RelayCommand]
-    public async Task LogoutAsync()
+    public async Task ExecuteLogoutAsync()
     {
         var dialog = new ContentDialog
         {
@@ -73,7 +65,14 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         if (result != ContentDialogResult.Primary)
             return;
 
-        await _logoutUseCase.ExecuteAsync();
+        try
+        {
+            await _logoutUseCase.ExecuteAsync();
+        }
+        catch (DomainException ex)
+        {
+            await _infoBarService.ShowErrorAsync(ex.Message);
+        }
     }
 
     public async Task OnNavigatedToAsync(object? param)
@@ -95,5 +94,10 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         }
 
         return $"{version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
+    }
+
+    partial void OnSelectedThemeChanged(ElementTheme value)
+    {
+        _themeSelectorService.SetTheme(value);
     }
 }

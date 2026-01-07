@@ -93,7 +93,7 @@
                     <Button 
                         Content="Login" 
                         Style="{StaticResource BrandButtonStyle}"
-                        Command="{x:Bind ViewModel.LoginCommand}"/>
+                        Command="{x:Bind ViewModel.ExecuteLoginCommand}"/>
 
                 </StackPanel>
 
@@ -109,7 +109,7 @@
                         FontSize="12"
                         Padding="0"
                         Content="Sign up"
-                        Command="{x:Bind ViewModel.NavigateToRegisterCommand}"/>
+                        Command="{x:Bind ViewModel.ExecuteNavigateToRegisterCommand}"/>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

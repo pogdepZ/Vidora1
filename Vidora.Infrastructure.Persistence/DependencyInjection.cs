@@ -5,7 +5,7 @@ namespace Vidora.Infrastructure.Persistence;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructurePersistence(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
         // TODO: Configure Infrastructure.Persistence services here
 

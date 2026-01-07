@@ -1,18 +1,17 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Vidora.Core.Interfaces.Storage;
-using Vidora.Infrastructure.Platform.Services;
+using Vidora.Infrastructure.Storage.Services;
 
-namespace Vidora.Infrastructure.Platform;
+namespace Vidora.Infrastructure.Storage;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructurePlatform(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // TODO: Configure Infrastructure.Platform services here
+        // TODO: Configure Infrastructure.Storage services here
         services.AddSingleton<ILocalSettingsService, LocalSettingsService>();
         services.AddSingleton<ISecureVaultService, SecureVaultService>();
-        services.AddSingleton<ISessionStorageService, SessionStorageService>();
         services.AddSingleton<IIdentityVerificationService, IdentityVerificationService>();
 
         return services;

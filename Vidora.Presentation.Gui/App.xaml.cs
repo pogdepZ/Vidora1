@@ -1,11 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
 using System;
-
-using Vidora.Core;
-using Vidora.Infrastructure.Api;
-using Vidora.Infrastructure.Platform;
-using Vidora.Infrastructure.Persistence;
 using Vidora.Presentation.Gui.Contracts.Services;
 
 namespace Vidora.Presentation.Gui;
@@ -24,15 +19,25 @@ public partial class App : Application
             .UseContentRoot(AppContext.BaseDirectory)
             .ConfigureServices((context, services) =>
             {
-                services
-                    .AddCore(context.Configuration)
-                    .AddPresentation(context.Configuration)
-                    .AddInfrastructureApi(context.Configuration)
-                    .AddInfrastructurePlatform(context.Configuration)
-                    .AddInfrastructurePersistence(context.Configuration);
+                Core.DependencyInjection
+                    .AddServices(services, context.Configuration);
+
+                Infrastructure.Api.DependencyInjection
+                    .AddServices(services, context.Configuration);
+
+                Infrastructure.Storage.DependencyInjection
+                    .AddServices(services, context.Configuration);
+
+                Infrastructure.Persistence.DependencyInjection
+                    .AddServices(services, context.Configuration);
+
+                Presentation.Gui.DependencyInjection
+                    .AddServices(services, context.Configuration);
+
             })
             .Build();
     }
+
 
     public static T GetService<T>() where T : class
     {

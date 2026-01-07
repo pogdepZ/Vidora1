@@ -105,7 +105,7 @@
                         Margin="0,20,0,0"
                         Content="Register" 
                         Style="{StaticResource BrandButtonStyle}"
-                        Command="{x:Bind ViewModel.RegisterCommand}"/>
+                        Command="{x:Bind ViewModel.ExecuteRegisterCommand}"/>
                 </StackPanel>
 
 
@@ -120,7 +120,7 @@
                         FontSize="12"
                         Padding="0"
                         Content="Sign in"
-                        Command="{x:Bind ViewModel.NavigateToLoginCommand}"/>
+                        Command="{x:Bind ViewModel.ExecuteNavigateToLoginCommand}"/>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>
