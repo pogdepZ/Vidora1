@@ -9,5 +9,4 @@ public interface IWatchlistApiService
     Task<Result<WatchlistResult>> GetWatchlistAsync(int page = 1, int limit = 10);
     Task<Result<ToggleWatchlistResult>> AddToWatchlistAsync(int movieId);
     Task<Result<ToggleWatchlistResult>> RemoveFromWatchlistAsync(int movieId);
-    Task<Result<ToggleWatchlistResult>> ToggleWatchlistAsync(int movieId);
 }

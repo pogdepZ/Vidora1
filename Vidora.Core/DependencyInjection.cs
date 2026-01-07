@@ -28,7 +28,6 @@ public static class DependencyInjection
         services.AddTransient<ApplyDiscountUseCase>();
         services.AddTransient<ConfirmPaymentUseCase>();
         services.AddTransient<GetWatchlistUseCase>();
-        services.AddTransient<ToggleWatchlistUseCase>();
         services.AddTransient<RemoveFromWatchlistUseCase>();
         services.AddTransient<AddToWatchlistUseCase>();
 
