@@ -20,8 +20,7 @@ namespace Vidora.Presentation.Gui.ViewModels;
 public partial class MovieDetailViewModel : ObservableRecipient, INavigationAware
 {
     private readonly GetMovieDetailUseCase _getMovieDetailUseCase;
-    private readonly AddToWatchlistUseCase _addToWatchlistUseCase;
-    private readonly RemoveFromWatchlistUseCase _removeFromWatchlistUseCase;
+    private readonly ToggleWatchlistUseCase _toggleWatchlistUseCase;
     private readonly IMapper _mapper;
     private readonly IInfoBarService _infoBarService;
     private readonly INavigationService _navigationService;
@@ -83,15 +82,13 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
 
     public MovieDetailViewModel(
         GetMovieDetailUseCase getMovieDetailUseCase,
-        AddToWatchlistUseCase addToWatchlistUseCase,
-        RemoveFromWatchlistUseCase removeFromWatchlistUseCase,
+        ToggleWatchlistUseCase toggleWatchlistUseCase,
         IMapper mapper,
         IInfoBarService infoBarService,
         INavigationService navigationService)
     {
         _getMovieDetailUseCase = getMovieDetailUseCase;
-        _addToWatchlistUseCase = addToWatchlistUseCase;
-        _removeFromWatchlistUseCase = removeFromWatchlistUseCase;
+        _toggleWatchlistUseCase = toggleWatchlistUseCase;
         _mapper = mapper;
         _infoBarService = infoBarService;
         _navigationService = navigationService;
@@ -206,33 +203,24 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
         {
             IsTogglingWatchlist = true;
 
-            if (IsInWatchlist)
+            var result = await _toggleWatchlistUseCase.ExecuteAsync(_movieId);
+
+            if (result.IsSuccess)
             {
-                // Xóa khỏi watchlist
-                var result = await _removeFromWatchlistUseCase.ExecuteAsync(_movieId);
-                if (result.IsSuccess)
+                IsInWatchlist = result.Value.IsInWatchlist;
+                
+                if (IsInWatchlist)
                 {
-                    IsInWatchlist = false;
-                    _infoBarService.ShowInfo("Đã xóa khỏi danh sách yêu thích");
-                }
-                else
-                {
-                    _infoBarService.ShowError(result.Error);
-                }
-            }
-            else
-            {
-                // Thêm vào watchlist
-                var result = await _addToWatchlistUseCase.ExecuteAsync(_movieId);
-                if (result.IsSuccess)
-                {
-                    IsInWatchlist = true;
                     _infoBarService.ShowSuccess("Đã thêm vào danh sách yêu thích");
                 }
                 else
                 {
-                    _infoBarService.ShowError(result.Error);
+                    _infoBarService.ShowInfo("Đã xóa khỏi danh sách yêu thích");
                 }
+            }
+            else
+            {
+                _infoBarService.ShowError(result.Error);
             }
         }
         catch (Exception ex)

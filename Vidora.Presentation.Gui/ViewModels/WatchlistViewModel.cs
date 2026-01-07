@@ -2,7 +2,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Vidora.Core.UseCases;
 using Vidora.Presentation.Gui.Contracts.Services;
@@ -26,21 +28,16 @@ public partial class WatchlistViewModel : ObservableRecipient, INavigationAware
     private bool _isLoading;
 
     [ObservableProperty]
-    private bool _isLoadingMore;
-
-    [ObservableProperty]
     private bool _hasMovies;
-
-    [ObservableProperty]
-    private int _currentPage = 1;
-
-    [ObservableProperty]
-    private bool _hasMorePages;
 
     [ObservableProperty]
     private int _totalMovies;
 
-    public ObservableCollection<GuiMovie> Movies { get; } = [];
+    // Danh sách phim gốc (để lưu trữ tất cả phim)
+    private readonly List<GuiMovie> _allMovies = [];
+
+    // Danh sách phim theo thể loại
+    public ObservableCollection<GenreMovieGroup> GenreGroups { get; } = [];
 
     public WatchlistViewModel(
         GetWatchlistUseCase getWatchlistUseCase,
@@ -74,27 +71,40 @@ public partial class WatchlistViewModel : ObservableRecipient, INavigationAware
         try
         {
             IsLoading = true;
-            CurrentPage = 1;
-            Movies.Clear();
+            _allMovies.Clear();
+            GenreGroups.Clear();
 
-            var result = await _getWatchlistUseCase.ExecuteAsync(CurrentPage, 10);
+            // Load tất cả phim (có thể load nhiều trang nếu cần)
+            var page = 1;
+            var hasMore = true;
 
-            if (result.IsSuccess)
+            while (hasMore)
             {
-                foreach (var movie in result.Value.Movies)
+                var result = await _getWatchlistUseCase.ExecuteAsync(page, 50);
+
+                if (result.IsSuccess)
                 {
-                    var mappedMovie = _mapper.Map<CoreMovie, GuiMovie>(movie);
-                    Movies.Add(mappedMovie);
-                }
+                    foreach (var movie in result.Value.Movies)
+                    {
+                        var mappedMovie = _mapper.Map<CoreMovie, GuiMovie>(movie);
+                        _allMovies.Add(mappedMovie);
+                    }
 
-                TotalMovies = result.Value.Pagination.Total;
-                HasMorePages = result.Value.Pagination.HasNext;
-                HasMovies = Movies.Count > 0;
+                    TotalMovies = result.Value.Pagination.Total;
+                    hasMore = result.Value.Pagination.HasNext;
+                    page++;
+                }
+                else
+                {
+                    _infoBarService.ShowError(result.Error);
+                    hasMore = false;
+                }
             }
-            else
-            {
-                _infoBarService.ShowError(result.Error);
-            }
+
+            // Nhóm phim theo thể loại
+            GroupMoviesByGenre();
+
+            HasMovies = _allMovies.Count > 0;
         }
         catch (Exception ex)
         {
@@ -106,42 +116,54 @@ public partial class WatchlistViewModel : ObservableRecipient, INavigationAware
         }
     }
 
-    [RelayCommand]
-    private async Task LoadMoreAsync()
+    private void GroupMoviesByGenre()
     {
-        if (IsLoadingMore || !HasMorePages) return;
+        GenreGroups.Clear();
 
-        try
+        // Lấy tất cả thể loại unique từ các phim
+        var genreMoviesDict = new Dictionary<string, List<GuiMovie>>();
+
+        foreach (var movie in _allMovies)
         {
-            IsLoadingMore = true;
-            CurrentPage++;
-
-            var result = await _getWatchlistUseCase.ExecuteAsync(CurrentPage, 10);
-
-            if (result.IsSuccess)
+            if (movie.Genres == null || movie.Genres.Count == 0)
             {
-                foreach (var movie in result.Value.Movies)
+                // Phim không có thể loại -> đưa vào "Khác"
+                if (!genreMoviesDict.ContainsKey("Khác"))
                 {
-                    var mappedMovie = _mapper.Map<CoreMovie, GuiMovie>(movie);
-                    Movies.Add(mappedMovie);
+                    genreMoviesDict["Khác"] = [];
                 }
-
-                HasMorePages = result.Value.Pagination.HasNext;
+                genreMoviesDict["Khác"].Add(movie);
             }
             else
             {
-                CurrentPage--;
-                _infoBarService.ShowError(result.Error);
+                foreach (var genre in movie.Genres)
+                {
+                    if (!genreMoviesDict.ContainsKey(genre))
+                    {
+                        genreMoviesDict[genre] = [];
+                    }
+                    // Chỉ thêm nếu chưa có trong danh sách (tránh trùng lặp)
+                    if (!genreMoviesDict[genre].Any(m => m.MovieId == movie.MovieId))
+                    {
+                        genreMoviesDict[genre].Add(movie);
+                    }
+                }
             }
         }
-        catch (Exception ex)
+
+        // Sắp xếp theo số lượng phim giảm dần
+        var sortedGenres = genreMoviesDict
+            .OrderByDescending(g => g.Value.Count)
+            .ToList();
+
+        foreach (var kvp in sortedGenres)
         {
-            CurrentPage--;
-            _infoBarService.ShowError($"Lỗi tải thêm: {ex.Message}");
-        }
-        finally
-        {
-            IsLoadingMore = false;
+            var group = new GenreMovieGroup
+            {
+                GenreName = kvp.Key,
+                Movies = new ObservableCollection<GuiMovie>(kvp.Value)
+            };
+            GenreGroups.Add(group);
         }
     }
 
@@ -156,9 +178,27 @@ public partial class WatchlistViewModel : ObservableRecipient, INavigationAware
 
             if (result.IsSuccess)
             {
-                Movies.Remove(movie);
-                TotalMovies--;
-                HasMovies = Movies.Count > 0;
+                // Xóa phim khỏi tất cả các group
+                foreach (var group in GenreGroups.ToList())
+                {
+                    var movieToRemove = group.Movies.FirstOrDefault(m => m.MovieId == movie.MovieId);
+                    if (movieToRemove != null)
+                    {
+                        group.Movies.Remove(movieToRemove);
+                    }
+
+                    // Xóa group nếu không còn phim
+                    if (group.Movies.Count == 0)
+                    {
+                        GenreGroups.Remove(group);
+                    }
+                }
+
+                // Xóa khỏi danh sách gốc
+                _allMovies.RemoveAll(m => m.MovieId == movie.MovieId);
+                TotalMovies = _allMovies.Count;
+                HasMovies = _allMovies.Count > 0;
+
                 _infoBarService.ShowSuccess($"Đã xóa \"{movie.Title}\" khỏi danh sách yêu thích");
             }
             else

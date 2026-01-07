@@ -114,9 +114,37 @@ public class WatchlistApiService : IWatchlistApiService
             apiRes.Message ?? "Xóa khỏi danh sách yêu thích thất bại"
         );
     }
+
+    public async Task<Result<ToggleWatchlistResult>> ToggleWatchlistAsync(int movieId)
+    {
+        var tokenObject = _sessionService.AccessToken;
+        var accessToken = tokenObject?.Token;
+
+        if (string.IsNullOrWhiteSpace(accessToken))
+        {
+            return Result.Failure<ToggleWatchlistResult>("Access token not found. Please login again.");
+        }
+
+        var url = $"api/watchlist/{movieId}";
+
+        var httpRes = await _apiClient.PostAsync(url, null, token: accessToken);
+
+        if (httpRes.IsSuccessStatusCode)
+        {
+            return Result.Success(new ToggleWatchlistResult
+            {
+                IsInWatchlist = true,
+                Message = "Đã cập nhật danh sách yêu thích"
+            });
+        }
+
+        var apiRes = await httpRes.ReadAsync<object>();
+        return Result.Failure<ToggleWatchlistResult>(
+            apiRes.Message ?? "Cập nhật danh sách yêu thích thất bại"
+        );
+    }
 }
 
-// DTO cho response toggle watchlist
 public class ToggleWatchlistData
 {
     public bool IsInWatchlist { get; set; }

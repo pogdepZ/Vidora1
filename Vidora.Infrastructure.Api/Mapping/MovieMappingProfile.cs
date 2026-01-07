@@ -5,6 +5,7 @@ using Vidora.Core.Entities;
 using Vidora.Infrastructure.Api.Dtos.Requests;
 using Vidora.Infrastructure.Api.Dtos.Responses.Datas;
 using Vidora.Infrastructure.Api.Dtos.Responses.Metas;
+using System.Collections.Generic;
 
 namespace Vidora.Infrastructure.Api.Mapping;
 
@@ -16,17 +17,17 @@ public class MovieMappingProfile : Profile
         CreateMap<SearchMovieCommand, SearchMovieRequest>();
 
         // Response Data -> Entity
-        CreateMap<MovieData, Movie>();
+        CreateMap<MovieData, Movie>()
+            .ForMember(dest => dest.Genres,
+                opt => opt.MapFrom(src => src.Genres ?? new List<string>()))
+            .ForMember(dest => dest.Actors,
+                opt => opt.MapFrom(src => src.Actors ?? new List<ActorData>()));
+
         CreateMap<GenreData, Genre>();
 
         // Pagination -> PaginationResult
         CreateMap<Pagination, PaginationResult>();
 
         CreateMap<ActorData, MovieMember>();
-
-        CreateMap<MovieData, Movie>()
-            .ForMember(dest => dest.Actors,
-                opt => opt.MapFrom(src => src.Actors));
-
     }
 }

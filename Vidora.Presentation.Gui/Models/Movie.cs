@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Vidora.Presentation.Gui.Models;
 
@@ -19,4 +20,9 @@ public class Movie
     public int DurationMinutes { get; set; }         // UI-only
     public IReadOnlyList<string> Genres { get; set; } = [];
     public IReadOnlyList<MovieMember> Actors { get; set; } = [];
+
+    /// <summary>
+    /// Hiển thị danh sách thể loại dạng chuỗi, cách nhau bởi dấu " • "
+    /// </summary>
+    public string GenresDisplay => Genres.Count > 0 ? string.Join(" • ", Genres.Take(3)) : "Chưa phân loại";
 }

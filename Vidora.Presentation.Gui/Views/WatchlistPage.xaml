@@ -58,141 +58,262 @@
                     Spacing="16"
                     Padding="48"
                     Visibility="{x:Bind ViewModel.HasMovies, Mode=OneWay, Converter={StaticResource BoolNegationToVisibilityConverter}}">
-                    <FontIcon Glyph="&#xEB52;" FontSize="64" Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
-                    <TextBlock 
-                        Text="Chưa có phim yêu thích" 
-                        FontSize="20" 
-                        FontWeight="SemiBold"
-                        HorizontalAlignment="Center"/>
-                    <TextBlock 
-                        Text="Thêm phim vào danh sách yêu thích để xem sau" 
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        HorizontalAlignment="Center"/>
+                    <StackPanel Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolNegationToVisibilityConverter}}">
+                        <FontIcon Glyph="&#xEB52;" FontSize="64" Foreground="{ThemeResource TextFillColorTertiaryBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock 
+                            Text="Chưa có phim yêu thích" 
+                            FontSize="20" 
+                            FontWeight="SemiBold"
+                            HorizontalAlignment="Center"
+                            Margin="0,16,0,0"/>
+                        <TextBlock 
+                            Text="Thêm phim vào danh sách yêu thích để xem sau" 
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            HorizontalAlignment="Center"/>
+                    </StackPanel>
                 </StackPanel>
 
-                <!-- Movies Grid -->
+                <!-- Genre Groups - Phân loại theo thể loại với scroll ngang vô hạn -->
                 <ItemsRepeater
-                    ItemsSource="{x:Bind ViewModel.Movies, Mode=OneWay}"
+                    ItemsSource="{x:Bind ViewModel.GenreGroups, Mode=OneWay}"
                     Visibility="{x:Bind ViewModel.HasMovies, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <ItemsRepeater.Layout>
-                        <UniformGridLayout
-                            MinItemWidth="280"
-                            MinItemHeight="160"
-                            MinColumnSpacing="16"
-                            MinRowSpacing="16"
-                            ItemsStretch="Fill"
-                            MaximumRowsOrColumns="4"/>
+                        <StackLayout Orientation="Vertical" Spacing="40"/>
                     </ItemsRepeater.Layout>
                     <ItemsRepeater.ItemTemplate>
-                        <DataTemplate x:DataType="models:Movie">
-                            <Border
-                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                                BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
-                                BorderThickness="1"
-                                CornerRadius="12"
-                                Padding="0">
+                        <DataTemplate x:DataType="models:GenreMovieGroup">
+                            <StackPanel Spacing="16">
+                                <!-- Genre Header -->
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     
-                                    <!-- Poster -->
-                                    <Border Grid.Column="0" CornerRadius="12,0,0,12">
-                                        <Image 
-                                            Source="{x:Bind PosterUrl}" 
-                                            Stretch="UniformToFill"
-                                            Width="120"
-                                            Height="160"/>
-                                    </Border>
-                                    
-                                    <!-- Info -->
-                                    <Grid Grid.Column="1" Padding="16" RowSpacing="8">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="*"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        
-                                        <!-- Title -->
-                                        <TextBlock 
-                                            Grid.Row="0"
-                                            Text="{x:Bind Title}" 
-                                            FontSize="16" 
-                                            FontWeight="SemiBold"
-                                            TextTrimming="CharacterEllipsis"
-                                            MaxLines="2"/>
-                                        
-                                        <!-- Year & Rating -->
-                                        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="12">
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12">
+                                        <Border 
+                                            Background="#E50914" 
+                                            CornerRadius="4" 
+                                            Padding="14,8">
                                             <TextBlock 
-                                                Text="{x:Bind ReleaseYear}"
-                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                                <FontIcon Glyph="&#xE735;" FontSize="12" Foreground="#E50914"/>
-                                                <TextBlock 
-                                                    Text="{x:Bind AvgRating}"
-                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                            </StackPanel>
-                                        </StackPanel>
-                                        
-                                        <!-- Description -->
+                                                Text="{x:Bind GenreName}" 
+                                                FontSize="18" 
+                                                FontWeight="Bold"
+                                                Foreground="White"/>
+                                        </Border>
                                         <TextBlock 
-                                            Grid.Row="2"
-                                            Text="{x:Bind Description}" 
+                                            VerticalAlignment="Center"
+                                            FontSize="14"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                            <Run Text="{x:Bind Movies.Count}"/>
+                                            <Run Text="phim"/>
+                                        </TextBlock>
+                                    </StackPanel>
+
+                                    <!-- Navigation hint -->
+                                    <StackPanel 
+                                        Grid.Column="2" 
+                                        Orientation="Horizontal" 
+                                        Spacing="4"
+                                        VerticalAlignment="Center"
+                                        Opacity="0.6">
+                                        <TextBlock 
+                                            Text="Kéo để xem thêm" 
+                                            FontSize="12"
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                            TextWrapping="Wrap"
-                                            TextTrimming="CharacterEllipsis"
-                                            MaxLines="2"
-                                            FontSize="12"/>
-                                        
-                                        <!-- Actions -->
-                                        <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="8">
-                                            <Button 
-                                                Command="{Binding ViewModel.ViewMovieDetailCommand, ElementName=WatchlistPageRoot}"
-                                                CommandParameter="{x:Bind}"
-                                                Style="{StaticResource AccentButtonStyle}"
-                                                Padding="12,6"
-                                                CornerRadius="6">
-                                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <FontIcon Glyph="&#xE768;" FontSize="12"/>
-                                                    <TextBlock Text="Xem" FontSize="12"/>
-                                                </StackPanel>
-                                            </Button>
-                                            
-                                            <Button 
-                                                Command="{Binding ViewModel.RemoveFromWatchlistCommand, ElementName=WatchlistPageRoot}"
-                                                CommandParameter="{x:Bind}"
-                                                Padding="12,6"
-                                                CornerRadius="6"
-                                                ToolTipService.ToolTip="Xóa khỏi yêu thích">
-                                                <FontIcon Glyph="&#xE74D;" FontSize="12" Foreground="#E50914"/>
-                                            </Button>
-                                        </StackPanel>
-                                    </Grid>
+                                            VerticalAlignment="Center"/>
+                                        <FontIcon 
+                                            Glyph="&#xE76C;" 
+                                            FontSize="12"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    </StackPanel>
                                 </Grid>
-                            </Border>
+
+                                <!-- Horizontal Movie List Container với nút điều hướng -->
+                                <Grid>
+                                    <!-- Movie Scroll Area -->
+                                    <ScrollViewer 
+                                        HorizontalScrollMode="Enabled" 
+                                        HorizontalScrollBarVisibility="Hidden"
+                                        VerticalScrollMode="Disabled"
+                                        VerticalScrollBarVisibility="Disabled"
+                                        Padding="0,8,0,8">
+                                        <ItemsRepeater ItemsSource="{x:Bind Movies}">
+                                            <ItemsRepeater.Layout>
+                                                <StackLayout Orientation="Horizontal" Spacing="16"/>
+                                            </ItemsRepeater.Layout>
+                                            <ItemsRepeater.ItemTemplate>
+                                                <DataTemplate x:DataType="models:Movie">
+                                                    <Grid Width="200">
+                                                        <Button
+                                                            Command="{Binding ViewModel.ViewMovieDetailCommand, ElementName=WatchlistPageRoot}"
+                                                            CommandParameter="{x:Bind}"
+                                                            HorizontalAlignment="Stretch"
+                                                            VerticalAlignment="Stretch"
+                                                            HorizontalContentAlignment="Stretch"
+                                                            VerticalContentAlignment="Stretch"
+                                                            Padding="0"
+                                                            Background="Transparent"
+                                                            BorderThickness="0"
+                                                            CornerRadius="12">
+                                                            <Grid 
+                                                                CornerRadius="12" 
+                                                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                                                BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                                                BorderThickness="1">
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition Height="280"/>
+                                                                    <RowDefinition Height="Auto"/>
+                                                                </Grid.RowDefinitions>
+
+                                                                <!-- Poster -->
+                                                                <Grid Grid.Row="0" CornerRadius="12,12,0,0">
+                                                                    <Image
+                                                                        Source="{x:Bind PosterUrl}"
+                                                                        Stretch="UniformToFill"/>
+
+                                                                    <!-- Fallback -->
+                                                                    <Border 
+                                                                        Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                                                        Visibility="{x:Bind PosterUrl, Converter={StaticResource NullToVisibilityConverter}}">
+                                                                        <FontIcon
+                                                                            Glyph="&#xE8B2;"
+                                                                            FontSize="48"
+                                                                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
+                                                                    </Border>
+
+                                                                    <!-- Gradient Overlay -->
+                                                                    <Border CornerRadius="12,12,0,0">
+                                                                        <Border.Background>
+                                                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                                                <GradientStop Color="Transparent" Offset="0.6"/>
+                                                                                <GradientStop Color="#80000000" Offset="1"/>
+                                                                            </LinearGradientBrush>
+                                                                        </Border.Background>
+                                                                    </Border>
+
+                                                                    <!-- Rating Badge -->
+                                                                    <Border
+                                                                        Background="#E50914"
+                                                                        CornerRadius="6"
+                                                                        Padding="8,4"
+                                                                        HorizontalAlignment="Left"
+                                                                        VerticalAlignment="Top"
+                                                                        Margin="10">
+                                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                                            <FontIcon Glyph="&#xE735;" FontSize="12" Foreground="White"/>
+                                                                            <TextBlock
+                                                                                Text="{x:Bind AvgRating}"
+                                                                                FontSize="12"
+                                                                                FontWeight="SemiBold"
+                                                                                Foreground="White"/>
+                                                                        </StackPanel>
+                                                                    </Border>
+
+                                                                    <!-- Year Badge -->
+                                                                    <Border
+                                                                        Background="#99000000"
+                                                                        CornerRadius="6"
+                                                                        Padding="8,4"
+                                                                        HorizontalAlignment="Right"
+                                                                        VerticalAlignment="Top"
+                                                                        Margin="10">
+                                                                        <TextBlock
+                                                                            Text="{x:Bind ReleaseYear}"
+                                                                            FontSize="12"
+                                                                            FontWeight="Medium"
+                                                                            Foreground="White"/>
+                                                                    </Border>
+
+                                                                    <!-- Heart Icon (Favorite) -->
+                                                                    <Border
+                                                                        Background="#CC000000"
+                                                                        CornerRadius="20"
+                                                                        Padding="8"
+                                                                        HorizontalAlignment="Left"
+                                                                        VerticalAlignment="Bottom"
+                                                                        Margin="10">
+                                                                        <FontIcon Glyph="&#xEB52;" FontSize="14" Foreground="#E50914"/>
+                                                                    </Border>
+
+                                                                    <!-- Remove Button -->
+                                                                    <Button 
+                                                                        Command="{Binding ViewModel.RemoveFromWatchlistCommand, ElementName=WatchlistPageRoot}"
+                                                                        CommandParameter="{x:Bind}"
+                                                                        HorizontalAlignment="Right"
+                                                                        VerticalAlignment="Bottom"
+                                                                        Margin="10"
+                                                                        Padding="10"
+                                                                        CornerRadius="20"
+                                                                        Background="#CC000000"
+                                                                        ToolTipService.ToolTip="Xóa khỏi yêu thích">
+                                                                        <FontIcon Glyph="&#xE74D;" FontSize="14" Foreground="White"/>
+                                                                    </Button>
+                                                                </Grid>
+
+                                                                <!-- Info -->
+                                                                <StackPanel Grid.Row="1" Padding="12,12" Spacing="6">
+                                                                    <TextBlock
+                                                                        Text="{x:Bind Title}"
+                                                                        FontWeight="SemiBold"
+                                                                        FontSize="14"
+                                                                        TextTrimming="CharacterEllipsis"
+                                                                        MaxLines="2"
+                                                                        TextWrapping="Wrap"
+                                                                        Height="40"
+                                                                        ToolTipService.ToolTip="{x:Bind Title}"/>
+                                                                    
+                                                                    <!-- Genres tags -->
+                                                                    <TextBlock
+                                                                        Text="{x:Bind GenresDisplay}"
+                                                                        FontSize="11"
+                                                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                        TextTrimming="CharacterEllipsis"
+                                                                        MaxLines="1"/>
+                                                                </StackPanel>
+                                                            </Grid>
+                                                        </Button>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsRepeater.ItemTemplate>
+                                        </ItemsRepeater>
+                                    </ScrollViewer>
+
+                                    <!-- Left fade gradient -->
+                                    <Border 
+                                        HorizontalAlignment="Left" 
+                                        Width="40"
+                                        IsHitTestVisible="False">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                <GradientStop Color="{ThemeResource ApplicationPageBackgroundThemeBrush}" Offset="0"/>
+                                                <GradientStop Color="Transparent" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                    </Border>
+
+                                    <!-- Right fade gradient -->
+                                    <Border 
+                                        HorizontalAlignment="Right" 
+                                        Width="60"
+                                        IsHitTestVisible="False">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                <GradientStop Color="Transparent" Offset="0"/>
+                                                <GradientStop Color="{ThemeResource ApplicationPageBackgroundThemeBrush}" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
                         </DataTemplate>
                     </ItemsRepeater.ItemTemplate>
                 </ItemsRepeater>
 
-                <!-- Load More Button -->
-                <Button
-                    Command="{x:Bind ViewModel.LoadMoreCommand}"
-                    HorizontalAlignment="Center"
-                    Padding="24,12"
-                    Margin="0,16,0,0"
-                    CornerRadius="8"
-                    Visibility="{x:Bind ViewModel.HasMorePages, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <ProgressRing 
-                            IsActive="True" 
-                            Width="16" Height="16"
-                            Visibility="{x:Bind ViewModel.IsLoadingMore, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                        <TextBlock Text="Tải thêm"/>
-                    </StackPanel>
-                </Button>
+                <!-- Bottom padding -->
+                <Border Height="40" 
+                        Visibility="{x:Bind ViewModel.HasMovies, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
             </StackPanel>
         </ScrollViewer>
     </Grid>
