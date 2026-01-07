@@ -2,6 +2,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using System;
+using System.Threading.Tasks;
 using Vidora.Core.Contracts.Services;
 using Vidora.Core.Events;
 using Vidora.Presentation.Gui.Contracts.Services;
@@ -80,12 +82,37 @@ public partial class ShellViewModel : ObservableRecipient
                 }
                 break;
             case SessionChangeReason.ManualLogout:
+                IsBackButtonVisible = false;
+                IsPaneToggleButtonVisible = false;
+                PaneDisplayMode = NavigationViewPaneDisplayMode.LeftMinimal;
+
+                await NavigationService.NavigateToAsync<LoginViewModel>(true);
+                break;
+
             case SessionChangeReason.ForcedLogout:
+                IsBackButtonVisible = false;
+                IsPaneToggleButtonVisible = false;
+                PaneDisplayMode = NavigationViewPaneDisplayMode.LeftMinimal;
+
+                await ShowForcedLogoutDialogAsync(
+                    title: "Logged out",
+                    message: "You have been logged out for security reasons."
+                );
+
+                await NavigationService.NavigateToAsync<LoginViewModel>(true);
+                break;
+
             case SessionChangeReason.SessionExpired:
                 IsBackButtonVisible = false;
                 IsPaneToggleButtonVisible = false;
                 PaneDisplayMode = NavigationViewPaneDisplayMode.LeftMinimal;
-                await NavigationService.NavigateToAsync<LoginViewModel>(clearNavigation: true);
+
+                await ShowForcedLogoutDialogAsync(
+                    title: "Session expired",
+                    message: "Your session has expired. Please log in again."
+                );
+
+                await NavigationService.NavigateToAsync<LoginViewModel>(true);
                 break;
         }
     }
@@ -131,5 +158,18 @@ public partial class ShellViewModel : ObservableRecipient
                 PaneDisplayMode = NavigationViewPaneDisplayMode.LeftCompact;
             }
         }
+    }
+
+    private async Task ShowForcedLogoutDialogAsync(string title, string message)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = title,
+            Content = message,
+            CloseButtonText = "OK",
+            XamlRoot = App.MainWindow.Content.XamlRoot
+        };
+
+        await dialog.ShowAsync();
     }
 }

@@ -9,9 +9,9 @@ public sealed record Password
     public Password(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new PasswordInvalidException("Password cannot be empty.");
+            throw new ValidationException("Password cannot be empty.");
         if (value.Length < 6)
-            throw new PasswordInvalidException("Password too short.");
+            throw new ValidationException("Password too short.");
 
         Value = value;
     }
@@ -24,7 +24,7 @@ public sealed record Password
             error = null;
             return true;
         }
-        catch (CoreException ex)
+        catch (ValidationException ex)
         {
             password = null;
             error = ex.Message;

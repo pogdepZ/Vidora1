@@ -5,5 +5,5 @@ namespace Vidora.Core.Interfaces.Api;
 
 public interface IHealthApiService
 {
-    Task<Result> CheckHealthAsync();
+    Task CheckHealthAsync();
 }

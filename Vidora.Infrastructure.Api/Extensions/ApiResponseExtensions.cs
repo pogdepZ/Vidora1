@@ -1,138 +1,46 @@
-﻿using System.Net.Http;
-using System.Threading.Tasks;
-using Vidora.Core.Helpers;
+﻿using System.Net;
+using Vidora.Core.Exceptions;
 using Vidora.Infrastructure.Api.Dtos.Responses;
 
 namespace Vidora.Infrastructure.Api.Extensions;
 
 internal static class ApiResponseExtensions
 {
-    public static async Task<ApiResponse> ReadAsync(
-    this HttpResponseMessage response)
+    public static SuccessResponse<T> EnsureSuccess<T>(this ApiResponse response)
     {
-        var statusCode = response.StatusCode;
-        var json = await response.Content.ReadAsStringAsync();
+        if (response is ErrorResponse error)
+            throw MapDomainException(error);
 
-        // HTTP error
-        if (!response.IsSuccessStatusCode)
-        {
-            if (JsonHelper.TryDeserialize<ErrorResponse>(json, out var error, JsonHelper.CamelCaseOptions)
-                && error != null)
-            {
-                return error with { StatusCode = statusCode };
-            }
+        if (response is not SuccessResponse<T> success)
+            throw new DomainException("Invalid response type");
 
-            return new ErrorResponse(
-                Error: json,
-                StatusCode: statusCode,
-                Message: "Http request failed"
-            );
-        }
-
-        // Success WITHOUT data
-        if (JsonHelper.TryDeserialize<SuccessResponse>(json, out var success, JsonHelper.CamelCaseOptions)
-            && success != null)
-        {
-            return success with { StatusCode = statusCode };
-        }
-
-        return new ErrorResponse(
-            Error: json,
-            StatusCode: statusCode,
-            Message: "Invalid response format"
-        );
+        return success;
     }
 
-
-    public static async Task<ApiResponse> ReadAsync<T>(
-        this HttpResponseMessage response)
+    public static DomainException MapDomainException(ErrorResponse error)
     {
-        var statusCode = response.StatusCode;
-        var json = await response.Content.ReadAsStringAsync();
-
-        // HTTP error
-        if (!response.IsSuccessStatusCode)
+        return error.StatusCode switch
         {
-            if (JsonHelper.TryDeserialize<ErrorResponse>(json, out var error, JsonHelper.CamelCaseOptions)
-                && error != null)
-            {
-                return error with { StatusCode = statusCode };
-            }
+            HttpStatusCode.BadRequest =>
+                new DomainException(error.Message ?? "Bad request error"),
 
-            return new ErrorResponse(
-                Error: json,
-                StatusCode: statusCode,
-                Message: "Http request failed"
-            );
-        }
+            HttpStatusCode.Unauthorized =>
+                new UnauthorizationException(error.Message ?? "Unauthorization error"),
 
-        // HTTP success
-        if (JsonHelper.TryDeserialize<SuccessResponse<T>>(json, out var success, JsonHelper.CamelCaseOptions)
-            && success != null)
-        {
-            return success with { StatusCode = statusCode };
-        }
+            HttpStatusCode.Forbidden =>
+                new ForbiddenException(error.Message ?? "Not permission"),
 
-        return new ErrorResponse(
-            Error: json,
-            StatusCode: statusCode,
-            Message: "Invalid response format"
-        );
-    }
+            HttpStatusCode.Conflict =>
+                new ConflictException(error.Message ?? "Conflict occurred"),
 
-    public static async Task<ApiResponse> ReadListAsync<T>(
-        this HttpResponseMessage response)
-    {
-        var statusCode = response.StatusCode;
-        var json = await response.Content.ReadAsStringAsync();
+            HttpStatusCode.NotFound =>
+                new NotFoundException(error.Message ?? "Resource not found"),
 
-        if (!response.IsSuccessStatusCode)
-        {
-            return new ErrorResponse(
-                Error: json,
-                StatusCode: statusCode,
-                Message: "Http request failed"
-            );
-        }
+            HttpStatusCode.UnprocessableEntity =>
+                new ValidationException(error.Message ?? "Validation error"),
 
-        if (JsonHelper.TryDeserialize<ListSuccessResponse<T>>(json, out var success, JsonHelper.CamelCaseOptions)
-            && success != null)
-        {
-            return success with { StatusCode = statusCode };
-        }
-
-        return new ErrorResponse(
-            Error: json,
-            StatusCode: statusCode,
-            Message: "Invalid list response format"
-        );
-    }
-
-    public static async Task<ApiResponse> ReadPaginatedAsync<T>(
-        this HttpResponseMessage response)
-    {
-        var statusCode = response.StatusCode;
-        var json = await response.Content.ReadAsStringAsync();
-
-        if (!response.IsSuccessStatusCode)
-        {
-            return new ErrorResponse(
-                Error: json,
-                StatusCode: statusCode,
-                Message: "Http request failed"
-            );
-        }
-
-        if (JsonHelper.TryDeserialize<PaginatedSuccessResponse<T>>(json, out var success, JsonHelper.CamelCaseOptions)
-            && success != null)
-        {
-            return success with { StatusCode = statusCode };
-        }
-
-        return new ErrorResponse(
-            Error: json,
-            StatusCode: statusCode,
-            Message: "Invalid paginated response format"
-        );
+            _ =>
+                new DomainException(error.Message ?? "Unexpected error")
+        };
     }
 }

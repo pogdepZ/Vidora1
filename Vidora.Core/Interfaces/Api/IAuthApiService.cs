@@ -7,7 +7,7 @@ namespace Vidora.Core.Interfaces.Api;
 
 public interface IAuthApiService
 {
-    Task<Result<LoginResult>> LoginAsync(LoginCommand command);
+    Task<LoginResult> LoginAsync(LoginCommand command);
 
-    Task<Result<RegisterResult>> RegisterAsync(RegisterCommand command);
+    Task<RegisterResult> RegisterAsync(RegisterCommand command);
 }

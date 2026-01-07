@@ -1,8 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CSharpFunctionalExtensions;
 using System.Threading.Tasks;
 using Vidora.Core.Contracts.Commands;
 using Vidora.Core.Contracts.Services;
+using Vidora.Core.Exceptions;
 using Vidora.Core.UseCases;
 using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
@@ -54,19 +56,20 @@ public partial class LoginViewModel : ObservableRecipient, INavigationAware
             }
         }
 
-        var request = new LoginCommand(
-            Email: Email,
-            Password: Password
-            );
+        try
+        {
+            var request = new LoginCommand(
+                Email: Email,
+                Password: Password
+                );
 
-        await Task.Delay(1000);
-        var result = await _loginUseCase.ExecuteAsync(request);
-
-        if (result.IsFailure)
+            var result = await _loginUseCase.ExecuteAsync(request);
+        }
+        catch (DomainException ex)
         {
             Password = string.Empty;
             _savedPassword = string.Empty;
-            await _infoBarService.ShowErrorAsync(result.Error, durationMs: 3000);
+            await _infoBarService.ShowErrorAsync(ex.Message, durationMs: 3000);
             return;
         }
 

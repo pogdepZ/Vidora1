@@ -1,6 +1,6 @@
-﻿using CSharpFunctionalExtensions;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Vidora.Core.Exceptions;
 using Vidora.Core.Interfaces.Api;
 namespace Vidora.Core.UseCases;
 
@@ -12,22 +12,30 @@ public class CheckHealthUseCase
         _healthApiService = healthApiService;
     }
 
-    public async Task<Result> ExecuteAsync()
+    public Task ExecuteAsync()
     {
-        try
         {
-            return await ExecuteAsyncInternal();
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure($"Cannot connect to server: {ex.Message}");
+            try
+            {
+                return ExecuteAsyncInternal();
+            }
+            catch (UnauthorizationException)
+            {
+                throw;
+            }
+            catch (DomainException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new DomainException(ex.Message);
+            }
         }
     }
 
-    private async Task<Result> ExecuteAsyncInternal()
+    private Task ExecuteAsyncInternal()
     {
-        var apiRes = await _healthApiService.CheckHealthAsync();
-
-        return apiRes;
+        return _healthApiService.CheckHealthAsync();
     }
 }

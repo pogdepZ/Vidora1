@@ -1,8 +1,8 @@
-﻿using CSharpFunctionalExtensions;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Vidora.Core.Contracts.Commands;
 using Vidora.Core.Contracts.Results;
+using Vidora.Core.Exceptions;
 using Vidora.Core.Interfaces.Api;
 using Vidora.Core.ValueObjects;
 
@@ -16,19 +16,27 @@ public class RegisterUseCase
         _authApiService = authApiService;
     }
 
-    public async Task<Result<RegisterResult>> ExecuteAsync(RegisterCommand command)
+    public Task<RegisterResult> ExecuteAsync(RegisterCommand command)
     {
         try
         {
-            return await ExecuteAsyncInternal(command);
+            return ExecuteAsyncInternal(command);
+        }
+        catch (UnauthorizationException)
+        {
+            throw;
+        }
+        catch (DomainException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
-            return Result.Failure<RegisterResult>($"Registration failed: {ex.Message}");
+            throw new DomainException(ex.Message);
         }
     }
 
-    private async Task<Result<RegisterResult>> ExecuteAsyncInternal(RegisterCommand command)
+    private Task<RegisterResult> ExecuteAsyncInternal(RegisterCommand command)
     {
         // Validate
         var apiRequest = command with
@@ -37,12 +45,6 @@ public class RegisterUseCase
             Password = new Password(command.Password)
         };
 
-        var apiResponse = await _authApiService.RegisterAsync(apiRequest);
-        if (apiResponse.IsFailure)
-        {
-            return Result.Failure<RegisterResult>(apiResponse.Error);
-        }
-        
-        return Result.Success<RegisterResult>(apiResponse.Value);
+        return _authApiService.RegisterAsync(apiRequest);
     }
 }

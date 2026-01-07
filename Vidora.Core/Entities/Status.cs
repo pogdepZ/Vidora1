@@ -3,5 +3,6 @@
 public enum Status
 {
     Active,
+    Locked,
     Inactive,
 }

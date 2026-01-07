@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using CSharpFunctionalExtensions;
 using System;
 using System.Threading.Tasks;
 using Vidora.Core.Contracts.Commands;
@@ -13,9 +12,6 @@ using Vidora.Infrastructure.Api.Extensions;
 
 namespace Vidora.Infrastructure.Api.Services;
 
-using LoginSuccessResponse = SuccessResponse<LoginResponseData>;
-using RegisterSuccessResponse = SuccessResponse<RegisterResponseData>;
-
 public class AuthApiService : IAuthApiService
 {
     private readonly ApiClient _apiClient;
@@ -26,23 +22,17 @@ public class AuthApiService : IAuthApiService
         _mapper = mapper;
     }
 
-    public async Task<Result<LoginResult>> LoginAsync(LoginCommand command)
+    public async Task<LoginResult> LoginAsync(LoginCommand command)
     {
         var req = _mapper.Map<LoginRequest>(command);
 
         var httpRes = await _apiClient.PostAsync(
-            url: "api/auth/login",
+            path: "api/auth/login",
             body: req
             );
 
         var apiRes = await httpRes.ReadAsync<LoginResponseData>();
-          
-        if (apiRes is not LoginSuccessResponse success)
-        {
-            return Result.Failure<LoginResult>(
-                apiRes.Message ?? "Login failed"
-            );
-        }
+        var success = apiRes.EnsureSuccess<LoginResponseData>();
 
         var expiresAt = DateTime.UtcNow.Add(
             ParseExpiresIn(success.Data.ExpiresIn)
@@ -52,31 +42,25 @@ public class AuthApiService : IAuthApiService
             ExpiresAt = expiresAt
         };
 
-        return Result.Success(result);
+        return result;
     }
 
 
-    public async Task<Result<RegisterResult>> RegisterAsync(RegisterCommand command)
+    public async Task<RegisterResult> RegisterAsync(RegisterCommand command)
     {
         var req = _mapper.Map<RegisterRequest>(command);
 
         var httpRes = await _apiClient.PostAsync(
-            url: "api/auth/register",
+            path: "api/auth/register",
             body: req
-        );
+        ); 
 
         var apiRes = await httpRes.ReadAsync<RegisterResponseData>();
-
-        if (apiRes is not RegisterSuccessResponse success)
-        {
-            return Result.Failure<RegisterResult>(
-                apiRes.Message ?? "Register failed"
-            );
-        }
+        var success = apiRes.EnsureSuccess<SuccessResponse<RegisterResponseData>>();
 
         var result = _mapper.Map<RegisterResult>(success.Data);
 
-        return Result.Success(result);
+        return result;
     }
 
     private static TimeSpan ParseExpiresIn(string? raw)

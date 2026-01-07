@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Threading.Tasks;
+using Vidora.Core.Exceptions;
 using Vidora.Core.UseCases;
 using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
@@ -48,18 +49,21 @@ public partial class RegisterViewModel : ObservableRecipient, INavigationAware
             await _infoBarService.ShowErrorAsync("Passwords do not match");
             return;
         }
-
-        var request = new Core.Contracts.Commands.RegisterCommand(
-            Email: Email,
-            Password: Password,
-            Username: Username,
-            FullName: FullName
-            );
-
-        var result = await _registerUseCase.ExecuteAsync(request);
-        if (result.IsFailure)
+        
+        try
         {
-            await _infoBarService.ShowErrorAsync(result.Error);
+            var request = new Core.Contracts.Commands.RegisterCommand(
+                Email: Email,
+                Password: Password,
+                Username: Username,
+                FullName: FullName
+                );
+
+            var result = await _registerUseCase.ExecuteAsync(request);
+        }
+        catch (DomainException ex)
+        {
+            await _infoBarService.ShowErrorAsync(ex.Message, durationMs: 2000);
             return;
         }
 

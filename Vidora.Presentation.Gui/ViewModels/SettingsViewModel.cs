@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
+using Vidora.Core.Exceptions;
 using Vidora.Core.UseCases;
 using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
@@ -23,10 +24,15 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     public List<ElementTheme> ElementThemes { get; }
 
     private readonly LogoutUseCase _logoutUseCase;
+    private readonly IInfoBarService _infoBarService;
     private readonly IThemeSelectorService _themeSelectorService;
-    public SettingsViewModel(LogoutUseCase logoutUseCase, IThemeSelectorService themeSelectorService)
+    public SettingsViewModel(
+        LogoutUseCase logoutUseCase,
+        IInfoBarService infoBarService,
+        IThemeSelectorService themeSelectorService)
     {
         _logoutUseCase = logoutUseCase;
+        _infoBarService = infoBarService;
         _themeSelectorService = themeSelectorService;
         
         SelectedTheme = _themeSelectorService.Theme;
@@ -59,7 +65,14 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         if (result != ContentDialogResult.Primary)
             return;
 
-        await _logoutUseCase.ExecuteAsync();
+        try
+        {
+            await _logoutUseCase.ExecuteAsync();
+        }
+        catch (DomainException ex)
+        {
+            await _infoBarService.ShowErrorAsync(ex.Message);
+        }
     }
 
     public async Task OnNavigatedToAsync(object? param)
