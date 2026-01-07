@@ -26,4 +26,8 @@
     <converters:BoolToHeartGlyphConverter x:Key="BoolToHeartGlyphConverter"/>
     <converters:BoolToHeartColorConverter x:Key="BoolToHeartColorConverter"/>
     <converters:BoolToWatchlistTextConverter x:Key="BoolToWatchlistTextConverter"/>
+    
+    <!-- Subscription Converters -->
+    <converters:BoolToSubscriptionTextConverter x:Key="BoolToSubscriptionTextConverter"/>
+    <converters:BoolToRenewGlyphConverter x:Key="BoolToRenewGlyphConverter"/>
 </ResourceDictionary>

@@ -56,32 +56,37 @@ public class SubscriptionApiService : ISubscriptionApiService
         return Result.Success(result);
     }
 
-    public async Task<Result<MySubscriptionsResult>> GetMySubscriptionsAsync()
+    public async Task<Result<CurrentSubscriptionResult>> GetCurrentSubscriptionAsync()
     {
         var tokenObject = _sessionService.AccessToken;
         var accessToken = tokenObject?.Token;
 
         if (string.IsNullOrWhiteSpace(accessToken))
         {
-            return Result.Failure<MySubscriptionsResult>("Access token not found. Please login again.");
+            return Result.Failure<CurrentSubscriptionResult>("Access token not found. Please login again.");
         }
 
-        var url = "api/subscriptions/my";
+        var url = "api/subscriptions/current";
 
         var httpRes = await _apiClient.GetAsync(url, token: accessToken);
 
-        var apiRes = await httpRes.ReadListAsync<MySubscriptionData>();
-
-        if (apiRes is not ListSuccessResponse<MySubscriptionData> success)
+        // If no subscription found (404 or empty), return empty result
+        if (!httpRes.IsSuccessStatusCode)
         {
-            return Result.Failure<MySubscriptionsResult>(
-                apiRes.Message ?? "Lấy danh sách gói đi mua"
-            );
+            return Result.Success(new CurrentSubscriptionResult { Subscription = null });
         }
 
-        var result = new MySubscriptionsResult
+        var apiRes = await httpRes.ReadAsync<CurrentSubscriptionData>();
+
+        if (apiRes is not SuccessResponse<CurrentSubscriptionData> success || success.Data == null)
         {
-            Subscriptions = _mapper.Map<IReadOnlyList<MySubscription>>(success.Data)
+            // No active subscription
+            return Result.Success(new CurrentSubscriptionResult { Subscription = null });
+        }
+
+        var result = new CurrentSubscriptionResult
+        {
+            Subscription = _mapper.Map<CurrentSubscription>(success.Data)
         };
 
         return Result.Success(result);

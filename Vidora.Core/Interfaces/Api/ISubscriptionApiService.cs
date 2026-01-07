@@ -7,5 +7,5 @@ namespace Vidora.Core.Interfaces.Api;
 public interface ISubscriptionApiService
 {
     Task<Result<SubscriptionPlansResult>> GetPlansAsync();
-    Task<Result<MySubscriptionsResult>> GetMySubscriptionsAsync();
+    Task<Result<CurrentSubscriptionResult>> GetCurrentSubscriptionAsync();
 }

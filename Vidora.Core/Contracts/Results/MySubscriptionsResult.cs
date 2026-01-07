@@ -1,9 +1,9 @@
-using System.Collections.Generic;
 using Vidora.Core.Entities;
 
 namespace Vidora.Core.Contracts.Results;
 
-public class MySubscriptionsResult
+public class CurrentSubscriptionResult
 {
-    public IReadOnlyList<MySubscription> Subscriptions { get; set; } = [];
+    public CurrentSubscription? Subscription { get; set; }
+    public bool HasActiveSubscription => Subscription?.IsActive == true;
 }

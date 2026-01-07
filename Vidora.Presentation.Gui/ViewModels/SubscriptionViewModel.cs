@@ -2,10 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using Vidora.Core.UseCases;
 using Vidora.Presentation.Gui.Contracts.Services;
@@ -17,7 +14,7 @@ namespace Vidora.Presentation.Gui.ViewModels;
 public partial class SubscriptionViewModel : ObservableRecipient, INavigationAware
 {
     private readonly GetSubscriptionPlansUseCase _getSubscriptionPlansUseCase;
-    private readonly GetMySubscriptionsUseCase _getMySubscriptionsUseCase;
+    private readonly GetCurrentSubscriptionUseCase _getCurrentSubscriptionUseCase;
     private readonly IMapper _mapper;
     private readonly IInfoBarService _infoBarService;
     private readonly INavigationService _navigationService;
@@ -25,17 +22,26 @@ public partial class SubscriptionViewModel : ObservableRecipient, INavigationAwa
     [ObservableProperty]
     private bool _isLoading;
 
+    [ObservableProperty]
+    private bool _hasActiveSubscription;
+
+    [ObservableProperty]
+    private int _currentPlanId;
+
+    [ObservableProperty]
+    private int _leftDay;
+
     public ObservableCollection<SubscriptionPlan> Plans { get; } = [];
 
     public SubscriptionViewModel(
         GetSubscriptionPlansUseCase getSubscriptionPlansUseCase,
-        GetMySubscriptionsUseCase getMySubscriptionsUseCase,
+        GetCurrentSubscriptionUseCase getCurrentSubscriptionUseCase,
         IMapper mapper,
         IInfoBarService infoBarService,
         INavigationService navigationService)
     {
         _getSubscriptionPlansUseCase = getSubscriptionPlansUseCase;
-        _getMySubscriptionsUseCase = getMySubscriptionsUseCase;
+        _getCurrentSubscriptionUseCase = getCurrentSubscriptionUseCase;
         _mapper = mapper;
         _infoBarService = infoBarService;
         _navigationService = navigationService;
@@ -60,14 +66,14 @@ public partial class SubscriptionViewModel : ObservableRecipient, INavigationAwa
         {
             IsLoading = true;
 
-            // Fetch plans and my subscriptions in parallel
+            // Fetch plans and current subscription in parallel
             var plansTask = _getSubscriptionPlansUseCase.ExecuteAsync();
-            var mySubscriptionsTask = _getMySubscriptionsUseCase.ExecuteAsync();
+            var currentSubscriptionTask = _getCurrentSubscriptionUseCase.ExecuteAsync();
 
-            await Task.WhenAll(plansTask, mySubscriptionsTask);
+            await Task.WhenAll(plansTask, currentSubscriptionTask);
 
             var plansResult = await plansTask;
-            var mySubscriptionsResult = await mySubscriptionsTask;
+            var currentSubscriptionResult = await currentSubscriptionTask;
 
             if (plansResult.IsFailure)
             {
@@ -75,22 +81,26 @@ public partial class SubscriptionViewModel : ObservableRecipient, INavigationAwa
                 return;
             }
 
-            // Get purchased plan IDs
-            var purchasedPlanIds = new HashSet<int>();
-            if (mySubscriptionsResult.IsSuccess)
+            // Check if user has active subscription
+            HasActiveSubscription = false;
+            CurrentPlanId = 0;
+            LeftDay = 0;
+
+            if (currentSubscriptionResult.IsSuccess && currentSubscriptionResult.Value.HasActiveSubscription)
             {
-                foreach (var sub in mySubscriptionsResult.Value.Subscriptions)
-                {
-                    purchasedPlanIds.Add(sub.PlanId);
-                }
+                var subscription = currentSubscriptionResult.Value.Subscription!;
+                HasActiveSubscription = true;
+                CurrentPlanId = subscription.PlanId;
+                LeftDay = subscription.LeftDay;
             }
 
-            // Map plans and set IsPurchased
+            // Map plans and set IsPurchased based on current subscription
             Plans.Clear();
             foreach (var plan in plansResult.Value.Plans)
             {
                 var mappedPlan = _mapper.Map<SubscriptionPlan>(plan);
-                mappedPlan.IsPurchased = purchasedPlanIds.Contains(plan.PlanId);
+                // Mark as purchased if this is the current active plan
+                mappedPlan.IsPurchased = HasActiveSubscription && plan.PlanId == CurrentPlanId;
                 Plans.Add(mappedPlan);
             }
         }

@@ -22,7 +22,7 @@ public static class DependencyInjection
         services.AddTransient<GetMovieDetailUseCase>();
         services.AddTransient<GetGenresUseCase>();
         services.AddTransient<GetSubscriptionPlansUseCase>();
-        services.AddTransient<GetMySubscriptionsUseCase>();
+        services.AddTransient<GetCurrentSubscriptionUseCase>();
         services.AddTransient<CreateOrderUseCase>();
         services.AddTransient<GetAvailablePromosUseCase>();
         services.AddTransient<ApplyDiscountUseCase>();

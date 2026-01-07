@@ -5,17 +5,17 @@ using Vidora.Core.Interfaces.Api;
 
 namespace Vidora.Core.UseCases;
 
-public class GetMySubscriptionsUseCase
+public class GetCurrentSubscriptionUseCase
 {
     private readonly ISubscriptionApiService _subscriptionApiService;
 
-    public GetMySubscriptionsUseCase(ISubscriptionApiService subscriptionApiService)
+    public GetCurrentSubscriptionUseCase(ISubscriptionApiService subscriptionApiService)
     {
         _subscriptionApiService = subscriptionApiService;
     }
 
-    public Task<Result<MySubscriptionsResult>> ExecuteAsync()
+    public Task<Result<CurrentSubscriptionResult>> ExecuteAsync()
     {
-        return _subscriptionApiService.GetMySubscriptionsAsync();
+        return _subscriptionApiService.GetCurrentSubscriptionAsync();
     }
 }

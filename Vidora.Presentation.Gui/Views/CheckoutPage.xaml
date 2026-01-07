@@ -16,15 +16,7 @@
 
                 <!-- Header -->
                 <StackPanel Spacing="8">
-                    <Button
-                        Command="{x:Bind ViewModel.BackToSubscriptionsCommand}"
-                        Style="{StaticResource SubtleButtonStyle}"
-                        Padding="8,4">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon Glyph="&#xE72B;" FontSize="14"/>
-                            <TextBlock Text="Quay lại"/>
-                        </StackPanel>
-                    </Button>
+                    
                     <TextBlock
                         Text="Thanh toán"
                         FontSize="28"

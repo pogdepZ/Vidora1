@@ -9,6 +9,6 @@ public class SubscriptionMappingProfile : Profile
     public SubscriptionMappingProfile()
     {
         CreateMap<SubscriptionPlanData, SubscriptionPlan>();
-        CreateMap<MySubscriptionData, MySubscription>();
+        CreateMap<CurrentSubscriptionData, CurrentSubscription>();
     }
 }
