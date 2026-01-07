@@ -15,6 +15,7 @@ using Vidora.Presentation.Gui.Models;
 using CoreMovie = Vidora.Core.Entities.Movie;
 using GuiMovie = Vidora.Presentation.Gui.Models.Movie;
 
+
 namespace Vidora.Presentation.Gui.ViewModels;
 
 public partial class MovieDetailViewModel : ObservableRecipient, INavigationAware
@@ -64,7 +65,6 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
     [ObservableProperty]
     private bool _isTogglingWatchlist;
 
-    // Rating properties
     [ObservableProperty]
     private bool _showRatingPanel;
 
@@ -80,10 +80,8 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
     [ObservableProperty]
     private int _userRating;
 
-    // Collection của các sao (1-10)
     public ObservableCollection<int> Stars { get; } = new(Enumerable.Range(1, 10));
 
-    // Wrapper properties for null-safe XAML bindings
     public string MovieTitle => Movie?.Title ?? "Đang tải...";
     public string MovieDescription => Movie?.Description ?? "Chưa có mô tả";
     public ImageSource MoviePosterImage
@@ -202,7 +200,7 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
         }
         else
         {
-            _infoBarService.ShowWarning("Phim chưa có sẵn");
+            await _infoBarService.ShowWarningAsync("Phim chưa có sẵn");
         }
     }
 
@@ -215,7 +213,7 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
         }
         else
         {
-            _infoBarService.ShowWarning("Trailer chưa có sẵn");
+            await _infoBarService.ShowWarningAsync("Trailer chưa có sẵn");
         }
     }
 
@@ -228,41 +226,38 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
         {
             IsTogglingWatchlist = true;
 
-            // Thay toggle bằng logic Add/Remove
             if (IsInWatchlist)
             {
-                // Xóa khỏi watchlist
                 var result = await _removeFromWatchlistUseCase.ExecuteAsync(_movieId);
 
                 if (result.IsSuccess)
                 {
                     IsInWatchlist = false;
-                    _infoBarService.ShowInfo("Đã xóa khỏi danh sách yêu thích");
+                    await _infoBarService.ShowInfoAsync("Đã xóa khỏi danh sách yêu thích");
                 }
                 else
                 {
-                    _infoBarService.ShowError(result.Error);
+                    await _infoBarService.ShowErrorAsync(result.Error);
                 }
             }
             else
             {
-                // Thêm vào watchlist
                 var result = await _addToWatchlistUseCase.ExecuteAsync(_movieId);
 
                 if (result.IsSuccess)
                 {
                     IsInWatchlist = true;
-                    _infoBarService.ShowSuccess("Đã thêm vào danh sách yêu thích");
+                    await _infoBarService.ShowSuccessAsync("Đã thêm vào danh sách yêu thích");
                 }
                 else
                 {
-                    _infoBarService.ShowError(result.Error);
+                    await _infoBarService.ShowErrorAsync(result.Error);
                 }
             }
         }
         catch (Exception ex)
         {
-            _infoBarService.ShowError($"Lỗi: {ex.Message}");
+            await _infoBarService.ShowErrorAsync($"Lỗi: {ex.Message}");
         }
         finally
         {
@@ -273,31 +268,26 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
     [RelayCommand]
     private void Share()
     {
-        _infoBarService.ShowInfo("Đã sao chép link chia sẻ");
-        // TODO: Implement share functionality
+        _infoBarService.ShowInfoAsync("Đã sao chép link chia sẻ");
     }
 
-    // ===== RATING COMMANDS =====
 
     [RelayCommand]
     private void OpenRatingPanel()
     {
         ShowRatingPanel = true;
-        // Ưu tiên: UserRating > AvgRating > 5 (mặc định)
         if (UserRating > 0)
         {
             SelectedRating = UserRating;
         }
         else if (Movie?.AvgRating > 0)
         {
-            // Làm tròn AvgRating thành số nguyên (1-10)
             SelectedRating = (int)Math.Round(Movie.AvgRating);
-            // Đảm bảo nằm trong khoảng 1-10
             SelectedRating = Math.Clamp(SelectedRating, 1, 10);
         }
         else
         {
-            SelectedRating = 5; // Mặc định 5 sao
+            SelectedRating = 5;
         }
         HoveredRating = 0;
     }
@@ -356,19 +346,18 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
             {
                 UserRating = SelectedRating;
                 ShowRatingPanel = false;
-                _infoBarService.ShowSuccess($"Đã đánh giá {SelectedRating}/10 ⭐");
+                await _infoBarService.ShowSuccessAsync($"Đã đánh giá {SelectedRating}/10 ⭐");
 
-                // Reload để cập nhật điểm trung bình mới
                 await LoadMovieDetailAsync();
             }
             else
             {
-                _infoBarService.ShowError(result.Error);
+                await _infoBarService.ShowErrorAsync(result.Error);
             }
         }
         catch (Exception ex)
         {
-            _infoBarService.ShowError($"Lỗi: {ex.Message}");
+            await _infoBarService.ShowErrorAsync($"Lỗi: {ex.Message}");
         }
         finally
         {

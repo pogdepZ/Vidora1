@@ -8,12 +8,9 @@ namespace Vidora.Presentation.Gui.ViewModels;
 
 public partial class HeroSectionItemViewModel : ObservableRecipient
 {
+    [ObservableProperty]
     private Movie? _movie;
-    public Movie? Movie
-    {
-        get => _movie;
-        set => SetProperty(ref _movie, value);
-    }
+
     public bool CanPlay => !string.IsNullOrEmpty(Movie?.VideoUrl);
     public bool CanWatchTrailer => string.IsNullOrEmpty(Movie?.VideoUrl)
                                    && !string.IsNullOrEmpty(Movie?.TrailerUrl);
@@ -27,7 +24,7 @@ public partial class HeroSectionItemViewModel : ObservableRecipient
 
 
     [RelayCommand]
-    public async Task PlayVideoAsync(string videoUrl)
+    public async Task ExecutePlayVideoAsync(string videoUrl)
     {
         if (!string.IsNullOrWhiteSpace(videoUrl))
         {

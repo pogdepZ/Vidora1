@@ -27,7 +27,6 @@ public sealed partial class MovieDetailPage : Page
     {
         if (_starIcons == null)
         {
-            // Ch? kh?i t?o khi rating panel ðý?c hi?n th?
             if (Star1 != null)
             {
                 _starIcons = [Star1, Star2, Star3, Star4, Star5, Star6, Star7, Star8, Star9, Star10];

@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<RootNamespace>Vidora.Infrastructure.Storage</RootNamespace>
+		<ImplicitUsings>disable</ImplicitUsings>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="13.0.1" />
+		<PackageReference Include="CloudinaryDotNet" Version="1.27.9" />
+		<PackageReference Include="CSharpFunctionalExtensions" Version="3.6.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Vidora.Core\Vidora.Core.csproj" />
+	</ItemGroup>
+
+</Project>

@@ -6,22 +6,10 @@ namespace Vidora.Core.Helpers;
 
 public static class JsonHelper
 {
-    public static readonly JsonSerializerOptions DefaultOptions = new()
+    public static readonly JsonSerializerOptions CamelCaseOptions = new()
     {
         PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = null,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        NumberHandling = JsonNumberHandling.AllowReadingFromString,
-        Converters =
-        {
-            new JsonStringEnumConverter()
-        }
-    };
-
-    public static readonly JsonSerializerOptions SnakeCaseOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         NumberHandling = JsonNumberHandling.AllowReadingFromString,
         Converters =
@@ -33,10 +21,10 @@ public static class JsonHelper
 
     //
     public static T? Deserialize<T>(string json, JsonSerializerOptions? options = null)
-        => JsonSerializer.Deserialize<T>(json, options ?? DefaultOptions);
+        => JsonSerializer.Deserialize<T>(json, options ?? CamelCaseOptions);
 
     public static string Serialize(object obj, JsonSerializerOptions? options = null)
-        => JsonSerializer.Serialize(obj, options ?? DefaultOptions);
+        => JsonSerializer.Serialize(obj, options ?? CamelCaseOptions);
 
     //
     public static bool TryDeserialize<T>(string json, out T? value, JsonSerializerOptions? options = null)
@@ -45,7 +33,7 @@ public static class JsonHelper
         {
             value = JsonSerializer.Deserialize<T>(
                 json,
-                options ?? DefaultOptions
+                options ?? CamelCaseOptions
             );
             return true;
         }
@@ -62,7 +50,7 @@ public static class JsonHelper
         {
             json = JsonSerializer.Serialize(
                 value,
-                options ?? DefaultOptions
+                options ?? CamelCaseOptions
             );
             return true;
         }

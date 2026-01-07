@@ -6,6 +6,7 @@ using Vidora.Core.Contracts.Results;
 using Vidora.Core.Contracts.Services;
 using Vidora.Core.Entities;
 using Vidora.Core.Interfaces.Api;
+using Vidora.Infrastructure.Api.Clients;
 using Vidora.Infrastructure.Api.Dtos.Responses;
 using Vidora.Infrastructure.Api.Dtos.Responses.Datas;
 using Vidora.Infrastructure.Api.Extensions;
@@ -16,28 +17,18 @@ public class SubscriptionApiService : ISubscriptionApiService
 {
     private readonly ApiClient _apiClient;
     private readonly IMapper _mapper;
-    private readonly ISessionStateService _sessionService;
 
-    public SubscriptionApiService(ApiClient apiClient, IMapper mapper, ISessionStateService sessionService)
+    public SubscriptionApiService(ApiClient apiClient, IMapper mapper)
     {
         _apiClient = apiClient;
         _mapper = mapper;
-        _sessionService = sessionService;
     }
 
     public async Task<Result<SubscriptionPlansResult>> GetPlansAsync()
     {
-        var tokenObject = _sessionService.AccessToken;
-        var accessToken = tokenObject?.Token;
-
-        if (string.IsNullOrWhiteSpace(accessToken))
-        {
-            return Result.Failure<SubscriptionPlansResult>("Access token not found. Please login again.");
-        }
-
         var url = "api/subscriptions/plans";
 
-        var httpRes = await _apiClient.GetAsync(url, token: accessToken);
+        var httpRes = await _apiClient.GetAsync(url);
 
         var apiRes = await httpRes.ReadListAsync<SubscriptionPlanData>();
 
@@ -58,17 +49,9 @@ public class SubscriptionApiService : ISubscriptionApiService
 
     public async Task<Result<CurrentSubscriptionResult>> GetCurrentSubscriptionAsync()
     {
-        var tokenObject = _sessionService.AccessToken;
-        var accessToken = tokenObject?.Token;
-
-        if (string.IsNullOrWhiteSpace(accessToken))
-        {
-            return Result.Failure<CurrentSubscriptionResult>("Access token not found. Please login again.");
-        }
-
         var url = "api/subscriptions/current";
 
-        var httpRes = await _apiClient.GetAsync(url, token: accessToken);
+        var httpRes = await _apiClient.GetAsync(url);
 
         // If no subscription found (404 or empty), return empty result
         if (!httpRes.IsSuccessStatusCode)

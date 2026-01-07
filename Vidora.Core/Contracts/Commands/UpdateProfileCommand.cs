@@ -5,9 +5,9 @@ namespace Vidora.Core.Contracts.Commands;
 
 public class UpdateProfileCommand
 {
-    public string FullName { get; set; }
-    public string Username { get; set; }
+    public string FullName { get; set; } = string.Empty;
+    public string Username { get; set; } = string.Empty;
     public Gender? Gender { get; set; }
-    public String? Birthday { get; set; }
+    public string? Birthday { get; set; }
     public string? Avatar { get; set; }
 }

@@ -1,6 +1,4 @@
-﻿using CSharpFunctionalExtensions;
-using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Vidora.Core.Contracts.Services;
 
 namespace Vidora.Core.UseCases;
@@ -14,26 +12,9 @@ public class AutoLoginUseCase
         _sessionState = sessionState; 
     }
 
-    public async Task<Result> ExecuteAsync()
-    {
-        try
-        {
-            return await ExecuteAsyncInternal();
-        }
-        catch (Exception ex)
-        {
-            return Result.Failure($"Auto login failed: {ex.Message}");
-        }
-    }
-
-    private async Task<Result> ExecuteAsyncInternal()
+    public Task ExecuteAsync()
     {
         _sessionState.RestoreSession();
-        if (!_sessionState.IsAuthenticated)
-        {
-            return Result.Failure("No valid session found. Please log in.");
-        }
-        
-        return Result.Success("Auto login successful.");
+        return Task.CompletedTask;
     }
 }

@@ -9,6 +9,7 @@ using Vidora.Core.Contracts.Results;
 using Vidora.Core.Contracts.Services;
 using Vidora.Core.Entities;
 using Vidora.Core.Interfaces.Api;
+using Vidora.Infrastructure.Api.Clients;
 using Vidora.Infrastructure.Api.Dtos.Responses;
 using Vidora.Infrastructure.Api.Dtos.Responses.Datas;
 using Vidora.Infrastructure.Api.Extensions;
@@ -19,26 +20,15 @@ public class MovieApiService : IMovieApiService
 {
     private readonly ApiClient _apiClient;
     private readonly IMapper _mapper;
-    private readonly ISessionStateService _sessionService;
 
-    public MovieApiService(ApiClient apiClient, IMapper mapper, ISessionStateService sessionService)
+    public MovieApiService(ApiClient apiClient, IMapper mapper)
     {
         _apiClient = apiClient;
         _mapper = mapper;
-        _sessionService = sessionService;
     }
 
     public async Task<Result<SearchMovieResult>> SearchMoviesAsync(SearchMovieCommand command)
     {
-        // Get access token
-        var tokenObject = _sessionService.AccessToken;
-        var accessToken = tokenObject?.Token;
-
-        if (string.IsNullOrWhiteSpace(accessToken))
-        {
-            return Result.Failure<SearchMovieResult>("Access token not found. Please login again.");
-        }
-
         // Build query string
         var queryParams = HttpUtility.ParseQueryString(string.Empty);
         
@@ -56,11 +46,11 @@ public class MovieApiService : IMovieApiService
 
         var url = $"api/movies?{queryParams}";
 
-        var httpRes = await _apiClient.GetAsync(url, token: accessToken);
+        var httpRes = await _apiClient.GetAsync(url);
 
         var apiRes = await httpRes.ReadPaginatedAsync<MovieData>();
 
-        if (apiRes is not PaginatedSucessResponse<MovieData> success)
+        if (apiRes is not PaginatedSuccessResponse<MovieData> success)
         {
             return Result.Failure<SearchMovieResult>(
                 apiRes.Message ?? "Tìm kiếm phim thất bại"
@@ -78,18 +68,9 @@ public class MovieApiService : IMovieApiService
 
     public async Task<Result<MovieDetailResult>> GetMovieDetailAsync(int movieId)
     {
-        // Get access token
-        var tokenObject = _sessionService.AccessToken;
-        var accessToken = tokenObject?.Token;
-
-        if (string.IsNullOrWhiteSpace(accessToken))
-        {
-            return Result.Failure<MovieDetailResult>("Access token not found. Please login again.");
-        }
-
         var url = $"api/movies/{movieId}";
 
-        var httpRes = await _apiClient.GetAsync(url, token: accessToken);
+        var httpRes = await _apiClient.GetAsync(url);
 
         var apiRes = await httpRes.ReadAsync<MovieData>();
 
@@ -110,18 +91,9 @@ public class MovieApiService : IMovieApiService
 
     public async Task<Result<GenreListResult>> GetGenresAsync()
     {
-        // Get access token
-        var tokenObject = _sessionService.AccessToken;
-        var accessToken = tokenObject?.Token;
-
-        if (string.IsNullOrWhiteSpace(accessToken))
-        {
-            return Result.Failure<GenreListResult>("Access token not found. Please login again.");
-        }
-
         var url = "api/movies/genres";
 
-        var httpRes = await _apiClient.GetAsync(url, token: accessToken);
+        var httpRes = await _apiClient.GetAsync(url);
 
         var apiRes = await httpRes.ReadListAsync<GenreData>();
 
@@ -142,14 +114,6 @@ public class MovieApiService : IMovieApiService
 
     public async Task<Result<RateMovieResult>> RateMovieAsync(int movieId, int rating)
     {
-        var tokenObject = _sessionService.AccessToken;
-        var accessToken = tokenObject?.Token;
-
-        if (string.IsNullOrWhiteSpace(accessToken))
-        {
-            return Result.Failure<RateMovieResult>("Access token not found. Please login again.");
-        }
-
         if (rating < 1 || rating > 10)
         {
             return Result.Failure<RateMovieResult>("Đánh giá phải từ 1 đến 10 sao");
@@ -158,7 +122,7 @@ public class MovieApiService : IMovieApiService
         var url = $"api/movies/{movieId}/rating";
         var body = new { number = rating };
 
-        var httpRes = await _apiClient.PutAsync(url, body, token: accessToken);
+        var httpRes = await _apiClient.PutAsync(url, body);
 
         if (httpRes.IsSuccessStatusCode)
         {

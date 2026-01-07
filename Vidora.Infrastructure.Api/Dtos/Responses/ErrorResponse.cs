@@ -3,9 +3,9 @@
 namespace Vidora.Infrastructure.Api.Dtos.Responses;
 
 internal record ErrorResponse(
-    object Error,
     HttpStatusCode StatusCode,
-    string? Message = null
+    string? Message = null,
+    object? Error = null
 ) : ApiResponse(StatusCode, Message)
 {
     public override bool Success => false;

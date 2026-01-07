@@ -15,9 +15,6 @@ internal class AuthMappingProfile : Profile
         CreateMap<LoginCommand, LoginRequest>();
         CreateMap<RegisterCommand, RegisterRequest>();
 
-        // UserData -> UserResult
-        CreateMap<UserData, UserResult>();
-
         // LoginResponseData -> LoginResult
         CreateMap<LoginResponseData, LoginResult>()
             .ForCtorParam(nameof(LoginResult.ExpiresAt), o => o.MapFrom(_ => DateTime.MinValue));

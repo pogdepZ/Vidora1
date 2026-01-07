@@ -12,10 +12,8 @@
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
 	<ImplicitUsings>disable</ImplicitUsings>
+	<NoWarn>$(NoWarn);MVVMTK0045</NoWarn>
   </PropertyGroup>
-  <ItemGroup>
-    <Page Remove="Views\ConfigPage.xaml" />
-  </ItemGroup>
 	
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -51,8 +49,8 @@
 	  
 	<!--For DI only-->
     <ProjectReference Include="..\Vidora.Infrastructure.Api\Vidora.Infrastructure.Api.csproj" />
+    <ProjectReference Include="..\Vidora.Infrastructure.Storage\Vidora.Infrastructure.Storage.csproj" />
     <ProjectReference Include="..\Vidora.Infrastructure.Persistence\Vidora.Infrastructure.Persistence.csproj" />
-    <ProjectReference Include="..\Vidora.Infrastructure.Platform\Vidora.Infrastructure.Platform.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -76,11 +74,6 @@
     </Content>
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Views\ConfigPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-  </ItemGroup>
 
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>

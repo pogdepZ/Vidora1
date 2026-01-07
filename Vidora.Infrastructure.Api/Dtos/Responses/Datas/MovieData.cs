@@ -15,5 +15,5 @@ internal record MovieData(
     int? UserRating,
     bool? IsInWatchlist,
     IReadOnlyList<string> Genres,
-    IReadOnlyList<ActorData> Actors
+    IReadOnlyList<ActorData>? Actors
 );

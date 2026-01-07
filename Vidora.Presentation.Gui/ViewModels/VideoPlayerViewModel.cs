@@ -2,7 +2,6 @@
 using System;
 using System.Threading.Tasks;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
-using Vidora.Presentation.Gui.Models;
 using Windows.Media.Core;
 
 namespace Vidora.Presentation.Gui.ViewModels;
@@ -10,13 +9,8 @@ namespace Vidora.Presentation.Gui.ViewModels;
 public partial class VideoPlayerViewModel : ObservableRecipient, INavigationAware
 {
     // TODO: add PosterSource
-
+    [ObservableProperty]
     private MediaSource? _MediaSource;
-    public MediaSource? MediaSource
-    {
-        get => _MediaSource;
-        set => SetProperty(ref _MediaSource, value);
-    }
 
     [ObservableProperty]
     private string _title = string.Empty;
@@ -39,7 +33,6 @@ public partial class VideoPlayerViewModel : ObservableRecipient, INavigationAwar
             return;
         }
 
-        // Xử lý anonymous object { Url, Title }
         if (parameter != null)
         {
             var paramType = parameter.GetType();

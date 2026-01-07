@@ -10,7 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Vidora.Core.Contracts.Commands;
 using Vidora.Core.Entities;
-using Vidora.Core.Interfaces.Services;
+using Vidora.Core.Interfaces.Storage;
 using Vidora.Core.UseCases;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
 using Windows.Storage;
@@ -25,12 +25,11 @@ public partial class ProfileViewModel : ObservableObject, INavigationAware
     private readonly ICloudinaryService _cloudinaryService;
     private readonly IMapper _mapper;
 
-    // --- CÁC BIẾN HIỂN THỊ (VIEW MODE) ---
     [ObservableProperty]
-    private User _currentUser;
+    private User? _currentUser;
 
     [ObservableProperty]
-    private Plan _currentPlan;
+    private Plan? _currentPlan;
 
     [ObservableProperty]
     private bool _isLoading;
@@ -39,9 +38,8 @@ public partial class ProfileViewModel : ObservableObject, INavigationAware
     private bool _hasPlan;
 
     [ObservableProperty]
-    private string _errorMessage;
+    private string _errorMessage = string.Empty;
 
-    // --- CÁC BIẾN CHỈNH SỬA (EDIT MODE) - Observable riêng để binding hoạt động ---
     [ObservableProperty]
     private bool _isEditing;
 
@@ -49,10 +47,10 @@ public partial class ProfileViewModel : ObservableObject, INavigationAware
     private bool _isSaving;
 
     [ObservableProperty]
-    private string _editFullName;
+    private string _editFullName = string.Empty;
 
     [ObservableProperty]
-    private string _editUsername;
+    private string _editUsername = string.Empty;
 
     [ObservableProperty]
     private Gender? _editGender;
@@ -61,11 +59,10 @@ public partial class ProfileViewModel : ObservableObject, INavigationAware
     private DateTime? _editBirthday;
 
     [ObservableProperty]
-    private string _editAvatar;
+    private string _editAvatar = string.Empty;
 
-    // --- AVATAR PREVIEW ---
     [ObservableProperty]
-    private BitmapImage _previewAvatarSource;
+    private BitmapImage? _previewAvatarSource;
 
     [ObservableProperty]
     private bool _hasNewAvatar;
@@ -73,11 +70,10 @@ public partial class ProfileViewModel : ObservableObject, INavigationAware
     [ObservableProperty]
     private bool _isUploadingAvatar;
 
-    private StorageFile _selectedAvatarFile;
+    private StorageFile? _selectedAvatarFile;
 
     public IReadOnlyList<Gender> GenderOptions { get; } = Enum.GetValues(typeof(Gender)).Cast<Gender>().ToList();
 
-    // Constructor
     public ProfileViewModel(
         GetProfileUseCase getProfileUseCase,
         UpdateProfileUseCase updateProfileUseCase,
@@ -90,7 +86,6 @@ public partial class ProfileViewModel : ObservableObject, INavigationAware
         _mapper = mapper;
     }
 
-    // --- NAVIGATION ---
     public async Task OnNavigatedToAsync(object parameter)
     {
         await LoadDataAsync();
@@ -101,7 +96,6 @@ public partial class ProfileViewModel : ObservableObject, INavigationAware
         return Task.CompletedTask;
     }
 
-    // --- LOAD DATA ---
     private async Task LoadDataAsync()
     {
         IsLoading = true;
@@ -141,22 +135,17 @@ public partial class ProfileViewModel : ObservableObject, INavigationAware
         }
     }
 
-    // --- COMMANDS CHỈNH SỬA ---
-
-    // 1. Bắt đầu sửa: Copy dữ liệu sang các property Edit riêng
     [RelayCommand]
     private void StartEdit()
     {
         if (CurrentUser == null) return;
 
-        // Copy dữ liệu sang các property observable riêng
         EditFullName = CurrentUser.FullName;
         EditUsername = CurrentUser.Username;
         EditGender = CurrentUser.Gender;
         EditBirthday = CurrentUser.Birthday;
-        EditAvatar = CurrentUser.Avatar;
+        EditAvatar = CurrentUser.Avatar ?? string.Empty;
 
-        // Reset avatar preview
         PreviewAvatarSource = null;
         HasNewAvatar = false;
         _selectedAvatarFile = null;
@@ -165,15 +154,14 @@ public partial class ProfileViewModel : ObservableObject, INavigationAware
         ErrorMessage = string.Empty;
     }
 
-    // 2. Hủy bỏ: Reset các property Edit
     [RelayCommand]
     private void CancelEdit()
     {
-        EditFullName = null;
-        EditUsername = null;
+        EditFullName = string.Empty;
+        EditUsername = string.Empty;
         EditGender = null;
         EditBirthday = null;
-        EditAvatar = null;
+        EditAvatar = string.Empty;
 
         PreviewAvatarSource = null;
         HasNewAvatar = false;
@@ -183,7 +171,6 @@ public partial class ProfileViewModel : ObservableObject, INavigationAware
         ErrorMessage = string.Empty;
     }
 
-    // 3. Chọn ảnh đại diện (avatar) từ bộ lựa chọn file
     [RelayCommand]
     private async Task PickAvatarAsync()
     {
@@ -222,7 +209,6 @@ public partial class ProfileViewModel : ObservableObject, INavigationAware
         }
     }
 
-    // 4. Xóa ảnh đại diện mới đã chọn, trở về ảnh cũ nếu có
     [RelayCommand]
     private void RemoveNewAvatar()
     {
@@ -232,11 +218,10 @@ public partial class ProfileViewModel : ObservableObject, INavigationAware
 
         if (CurrentUser != null)
         {
-            EditAvatar = CurrentUser.Avatar;
+            EditAvatar = CurrentUser.Avatar ?? string.Empty;
         }
     }
 
-    // 5. Lưu thay đổi: Gọi API Update
     [RelayCommand]
     private async Task SaveEdit()
     {
@@ -247,7 +232,6 @@ public partial class ProfileViewModel : ObservableObject, INavigationAware
         {
             string? avatarUrl = EditAvatar;
 
-            // Upload ảnh mới lên Cloudinary nếu có
             if (HasNewAvatar && _selectedAvatarFile != null)
             {
                 IsUploadingAvatar = true;
@@ -270,7 +254,6 @@ public partial class ProfileViewModel : ObservableObject, INavigationAware
                 avatarUrl = uploadResult.Value;
             }
 
-            // Tạo Command từ các property Edit
             var command = new UpdateProfileCommand
             {
                 FullName = EditFullName,
@@ -280,16 +263,12 @@ public partial class ProfileViewModel : ObservableObject, INavigationAware
                 Avatar = avatarUrl
             };
 
-            // Gọi UseCase
             var result = await _updateProfileUseCase.ExecuteAsync(command);
 
-            // Xử lý kết quả
             if (result.IsSuccess)
             {
-                // Thành công: Cập nhật User gốc bằng dữ liệu mới nhất từ Server
                 CurrentUser = result.Value.User;
 
-                // Reset edit state
                 CancelEdit();
             }
             else

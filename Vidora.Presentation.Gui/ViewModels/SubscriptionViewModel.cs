@@ -8,7 +8,6 @@ using Vidora.Core.UseCases;
 using Vidora.Presentation.Gui.Contracts.Services;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
 using Vidora.Presentation.Gui.Models;
-
 namespace Vidora.Presentation.Gui.ViewModels;
 
 public partial class SubscriptionViewModel : ObservableRecipient, INavigationAware
@@ -77,7 +76,7 @@ public partial class SubscriptionViewModel : ObservableRecipient, INavigationAwa
 
             if (plansResult.IsFailure)
             {
-                _infoBarService.ShowError(plansResult.Error);
+                await _infoBarService.ShowErrorAsync(plansResult.Error);
                 return;
             }
 
@@ -106,7 +105,7 @@ public partial class SubscriptionViewModel : ObservableRecipient, INavigationAwa
         }
         catch (Exception ex)
         {
-            _infoBarService.ShowError($"Lỗi tải danh sách gói: {ex.Message}");
+            await _infoBarService.ShowErrorAsync($"Lỗi tải danh sách gói: {ex.Message}");
         }
         finally
         {

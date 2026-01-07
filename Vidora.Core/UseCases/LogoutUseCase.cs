@@ -1,7 +1,8 @@
-﻿using CSharpFunctionalExtensions;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Vidora.Core.Contracts.Services;
+using Vidora.Core.Events;
+using Vidora.Core.Exceptions;
 
 namespace Vidora.Core.UseCases;
 
@@ -14,22 +15,29 @@ public class LogoutUseCase
         _sessionStateService = sessionStateService;
     }
 
-    public async Task<Result> ExecuteAsync()
+    public Task ExecuteAsync()
     {
         try
         {
-            return await ExecuteAsyncInternal();
+            return ExecuteAsyncInternal();
+        }
+        catch (UnauthorizationException)
+        {
+            throw;
+        }
+        catch (DomainException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
-            return Result.Failure($"Logout failed: {ex.Message}");
+            throw new DomainException(ex.Message);
         }
     }
 
-    private async Task<Result> ExecuteAsyncInternal()
+    private Task ExecuteAsyncInternal()
     {
-        _sessionStateService.ClearSession();
-
-        return Result.Success();
+        _sessionStateService.ClearSession(SessionChangeReason.ManualLogout);
+        return Task.CompletedTask;
     }
 }

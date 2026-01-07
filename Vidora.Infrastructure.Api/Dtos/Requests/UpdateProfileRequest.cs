@@ -1,11 +1,9 @@
-﻿using System;
-
-namespace Vidora.Infrastructure.Api.Dtos.Requests;
+﻿namespace Vidora.Infrastructure.Api.Dtos.Requests;
 
 internal record UpdateProfileRequest(
     string FullName,
     string Username,
     string? Gender,    
-    String? Birthday,
+    string? Birthday,
     string? Avatar
 );

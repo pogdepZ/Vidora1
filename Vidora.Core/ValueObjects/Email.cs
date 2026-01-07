@@ -12,10 +12,10 @@ public sealed partial record Email
     public Email(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new EmailInvalidException("Email cannot be empty.");
+            throw new ValidationException("Email cannot be empty.");
 
         if (!EmailRegex.IsMatch(value))
-            throw new EmailInvalidException("Invalid email format.");
+            throw new ValidationException("Invalid email format.");
 
         Value = value;
     }
@@ -28,7 +28,7 @@ public sealed partial record Email
             error = null;
             return true;
         }
-        catch(CoreException ex)
+        catch(ValidationException ex)
         {
             email = null;
             error = ex.Message;

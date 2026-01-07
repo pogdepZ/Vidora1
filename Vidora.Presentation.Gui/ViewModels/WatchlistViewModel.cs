@@ -14,6 +14,7 @@ using Vidora.Presentation.Gui.Models;
 using CoreMovie = Vidora.Core.Entities.Movie;
 using GuiMovie = Vidora.Presentation.Gui.Models.Movie;
 
+
 namespace Vidora.Presentation.Gui.ViewModels;
 
 public partial class WatchlistViewModel : ObservableRecipient, INavigationAware
@@ -96,7 +97,7 @@ public partial class WatchlistViewModel : ObservableRecipient, INavigationAware
                 }
                 else
                 {
-                    _infoBarService.ShowError(result.Error);
+                    await _infoBarService.ShowErrorAsync(result.Error);
                     hasMore = false;
                 }
             }
@@ -108,7 +109,7 @@ public partial class WatchlistViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception ex)
         {
-            _infoBarService.ShowError($"Lỗi tải danh sách: {ex.Message}");
+            await _infoBarService.ShowErrorAsync($"Lỗi tải danh sách: {ex.Message}");
         }
         finally
         {
@@ -199,16 +200,16 @@ public partial class WatchlistViewModel : ObservableRecipient, INavigationAware
                 TotalMovies = _allMovies.Count;
                 HasMovies = _allMovies.Count > 0;
 
-                _infoBarService.ShowSuccess($"Đã xóa \"{movie.Title}\" khỏi danh sách yêu thích");
+                await _infoBarService.ShowSuccessAsync($"Đã xóa \"{movie.Title}\" khỏi danh sách yêu thích");
             }
             else
             {
-                _infoBarService.ShowError(result.Error);
+                await _infoBarService.ShowErrorAsync(result.Error);
             }
         }
         catch (Exception ex)
         {
-            _infoBarService.ShowError($"Lỗi: {ex.Message}");
+            await _infoBarService.ShowErrorAsync($"Lỗi: {ex.Message}");
         }
     }
 

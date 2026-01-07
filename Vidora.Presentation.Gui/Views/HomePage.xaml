@@ -26,11 +26,7 @@
                 Command="{Binding ViewModel.ViewMovieDetailCommand, ElementName=HomePageRoot}"
                 CommandParameter="{x:Bind}">
                 <Grid>
-                    <Image
-                        HorizontalAlignment="Right"
-                        Source="{x:Bind BannerUrl}"
-                        Stretch="UniformToFill"/>
-                    <!-- Overlay với thông tin phim khi hover -->
+                   
                     <Border Background="#80000000" Opacity="0" x:Name="HoverOverlay">
                         <StackPanel VerticalAlignment="Bottom" Padding="8">
                             <TextBlock Text="{x:Bind Title}" FontWeight="SemiBold" 

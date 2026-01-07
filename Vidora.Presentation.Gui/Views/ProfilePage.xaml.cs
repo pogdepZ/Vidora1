@@ -6,7 +6,6 @@ namespace Vidora.Presentation.Gui.Views;
 
 public sealed partial class ProfilePage : Page
 {
-    // Khai báo ViewModel để x:Bind trong XAML sử dụng
     public ProfileViewModel ViewModel { get; } = App.GetService<ProfileViewModel>();
   
     public ProfilePage()
@@ -14,12 +13,10 @@ public sealed partial class ProfilePage : Page
         InitializeComponent();
     }
 
-    // Chuyển thành 'async void' để await được hàm LoadData bên ViewModel
     protected override async void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
 
-        // Gọi hàm Async bên ViewModel và chờ nó chạy xong
         await ViewModel.OnNavigatedToAsync(e.Parameter);
     }
 
@@ -27,7 +24,6 @@ public sealed partial class ProfilePage : Page
     {
         base.OnNavigatedFrom(e);
 
-        // Gọi hàm cleanup Async bên ViewModel
         await ViewModel.OnNavigatedFromAsync();
     }
 }

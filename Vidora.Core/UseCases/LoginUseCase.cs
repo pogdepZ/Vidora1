@@ -1,13 +1,11 @@
 ﻿using AutoMapper;
-using CSharpFunctionalExtensions;
 using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Vidora.Core.Contracts.Commands;
 using Vidora.Core.Contracts.Results;
 using Vidora.Core.Contracts.Services;
 using Vidora.Core.Entities;
-using Vidora.Core.Events;
+using Vidora.Core.Exceptions;
 using Vidora.Core.Interfaces.Api;
 using Vidora.Core.ValueObjects;
 
@@ -15,62 +13,53 @@ namespace Vidora.Core.UseCases;
 
 public class LoginUseCase
 {
-    private readonly IAuthApiService _authService;
+    private readonly IAuthApiService _authApiService;
     private readonly ISessionStateService _sessionState;
     private readonly IMapper _mapper;
     public LoginUseCase(IAuthApiService authService, ISessionStateService sessionState, IMapper mapper)
     {
-        _authService = authService;
+        _authApiService = authService;
         _sessionState = sessionState;
         _mapper = mapper;
     }
 
-    public async Task<Result<LoginResult>> ExecuteAsync(LoginCommand command)
+    public Task<LoginResult> ExecuteAsync(LoginCommand command)
     {
         try
         {
-            return await ExecuteAsyncInternal(command);
+            return ExecuteAsyncInternal(command);
         }
-        catch (Exception ex)
+        catch (UnauthorizationException)
         {
-            return Result.Failure<LoginResult>($"Login failed: {ex.Message}");
+            throw;
+        }
+        catch (DomainException)
+        {
+            throw;
+        }
+        catch(Exception ex)
+        {
+            throw new DomainException(ex.Message);
         }
     }
 
-
-    private async Task<Result<LoginResult>> ExecuteAsyncInternal(LoginCommand command)
+    private async Task<LoginResult> ExecuteAsyncInternal(LoginCommand command)
     {
         // Validate
-        var apiRequest = command with {
+        var apiRequest = command with
+        {
             Email = new Email(command.Email),
             Password = new Password(command.Password)
         };
 
         // Call api
-        var apiResponse = await _authService.LoginAsync(apiRequest);
-        if (apiResponse.IsFailure)
-        {
-            return Result.Failure<LoginResult>(apiResponse.Error);
-        }
+        var loginResult = await _authApiService.LoginAsync(apiRequest);
 
-       
-
-
-        // Update session
-        var session = new Session
-        {
-            CurrentUser = _mapper.Map<User>(apiResponse.Value.User),
-            AccessToken = new AuthToken(
-                 apiResponse.Value.AccessToken,
-                 apiResponse.Value.ExpiresAt.AddDays(10).ToUniversalTime()
-             )
-        };
-        
-        _sessionState.SetSession(session, SessionChangeReason.ManualLogin);
-
-
+        // Save Sesion
+        var session = _mapper.Map<Session>(loginResult);
+        _sessionState.SetSession(session, Events.SessionChangeReason.ManualLogin);
 
         // Return
-        return Result.Success<LoginResult>(apiResponse.Value);
+        return loginResult;
     }
 }

@@ -159,13 +159,13 @@ public partial class SearchViewModel : ObservableRecipient, INavigationAware
             }
             else
             {
-                _infoBarService.ShowError(result.Error);
+                await _infoBarService.ShowErrorAsync(result.Error);
                 ClearResults();
             }
         }
         catch (Exception ex)
         {
-            _infoBarService.ShowError($"Lỗi tìm kiếm: {ex.Message}");
+            await _infoBarService.ShowErrorAsync($"Lỗi tìm kiếm: {ex.Message}");
             ClearResults();
         }
         finally

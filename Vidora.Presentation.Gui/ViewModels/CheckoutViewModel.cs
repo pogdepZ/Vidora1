@@ -93,7 +93,7 @@ public partial class CheckoutViewModel : ObservableRecipient, INavigationAware
         }
         else
         {
-            _infoBarService.ShowError("Không tìm thấy thông tin gói đăng ký");
+            await _infoBarService.ShowErrorAsync("Không tìm thấy thông tin gói đăng ký");
             await _navigationService.NavigateToAsync<SubscriptionViewModel>();
         }
     }
@@ -116,7 +116,7 @@ public partial class CheckoutViewModel : ObservableRecipient, INavigationAware
             var orderResult = await _createOrderUseCase.ExecuteAsync(SelectedPlan.PlanId);
             if (orderResult.IsFailure)
             {
-                _infoBarService.ShowError(orderResult.Error);
+                await _infoBarService.ShowErrorAsync(orderResult.Error);
                 return;
             }
 
@@ -127,7 +127,7 @@ public partial class CheckoutViewModel : ObservableRecipient, INavigationAware
         }
         catch (Exception ex)
         {
-            _infoBarService.ShowError($"Lỗi khi tạo đơn hàng: {ex.Message}");
+           await _infoBarService.ShowErrorAsync($"Lỗi khi tạo đơn hàng: {ex.Message}");
         }
         finally
         {
@@ -179,16 +179,16 @@ public partial class CheckoutViewModel : ObservableRecipient, INavigationAware
             var result = await _applyDiscountUseCase.ExecuteAsync(CurrentOrder.OrderId, SelectedPromo.DiscountId);
             if (result.IsFailure)
             {
-                _infoBarService.ShowError(result.Error);
+                await _infoBarService.ShowErrorAsync(result.Error);
                 return;
             }
 
             CurrentOrder = _mapper.Map<Order>(result.Value.Order);
-            _infoBarService.ShowSuccess("Đã áp dụng mã giảm giá");
+            await _infoBarService.ShowSuccessAsync("Đã áp dụng mã giảm giá");
         }
         catch (Exception ex)
         {
-            _infoBarService.ShowError($"Lỗi áp dụng mã giảm giá: {ex.Message}");
+            await _infoBarService.ShowErrorAsync($"Lỗi áp dụng mã giảm giá: {ex.Message}");
         }
         finally
         {
@@ -215,16 +215,16 @@ public partial class CheckoutViewModel : ObservableRecipient, INavigationAware
             var result = await _confirmPaymentUseCase.ExecuteAsync(CurrentOrder.OrderId);
             if (result.IsFailure)
             {
-                _infoBarService.ShowError(result.Error);
+               await  _infoBarService.ShowErrorAsync(result.Error);
                 return;
             }
 
             PaymentSuccess = true;
-            _infoBarService.ShowSuccess("Thanh toán thành công!");
+            await _infoBarService.ShowSuccessAsync("Thanh toán thành công!");
         }
         catch (Exception ex)
         {
-            _infoBarService.ShowError($"Lỗi xác nhận thanh toán: {ex.Message}");
+            await _infoBarService.ShowErrorAsync($"Lỗi xác nhận thanh toán: {ex.Message}");
         }
         finally
         {

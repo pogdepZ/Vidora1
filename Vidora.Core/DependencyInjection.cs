@@ -9,13 +9,16 @@ namespace Vidora.Core;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddCore(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
         // UseCases
+        services.AddTransient<CheckHealthUseCase>();
+
         services.AddTransient<LoginUseCase>();
         services.AddTransient<AutoLoginUseCase>();
         services.AddTransient<LogoutUseCase>();
         services.AddTransient<RegisterUseCase>();
+
         services.AddTransient<GetProfileUseCase>();
         services.AddTransient<UpdateProfileUseCase>();
         services.AddTransient<SearchMovieUseCase>();
@@ -32,6 +35,7 @@ public static class DependencyInjection
         services.AddTransient<AddToWatchlistUseCase>();
         services.AddTransient<RateMovieUseCase>();
         services.AddTransient<GetDashboardUseCase>();
+
 
         // Services
         services.AddSingleton<ISessionStateService, SessionStateService>();

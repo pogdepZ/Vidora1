@@ -1,101 +1,46 @@
-﻿using System.Net.Http;
-using System.Threading.Tasks;
-using Vidora.Core.Helpers;
+﻿using System.Net;
+using Vidora.Core.Exceptions;
 using Vidora.Infrastructure.Api.Dtos.Responses;
 
 namespace Vidora.Infrastructure.Api.Extensions;
 
 internal static class ApiResponseExtensions
 {
-    public static async Task<ApiResponse> ReadAsync<T>(
-        this HttpResponseMessage response)
+    public static SuccessResponse<T> EnsureSuccess<T>(this ApiResponse response)
     {
-        var statusCode = response.StatusCode;
-        var json = await response.Content.ReadAsStringAsync();
+        if (response is ErrorResponse error)
+            throw MapDomainException(error);
 
-        // HTTP error
-        if (!response.IsSuccessStatusCode)
-        {
-            if (JsonHelper.TryDeserialize<ErrorResponse>(json, out var error)
-                && error != null)
-            {
-                return error with { StatusCode = statusCode };
-            }
+        if (response is not SuccessResponse<T> success)
+            throw new DomainException("Invalid response type");
 
-            return new ErrorResponse(
-                Error: json,
-                StatusCode: statusCode,
-                Message: "Http request failed"
-            );
-        }
-
-        // HTTP success
-        if (JsonHelper.TryDeserialize<SuccessResponse<T>>(json, out var success)
-            && success != null)
-        {
-            return success with { StatusCode = statusCode };
-        }
-
-        return new ErrorResponse(
-            Error: json,
-            StatusCode: statusCode,
-            Message: "Invalid response format"
-        );
+        return success;
     }
 
-    public static async Task<ApiResponse> ReadListAsync<T>(
-        this HttpResponseMessage response)
+    public static DomainException MapDomainException(ErrorResponse error)
     {
-        var statusCode = response.StatusCode;
-        var json = await response.Content.ReadAsStringAsync();
-
-        if (!response.IsSuccessStatusCode)
+        return error.StatusCode switch
         {
-            return new ErrorResponse(
-                Error: json,
-                StatusCode: statusCode,
-                Message: "Http request failed"
-            );
-        }
+            HttpStatusCode.BadRequest =>
+                new DomainException(error.Message ?? "Bad request error"),
 
-        if (JsonHelper.TryDeserialize<ListSuccessResponse<T>>(json, out var success)
-            && success != null)
-        {
-            return success with { StatusCode = statusCode };
-        }
+            HttpStatusCode.Unauthorized =>
+                new UnauthorizationException(error.Message ?? "Unauthorization error"),
 
-        return new ErrorResponse(
-            Error: json,
-            StatusCode: statusCode,
-            Message: "Invalid list response format"
-        );
-    }
+            HttpStatusCode.Forbidden =>
+                new ForbiddenException(error.Message ?? "Not permission"),
 
-    public static async Task<ApiResponse> ReadPaginatedAsync<T>(
-        this HttpResponseMessage response)
-    {
-        var statusCode = response.StatusCode;
-        var json = await response.Content.ReadAsStringAsync();
+            HttpStatusCode.Conflict =>
+                new ConflictException(error.Message ?? "Conflict occurred"),
 
-        if (!response.IsSuccessStatusCode)
-        {
-            return new ErrorResponse(
-                Error: json,
-                StatusCode: statusCode,
-                Message: "Http request failed"
-            );
-        }
+            HttpStatusCode.NotFound =>
+                new NotFoundException(error.Message ?? "Resource not found"),
 
-        if (JsonHelper.TryDeserialize<PaginatedSucessResponse<T>>(json, out var success)
-            && success != null)
-        {
-            return success with { StatusCode = statusCode };
-        }
+            HttpStatusCode.UnprocessableEntity =>
+                new ValidationException(error.Message ?? "Validation error"),
 
-        return new ErrorResponse(
-            Error: json,
-            StatusCode: statusCode,
-            Message: "Invalid paginated response format"
-        );
+            _ =>
+                new DomainException(error.Message ?? "Unexpected error")
+        };
     }
 }

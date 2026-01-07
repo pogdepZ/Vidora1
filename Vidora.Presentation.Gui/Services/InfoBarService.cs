@@ -32,19 +32,38 @@ public class InfoBarService : IInfoBarService
         _infoBar.IsOpen = false;
     }
 
-    public void ShowSuccess(string message, int durationMs = 1500)
-        => Show(message, InfoBarSeverity.Success, durationMs);
+    public Task ShowSuccessAsync(string message, int durationMs = 1500)
+        => ShowAsync(message, InfoBarSeverity.Success, durationMs);
 
-    public void ShowError(string message, int durationMs = 1500)
-        => Show(message, InfoBarSeverity.Error, durationMs);
+    public Task ShowErrorAsync(string message, int durationMs = 1500)
+        => ShowAsync(message, InfoBarSeverity.Error, durationMs);
 
-    public void ShowWarning(string message, int durationMs = 1500)
-        => Show(message, InfoBarSeverity.Warning, durationMs);
+    public Task ShowWarningAsync(string message, int durationMs = 1500)
+        => ShowAsync(message, InfoBarSeverity.Warning, durationMs);
 
-    public void ShowInfo(string message, int durationMs = 1500)
-        => Show(message, InfoBarSeverity.Informational, durationMs);
+    public Task ShowInfoAsync(string message, int durationMs = 1500)
+        => ShowAsync(message, InfoBarSeverity.Informational, durationMs);
 
-    private void Show(string message, InfoBarSeverity severity, int durationMs)
+    public async Task CloseAsync()
+    {
+        if (_infoBar is null || !_infoBar.IsOpen)
+            return;
+
+        _currentCts?.Cancel();
+        _currentCts?.Dispose();
+        _currentCts = null;
+
+        await App.MainWindow.DispatcherQueue.EnqueueAsync(() =>
+        {
+            _infoBar.IsOpen = false;
+            _infoBar.Opacity = 1;
+        });
+    }
+
+    private async Task ShowAsync(
+            string message,
+            InfoBarSeverity severity,
+            int durationMs)
     {
         if (_infoBar is null)
             throw new InvalidOperationException("InfoBar not initialized.");
@@ -54,44 +73,44 @@ public class InfoBarService : IInfoBarService
         _currentCts = new CancellationTokenSource();
         var token = _currentCts.Token;
 
-        _infoBar.Message = message;
-        _infoBar.Severity = severity;
-        _infoBar.IsOpen = true;
+        await App.MainWindow.DispatcherQueue.EnqueueAsync(() =>
+        {
+            _infoBar.Message = message;
+            _infoBar.Severity = severity;
+            _infoBar.Opacity = 1;
+            _infoBar.IsOpen = true;
+        });
 
-        CloseAfterDelayAsync(token, durationMs);
-    }
+        if (durationMs <= 0)
+            return;
 
-    private async void CloseAfterDelayAsync(CancellationToken token, int durationMs)
-    {
         try
         {
             await Task.Delay(durationMs, token);
+            await FadeOutAsync(_infoBar, 200, token);
+
+            if (!token.IsCancellationRequested)
+            {
+                await App.MainWindow.DispatcherQueue.EnqueueAsync(() =>
+                {
+                    _infoBar.IsOpen = false;
+                    _infoBar.Opacity = 1;
+                });
+            }
         }
         catch (TaskCanceledException)
         {
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"InfoBar error: {ex}");
-        }
-        finally
-        {
-            App.MainWindow.DispatcherQueue.TryEnqueue(async () =>
-            {
-                await FadeOutAsync(_infoBar!, 200, token);
-
-                if (!token.IsCancellationRequested)
-                    _infoBar!.IsOpen = false;
-
-                _infoBar!.Opacity = 1;
-            });
+            // ignore
         }
     }
 
-    private async Task FadeOutAsync(InfoBar infoBar, int durationMs, CancellationToken token)
+    private static async Task FadeOutAsync(
+        InfoBar infoBar,
+        int durationMs,
+        CancellationToken token)
     {
-        const double frame = 16.67; // ~60fps
-        int steps = durationMs / (int)frame;
+        const double frameMs = 16.67; // ~60fps
+        int steps = Math.Max(1, durationMs / (int)frameMs);
 
         for (int i = 0; i < steps; i++)
         {
@@ -101,7 +120,7 @@ public class InfoBarService : IInfoBarService
             double progress = (double)i / steps;
             infoBar.Opacity = 1.0 - progress;
 
-            await Task.Delay((int)frame);
+            await Task.Delay((int)frameMs, token);
         }
 
         infoBar.Opacity = 0;

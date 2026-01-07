@@ -7,6 +7,7 @@ using Vidora.Core.Contracts.Results;
 using Vidora.Core.Contracts.Services;
 using Vidora.Core.Entities;
 using Vidora.Core.Interfaces.Api;
+using Vidora.Infrastructure.Api.Clients;
 using Vidora.Infrastructure.Api.Dtos.Responses;
 using Vidora.Infrastructure.Api.Dtos.Responses.Datas;
 using Vidora.Infrastructure.Api.Extensions;
@@ -17,35 +18,23 @@ public class OrderApiService : IOrderApiService
 {
     private readonly ApiClient _apiClient;
     private readonly IMapper _mapper;
-    private readonly ISessionStateService _sessionService;
 
-    public OrderApiService(ApiClient apiClient, IMapper mapper, ISessionStateService sessionService)
+    public OrderApiService(ApiClient apiClient, IMapper mapper)
     {
         _apiClient = apiClient;
         _mapper = mapper;
-        _sessionService = sessionService;
     }
 
     public async Task<Result<CreateOrderResult>> CreateOrderAsync(int planId)
     {
-        var tokenObject = _sessionService.AccessToken;
-        var accessToken = tokenObject?.Token;
-
-        if (string.IsNullOrWhiteSpace(accessToken))
-        {
-            return Result.Failure<CreateOrderResult>("Access token not found. Please login again.");
-        }
-        
         var url = "api/orders";
         var body = new { planId };
 
 
         Debug.WriteLine(planId);
-        Debug.WriteLine(accessToken);
-        var httpRes = await _apiClient.PostAsync(url, body, token: accessToken);
+        var httpRes = await _apiClient.PostAsync(url, body);
 
         
-
         var apiRes = await httpRes.ReadAsync<OrderData>();
 
         if (apiRes is not SuccessResponse<OrderData> success)
@@ -65,17 +54,9 @@ public class OrderApiService : IOrderApiService
 
     public async Task<Result<AvailablePromosResult>> GetAvailablePromosAsync()
     {
-        var tokenObject = _sessionService.AccessToken;
-        var accessToken = tokenObject?.Token;
-
-        if (string.IsNullOrWhiteSpace(accessToken))
-        {
-            return Result.Failure<AvailablePromosResult>("Access token not found. Please login again.");
-        }
-
         var url = "api/promos/available";
 
-        var httpRes = await _apiClient.GetAsync(url, token: accessToken);
+        var httpRes = await _apiClient.GetAsync(url);
 
         var apiRes = await httpRes.ReadListAsync<PromoData>();
 
@@ -96,19 +77,11 @@ public class OrderApiService : IOrderApiService
 
     public async Task<Result<ApplyDiscountResult>> ApplyDiscountAsync(int orderId, int discountId)
     {
-        var tokenObject = _sessionService.AccessToken;
-        var accessToken = tokenObject?.Token;
-
-        if (string.IsNullOrWhiteSpace(accessToken))
-        {
-            return Result.Failure<ApplyDiscountResult>("Access token not found. Please login again.");
-        }
-
         var url = "api/orders/apply-discount";
         var body = new { orderId , discountId };
 
 
-        var httpRes = await _apiClient.PutAsync(url, body, token: accessToken);
+        var httpRes = await _apiClient.PutAsync(url, body);
 
         var apiRes = await httpRes.ReadAsync<OrderData>();
 
@@ -129,18 +102,10 @@ public class OrderApiService : IOrderApiService
 
     public async Task<Result<ConfirmPaymentResult>> ConfirmPaymentAsync(int orderId)
     {
-        var tokenObject = _sessionService.AccessToken;
-        var accessToken = tokenObject?.Token;
-
-        if (string.IsNullOrWhiteSpace(accessToken))
-        {
-            return Result.Failure<ConfirmPaymentResult>("Access token not found. Please login again.");
-        }
-
         var url = $"api/orders/{orderId}/status";
         var body = new { status = "COMPLETED" };
 
-        var httpRes = await _apiClient.PutAsync(url, body, token: accessToken);
+        var httpRes = await _apiClient.PutAsync(url, body);
 
         if (!httpRes.IsSuccessStatusCode)
         {

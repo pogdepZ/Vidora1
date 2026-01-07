@@ -2,6 +2,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using System;
+using System.Threading.Tasks;
 using Vidora.Core.Contracts.Services;
 using Vidora.Core.Events;
 using Vidora.Presentation.Gui.Contracts.Services;
@@ -11,60 +13,36 @@ namespace Vidora.Presentation.Gui.ViewModels;
 
 public partial class ShellViewModel : ObservableRecipient
 {
+    [ObservableProperty]
     private Role? _currentUserRole;
-    public Role? CurrentUserRole
-    {
-        get => _currentUserRole;
-        set => SetProperty(ref _currentUserRole, value);
-    }
 
+    [ObservableProperty]
     private object? _selectedItem;
-    public object? SelectedItem
-    {
-        get => _selectedItem;
-        set => SetProperty(ref _selectedItem, value);
-    }
 
+    [ObservableProperty]
     private bool _isBackEnabled;
-    public bool IsBackEnabled
-    {
-        get => _isBackEnabled;
-        set => SetProperty(ref _isBackEnabled, value);
-    }
 
+    [ObservableProperty]
     private bool _isBackButtonVisible = false;
-    public bool IsBackButtonVisible
-    {
-        get => _isBackButtonVisible;
-        set => SetProperty(ref _isBackButtonVisible, value);
-    }
 
+    [ObservableProperty]
     private bool _isPaneToggleButtonVisible = false;
-    public bool IsPaneToggleButtonVisible
-    {
-        get => _isPaneToggleButtonVisible;
-        set => SetProperty(ref _isPaneToggleButtonVisible, value);
-    }
 
+    [ObservableProperty]
     private NavigationViewPaneDisplayMode _paneDisplayMode = NavigationViewPaneDisplayMode.LeftMinimal;
-    public NavigationViewPaneDisplayMode PaneDisplayMode
-    {
-        get => _paneDisplayMode;
-        set => SetProperty(ref _paneDisplayMode, value);
-    }
 
     public IInfoBarService InfoBarService { get; }
+    public INavigationService NavigationService { get; }
     public INavigationViewService NavigationViewService { get; }
 
     private readonly IPageService _pageService;
-    private readonly INavigationService _navigationService;
     private readonly ISessionStateService _sessionState;
     private readonly IMapper _mapper;
     public ShellViewModel(
         IInfoBarService infoBarService,
+        INavigationService navigationService,
         INavigationViewService navigationViewService,
         IPageService pageService,
-        INavigationService navigationService,
         ISessionStateService sessionService,
         IMapper mapper
         )
@@ -74,8 +52,8 @@ public partial class ShellViewModel : ObservableRecipient
 
         _pageService = pageService;
 
-        _navigationService = navigationService;
-        _navigationService.Navigated += OnNavigated;
+        NavigationService = navigationService;
+        NavigationService.Navigated += OnNavigated;
 
         _sessionState = sessionService;
         _sessionState.SessionChanged += OnSessionChanged;
@@ -94,31 +72,56 @@ public partial class ShellViewModel : ObservableRecipient
                 IsBackButtonVisible = true;
                 IsPaneToggleButtonVisible = true;
                 PaneDisplayMode = NavigationViewPaneDisplayMode.LeftCompact;
-                if (_currentUserRole == Role.User)
+                if (CurrentUserRole == Role.User)
                 {
-                    await _navigationService.NavigateToAsync<HomeViewModel>(clearNavigation: true);
+                    await NavigationService.NavigateToAsync<HomeViewModel>(clearNavigation: true);
                 }
                 else
                 {
-                    await _navigationService.NavigateToAsync<AdminDashboardViewModel>(clearNavigation: true);
+                    await NavigationService.NavigateToAsync<AdminDashboardViewModel>(clearNavigation: true);
                 }
                 break;
             case SessionChangeReason.ManualLogout:
+                IsBackButtonVisible = false;
+                IsPaneToggleButtonVisible = false;
+                PaneDisplayMode = NavigationViewPaneDisplayMode.LeftMinimal;
+
+                await NavigationService.NavigateToAsync<LoginViewModel>(true);
+                break;
+
             case SessionChangeReason.ForcedLogout:
+                IsBackButtonVisible = false;
+                IsPaneToggleButtonVisible = false;
+                PaneDisplayMode = NavigationViewPaneDisplayMode.LeftMinimal;
+
+                await ShowForcedLogoutDialogAsync(
+                    title: "Logged out",
+                    message: "You have been logged out for security reasons."
+                );
+
+                await NavigationService.NavigateToAsync<LoginViewModel>(true);
+                break;
+
             case SessionChangeReason.SessionExpired:
                 IsBackButtonVisible = false;
                 IsPaneToggleButtonVisible = false;
                 PaneDisplayMode = NavigationViewPaneDisplayMode.LeftMinimal;
-                await _navigationService.NavigateToAsync<LoginViewModel>(clearNavigation: true);
+
+                await ShowForcedLogoutDialogAsync(
+                    title: "Session expired",
+                    message: "Your session has expired. Please log in again."
+                );
+
+                await NavigationService.NavigateToAsync<LoginViewModel>(true);
                 break;
         }
     }
 
-    private void OnNavigated(object sender, NavigationEventArgs e)
+    private async void OnNavigated(object sender, NavigationEventArgs e)
     {
-        InfoBarService.CloseIfOpen();
+        await InfoBarService.CloseAsync();
 
-        IsBackEnabled = _navigationService.CanGoBack;
+        IsBackEnabled = NavigationService.CanGoBack;
 
         if (e.SourcePageType == _pageService.GetPageType<SettingsViewModel>())
         {
@@ -155,5 +158,18 @@ public partial class ShellViewModel : ObservableRecipient
                 PaneDisplayMode = NavigationViewPaneDisplayMode.LeftCompact;
             }
         }
+    }
+
+    private async Task ShowForcedLogoutDialogAsync(string title, string message)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = title,
+            Content = message,
+            CloseButtonText = "OK",
+            XamlRoot = App.MainWindow.Content.XamlRoot
+        };
+
+        await dialog.ShowAsync();
     }
 }
