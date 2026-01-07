@@ -1,4 +1,4 @@
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using System;
 using System.Threading.Tasks;
 using Vidora.Core.Contracts.Results;
@@ -21,14 +21,14 @@ public class RemoveFromWatchlistUseCase
         {
             if (movieId <= 0)
             {
-                return Result.Failure<ToggleWatchlistResult>("ID phim kh�ng h?p l?");
+                return Result.Failure<ToggleWatchlistResult>("ID phim không hợp lệ");
             }
 
             return await _watchlistApiService.RemoveFromWatchlistAsync(movieId);
         }
         catch (Exception ex)
         {
-            return Result.Failure<ToggleWatchlistResult>($"L?i x�a kh?i danh s�ch y�u th�ch: {ex.Message}");
+            return Result.Failure<ToggleWatchlistResult>($"Lỗi xóa khỏi danh sách yêu thích: {ex.Message}");
         }
     }
 }

@@ -1,4 +1,4 @@
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using System;
 using System.Threading.Tasks;
 using Vidora.Core.Contracts.Results;
@@ -23,7 +23,7 @@ public class GetWatchlistUseCase
         }
         catch (Exception ex)
         {
-            return Result.Failure<WatchlistResult>($"L?i t?i danh s�ch y�u th�ch: {ex.Message}");
+            return Result.Failure<WatchlistResult>($"Lỗi tải danh sách yêu thích: {ex.Message}");
         }
     }
 }

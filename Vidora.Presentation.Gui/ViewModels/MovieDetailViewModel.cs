@@ -133,10 +133,7 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
             {
                 Movie = _mapper.Map<CoreMovie, GuiMovie>(result.Value.Movie);
 
-                // ✅ Xóa 2 dòng hardcode này khi muốn dùng link thật từ API
-                Movie.VideoUrl = "https://player.cloudinary.com/embed/?cloud_name=dv7hgu8yw&public_id=phim1_jgzhpj&profile=cld-default.mp4";    
-                Movie.TrailerUrl = "https://res.cloudinary.com/df8meqyyc/video/upload/v1764442497/strangerthings5_pi1yuk.mp4";
-
+             
                 GenresDisplay = Movie.Genres.Count > 0
                     ? string.Join(" • ", Movie.Genres)
                     : "Chưa cập nhật";
@@ -146,7 +143,7 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
                     : "Không có thông tin diễn viên";
 
                 HasTrailer = !string.IsNullOrEmpty(Movie.TrailerUrl);
-                HasMovie = !string.IsNullOrEmpty(Movie.VideoUrl);
+                HasMovie = !string.IsNullOrEmpty(Movie.MovieUrl);
 
                 // TODO: Load watchlist status from API
                 // IsInWatchlist = result.Value.IsInWatchlist;
@@ -179,7 +176,7 @@ public partial class MovieDetailViewModel : ObservableRecipient, INavigationAwar
     {
         if (Movie?.VideoUrl is not null)
         {
-            await _navigationService.NavigateToAsync<VideoPlayerViewModel>(new { Url = Movie.VideoUrl, Title = Movie.Title });
+            await _navigationService.NavigateToAsync<VideoPlayerViewModel>(new { Url = Movie.MovieUrl});
         }
         else
         {

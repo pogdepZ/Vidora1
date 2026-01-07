@@ -12,7 +12,7 @@
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <ScrollViewer VerticalScrollMode="Enabled" VerticalScrollBarVisibility="Hidden">
-            <StackPanel Padding="24" Spacing="24" MaxWidth="600" HorizontalAlignment="Center">
+            <StackPanel Padding="24" Spacing="24" MinWidth="800" HorizontalAlignment="Center">
 
                 <!-- Header -->
                 <StackPanel Spacing="8">

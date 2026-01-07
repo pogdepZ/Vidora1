@@ -190,12 +190,7 @@
                                                 Stretch="UniformToFill"/>
 
                                             <!-- Fallback -->
-                                            <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
-                                                <FontIcon
-                                                    Glyph="&#xE8B2;"
-                                                    FontSize="36"
-                                                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
-                                            </Border>
+
 
                                             <!-- Rating Badge -->
                                             <Border

@@ -6,5 +6,5 @@ public class SearchMovieCommand
     public int? GenreId { get; set; }
     public int? ReleaseYear { get; set; }
     public int Page { get; set; } = 1;
-    public int Limit { get; set; } = 10;
+    public int Limit { get; set; } = 8;
 }

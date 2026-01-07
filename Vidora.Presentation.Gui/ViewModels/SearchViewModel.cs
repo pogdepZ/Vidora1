@@ -148,7 +148,7 @@ public partial class SearchViewModel : ObservableRecipient, INavigationAware
                 GenreId = SelectedGenre?.GenreId,
                 ReleaseYear = SelectedYear,
                 Page = CurrentPage,
-                Limit = 20
+                Limit = 8
             };
 
             var result = await _searchMovieUseCase.ExecuteAsync(command);

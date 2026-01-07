@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CSharpFunctionalExtensions;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Web;
 using Vidora.Core.Contracts.Commands;
@@ -52,6 +53,8 @@ public class MovieApiService : IMovieApiService
         
         queryParams["page"] = command.Page.ToString();
         queryParams["limit"] = command.Limit.ToString();
+
+      
 
         var url = $"api/movies?{queryParams}";
 

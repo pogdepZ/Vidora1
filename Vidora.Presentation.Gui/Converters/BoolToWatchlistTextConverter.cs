@@ -1,4 +1,4 @@
-using Microsoft.UI.Xaml.Data;
+Ôªøusing Microsoft.UI.Xaml.Data;
 using System;
 
 namespace Vidora.Presentation.Gui.Converters;
@@ -9,9 +9,9 @@ public class BoolToWatchlistTextConverter : IValueConverter
     {
         if (value is bool isInWatchlist && isInWatchlist)
         {
-            return "–? thÌch";
+            return "ƒê√£ th√≠ch";
         }
-        return "YÍu thÌch";
+        return "Y√™u th√≠ch";
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)

@@ -1,4 +1,4 @@
-using CSharpFunctionalExtensions;
+ï»¿using CSharpFunctionalExtensions;
 using System;
 using System.Threading.Tasks;
 using Vidora.Core.Contracts.Results;
@@ -21,14 +21,14 @@ public class AddToWatchlistUseCase
         {
             if (movieId <= 0)
             {
-                return Result.Failure<ToggleWatchlistResult>("ID phim không h?p l?");
+                return Result.Failure<ToggleWatchlistResult>("ID phim khÃ´ng há»£p lá»‡");
             }
 
             return await _watchlistApiService.AddToWatchlistAsync(movieId);
         }
         catch (Exception ex)
         {
-            return Result.Failure<ToggleWatchlistResult>($"L?i thêm vào danh sách yêu thích: {ex.Message}");
+            return Result.Failure<ToggleWatchlistResult>($"Lá»—i thÃªm vÃ o danh sÃ¡ch yÃªu thÃ­ch: {ex.Message}");
         }
     }
 }
