@@ -24,9 +24,11 @@
                  HorizontalAlignment="Center"
                  Margin="0,10,0,0"
                  Canvas.ZIndex="999"
-                 IsOpen="False"
+                 IsOpen="{x:Bind ViewModel.IsInfoOpen, Mode=OneWay}"
                  IsClosable="True"
-                 Severity="Success"
+                 Severity="{x:Bind ViewModel.InfoSeverity, Mode=OneWay}"
+                 Title="{x:Bind ViewModel.InfoTitle, Mode=OneWay}"
+                 Message="{x:Bind ViewModel.InfoMessage, Mode=OneWay}"
                  Width="500"/>
 
         <!-- ===== HEADER ===== -->
@@ -44,18 +46,14 @@
 
             <!-- Buttons: Import + Add new movie -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12">
-                <!-- Import Excel Button (demo) -->
-                <Button Click="OnImportExcelButtonClick"
-                        Padding="20,10">
+                <Button Command="{x:Bind ViewModel.ImportExcelCommand}" Padding="20,10">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE8B5;" FontSize="14"/>
                         <TextBlock Text="Import Excel" FontWeight="SemiBold"/>
                     </StackPanel>
                 </Button>
 
-                <!-- Add new movie Button (demo) -->
-                <Button Click="OnAddMovieButtonClick"
-                        Padding="20,10">
+                <Button Command="{x:Bind ViewModel.AddMovieCommand}" Padding="20,10">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon Glyph="&#xE710;" FontSize="14"/>
                         <TextBlock Text="Add New Movie" FontWeight="SemiBold"/>
@@ -73,7 +71,7 @@
                 CornerRadius="12"
                 BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
                 BorderThickness="1"
-                Visibility="Collapsed">
+                Visibility="{x:Bind ViewModel.IsImportSectionVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
             <StackPanel Spacing="12">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -84,7 +82,7 @@
                     <StackPanel>
                         <TextBlock Text="Importing Movies from Excel" FontWeight="SemiBold" FontSize="16"/>
                         <TextBlock x:Name="ImportStatusText"
-                                   Text="..."
+                                   Text="{x:Bind ViewModel.ImportStatusText, Mode=OneWay}"
                                    Foreground="Gray"
                                    FontSize="12"
                                    Margin="0,4,0,0"/>
@@ -97,7 +95,7 @@
                         <StackPanel>
                             <TextBlock Text="Success" Foreground="Gray" FontSize="11" HorizontalAlignment="Center"/>
                             <TextBlock x:Name="ImportSuccessText"
-                                       Text="0"
+                                       Text="{x:Bind ViewModel.ImportSuccessCount, Mode=OneWay}"
                                        Foreground="#46D369"
                                        FontWeight="Bold"
                                        FontSize="18"
@@ -106,7 +104,7 @@
                         <StackPanel>
                             <TextBlock Text="Failed" Foreground="Gray" FontSize="11" HorizontalAlignment="Center"/>
                             <TextBlock x:Name="ImportFailedText"
-                                       Text="0"
+                                       Text="{x:Bind ViewModel.ImportFailedCount, Mode=OneWay}"
                                        Foreground="#D81F26"
                                        FontWeight="Bold"
                                        FontSize="18"
@@ -115,16 +113,16 @@
                         <StackPanel>
                             <TextBlock Text="Total" Foreground="Gray" FontSize="11" HorizontalAlignment="Center"/>
                             <TextBlock FontWeight="Bold" FontSize="18" HorizontalAlignment="Center">
-                                <Run x:Name="ImportCurrentRun" Text="0"/>
+                                <Run x:Name="ImportCurrentRun" Text="{x:Bind ViewModel.ImportCurrentCount, Mode=OneWay}"/>
                                 <Run Text="/"/>
-                                <Run x:Name="ImportTotalRun" Text="0"/>
+                                <Run x:Name="ImportTotalRun" Text="{x:Bind ViewModel.ImportTotalCount, Mode=OneWay}"/>
                             </TextBlock>
                         </StackPanel>
                     </StackPanel>
                 </Grid>
 
                 <ProgressBar x:Name="ImportProgressBar"
-                             Value="0"
+                             Value="{x:Bind ViewModel.ImportProgress, Mode=OneWay}"
                              Maximum="100"
                              Height="8"
                              CornerRadius="4"/>
@@ -148,50 +146,49 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Search by Title -->
                 <AutoSuggestBox x:Name="SearchBox"
                                 Grid.Column="0"
                                 PlaceholderText="Search by movie title..."
                                 QueryIcon="Find"
                                 MinWidth="280"
                                 VerticalAlignment="Center"
-                                QuerySubmitted="OnSearchQuerySubmitted"/>
+                                Text="{x:Bind ViewModel.SearchTitle, Mode=TwoWay}"
+                                QuerySubmitted="{x:Bind ViewModel.OnSearchQuerySubmitted}"/>
 
-                <!-- Genre Filter -->
                 <ComboBox x:Name="GenreCombo"
                           Grid.Column="1"
                           Margin="16,0,0,0"
                           MinWidth="180"
                           PlaceholderText="Genre"
                           VerticalAlignment="Center"
+                          ItemsSource="{x:Bind ViewModel.Genres, Mode=OneWay}"
+                          SelectedItem="{x:Bind ViewModel.SelectedGenre, Mode=TwoWay}"
                           DisplayMemberPath="Name"/>
 
-                <!-- Release Year Filter -->
                 <TextBox x:Name="ReleaseYearBox"
                          Grid.Column="2"
                          Margin="16,0,0,0"
                          Width="120"
                          PlaceholderText="Release Year"
                          VerticalAlignment="Center"
-                         InputScope="Number"/>
+                         InputScope="Number"
+                         Text="{x:Bind ViewModel.ReleaseYear, Mode=TwoWay}"/>
 
-                <!-- Search Button -->
                 <Button Grid.Column="3"
                         Margin="16,0,0,0"
                         VerticalAlignment="Center"
-                        Click="OnSearchClick">
+                        Command="{x:Bind ViewModel.SearchCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon Glyph="&#xE721;" FontSize="14"/>
                         <TextBlock Text="Search"/>
                     </StackPanel>
                 </Button>
 
-                <!-- Clear Filters Button -->
                 <Button Grid.Column="4"
                         Margin="8,0,0,0"
                         VerticalAlignment="Center"
                         ToolTipService.ToolTip="Clear Filters"
-                        Click="OnClearClick">
+                        Command="{x:Bind ViewModel.ClearFiltersCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon Glyph="&#xE894;" FontSize="14"/>
                         <TextBlock Text="Clear"/>
@@ -236,7 +233,8 @@
                 <ListView x:Name="MoviesList"
                           Grid.Row="1"
                           SelectionMode="None"
-                          Padding="0">
+                          Padding="0"
+                          ItemsSource="{x:Bind ViewModel.Movies, Mode=OneWay}">
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <Grid Padding="20,14">
@@ -247,7 +245,6 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
-                                <!-- MOVIE -->
                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="14">
                                     <Border Width="44" Height="64" CornerRadius="6">
                                         <Image Source="{Binding PosterUrl}" Stretch="UniformToFill"/>
@@ -263,38 +260,35 @@
                                     </StackPanel>
                                 </StackPanel>
 
-                                <!-- GENRE -->
                                 <TextBlock Grid.Column="1"
                                            Text="{Binding GenresText}"
                                            VerticalAlignment="Center"
                                            Foreground="Gray"
                                            HorizontalAlignment="Center"/>
 
-                                <!-- DIRECTOR (API list movies chưa trả -> để trống/tạm) -->
                                 <TextBlock Grid.Column="2"
                                            Text="{Binding DirectorName}"
                                            Foreground="Gray"
                                            VerticalAlignment="Center"
                                            HorizontalAlignment="Center"/>
 
-                                <!-- ACTION -->
                                 <StackPanel Grid.Column="3"
                                             Orientation="Horizontal"
                                             Spacing="10"
                                             VerticalAlignment="Center"
                                             HorizontalAlignment="Center">
-                                    <Button Click="OnViewEditClick"
+                                    <Button Command="{x:Bind ElementName=PageRoot, Path=ViewModel.ViewEditCommand}"
+                                            CommandParameter="{Binding MovieId}"
                                             Background="Transparent"
                                             BorderThickness="0"
-                                            ToolTipService.ToolTip="View Details / Edit"
-                                            Tag="{Binding MovieId}">
+                                            ToolTipService.ToolTip="View Details / Edit">
                                         <FontIcon Glyph="&#xE70F;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
                                     </Button>
-                                    <Button Click="OnDeleteClick"
+                                    <Button Command="{x:Bind ElementName=PageRoot, Path=ViewModel.DeleteCommand}"
+                                            CommandParameter="{Binding MovieId}"
                                             Background="Transparent"
                                             BorderThickness="0"
-                                            ToolTipService.ToolTip="Delete Movie"
-                                            Tag="{Binding MovieId}">
+                                            ToolTipService.ToolTip="Delete Movie">
                                         <FontIcon Glyph="&#xE74D;" Foreground="Red" />
                                     </Button>
                                 </StackPanel>
@@ -306,8 +300,8 @@
                 <!-- ===== LOADING ===== -->
                 <ProgressRing x:Name="LoadingRing"
                               Grid.Row="1"
-                              IsActive="False"
-                              Visibility="Collapsed"
+                              IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+                              Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                               HorizontalAlignment="Center"
                               VerticalAlignment="Center"/>
 
@@ -317,14 +311,14 @@
                             HorizontalAlignment="Right"
                             Spacing="12"
                             Padding="20">
-                    <Button x:Name="PrevBtn" Content="◀" Click="OnPrevClick"/>
+                    <Button x:Name="PrevBtn" Content="◀" Command="{x:Bind ViewModel.PrevCommand}" IsEnabled="{x:Bind ViewModel.CanPrev, Mode=OneWay}"/>
                     <TextBlock VerticalAlignment="Center">
                         <Run Text="Page "/>
-                        <Run x:Name="CurrentPageRun" Text="1" FontWeight="Bold"/>
+                        <Run x:Name="CurrentPageRun" Text="{x:Bind ViewModel.CurrentPage, Mode=OneWay}" FontWeight="Bold"/>
                         <Run Text=" / "/>
-                        <Run x:Name="TotalPagesRun" Text="1" FontWeight="Bold"/>
+                        <Run x:Name="TotalPagesRun" Text="{x:Bind ViewModel.TotalPages, Mode=OneWay}" FontWeight="Bold"/>
                     </TextBlock>
-                    <Button x:Name="NextBtn" Content="▶" Click="OnNextClick"/>
+                    <Button x:Name="NextBtn" Content="▶" Command="{x:Bind ViewModel.NextCommand}" IsEnabled="{x:Bind ViewModel.CanNext, Mode=OneWay}"/>
                 </StackPanel>
             </Grid>
         </Border>
