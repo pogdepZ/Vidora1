@@ -39,7 +39,7 @@ public partial class AdminDashboardViewModel : ObservableRecipient, INavigationA
     private ObservableCollection<UserDto> _recentSignups = [];
 
     [ObservableProperty]
-    private ObservableCollection<MovieDto> _mostWatchedMovies = [];
+    private ObservableCollection<MovieDto> _highestRatedMovies = [];
 
     public AdminDashboardViewModel(ISessionStateService sessionStateService)
     {
@@ -87,7 +87,7 @@ public partial class AdminDashboardViewModel : ObservableRecipient, INavigationA
             RevenueText = "0";
 
             RecentSignups = new ObservableCollection<UserDto>(dto.NewUsers ?? new List<UserDto>());
-            MostWatchedMovies = new ObservableCollection<MovieDto>(dto.MostWatchedMovies ?? new List<MovieDto>());
+            HighestRatedMovies = new ObservableCollection<MovieDto>(dto.HighestRatedMovies ?? new List<MovieDto>());
         }
         catch (HttpRequestException ex)
         {
