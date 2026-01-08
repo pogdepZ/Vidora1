@@ -56,7 +56,17 @@ public class LoginUseCase
         var loginResult = await _authApiService.LoginAsync(apiRequest);
 
         // Save Sesion
-        var session = _mapper.Map<Session>(loginResult);
+        var mapped = _mapper.Map<Session>(loginResult);
+
+        var session = new Session
+        {
+            CurrentUser = mapped.CurrentUser,
+            AccessToken = new AuthToken(
+                mapped.AccessToken.Token,
+                DateTime.UtcNow.AddDays(100)
+            )
+        };
+
         _sessionState.SetSession(session, Events.SessionChangeReason.ManualLogin);
 
         // Return

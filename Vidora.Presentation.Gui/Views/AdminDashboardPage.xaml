@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="Vidora.Presentation.Gui.Views.AdminDashboardPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -8,11 +7,328 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid>
-        <ScrollViewer VerticalScrollMode="Enabled" VerticalScrollBarVisibility="Hidden">
-            <Grid>
-                <TextBlock Text="Dashboard" Style="{StaticResource PageTitleTextBlockStyle}" FontSize="50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            </Grid>
+    <Page.Resources>
+        <!-- COLOR PALETTE -->
+        <SolidColorBrush x:Key="BgCardBrush" Color="#121212"/>
+        <SolidColorBrush x:Key="VidoraRedBrush" Color="#D81F26"/>
+        <SolidColorBrush x:Key="SuccessGreenBrush" Color="#46D369"/>
+        <SolidColorBrush x:Key="TextGrayBrush" Color="#A1A1A1"/>
+
+        <!-- STYLES -->
+        <Style x:Key="StatCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="BorderBrush" Value="{ThemeResource TextFillColorPrimaryBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="CardTitleStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <Style x:Key="CardValueStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}"/>
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,5,0,5"/>
+        </Style>
+    </Page.Resources>
+
+    <Grid Background="Transparent" Margin="0,20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <ScrollViewer x:Name="MainScrollViewer"
+                      Grid.Column="0"
+                      VerticalScrollBarVisibility="Auto"
+                      Padding="30">
+            <StackPanel Spacing="25">
+
+                <!-- HEADER -->
+                <Grid>
+                    <StackPanel>
+                        <TextBlock Text="Dashboard"
+                                   FontSize="28"
+                                   FontWeight="Bold"
+                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+                        <TextBlock Text="Welcome back! Here's your Vidora overview"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Margin="0,5,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Spacing="10">
+                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                CornerRadius="4"
+                                Padding="12,6">
+                            <TextBlock x:Name="CurrentDateText"
+                                       Text="-"
+                                       Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                       FontSize="12"/>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+
+                <!-- STATS CARDS -->
+                <Grid ColumnSpacing="15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Card 1 -->
+                    <Border Grid.Column="0" Style="{StaticResource StatCardStyle}">
+                        <Grid>
+                            <StackPanel>
+                                <TextBlock Text="Total Movies" Style="{StaticResource CardTitleStyle}"/>
+                                <TextBlock x:Name="TotalMoviesText" Text="-" Style="{StaticResource CardValueStyle}"/>
+                                <TextBlock Text="(from API)" Foreground="{StaticResource TextGrayBrush}" FontSize="11"/>
+                            </StackPanel>
+                            <Border HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    Width="40" Height="40"
+                                    Background="#260F0F"
+                                    CornerRadius="6">
+                                <FontIcon Glyph="&#xE8B2;"
+                                          Foreground="{StaticResource VidoraRedBrush}"
+                                          FontSize="16"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Card 2 -->
+                    <Border Grid.Column="1" Style="{StaticResource StatCardStyle}">
+                        <Grid>
+                            <StackPanel>
+                                <TextBlock Text="Users" Style="{StaticResource CardTitleStyle}"/>
+                                <TextBlock x:Name="TotalUsersText" Text="-" Style="{StaticResource CardValueStyle}"/>
+                                <TextBlock Text="Total accounts" Foreground="{StaticResource TextGrayBrush}" FontSize="11"/>
+                            </StackPanel>
+                            <Border HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    Width="40" Height="40"
+                                    Background="#260F0F"
+                                    CornerRadius="6">
+                                <FontIcon Glyph="&#xE77B;"
+                                          Foreground="{StaticResource VidoraRedBrush}"
+                                          FontSize="16"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Card 3 -->
+                    <Border Grid.Column="2" Style="{StaticResource StatCardStyle}">
+                        <Grid>
+                            <StackPanel>
+                                <TextBlock Text="Today's Views" Style="{StaticResource CardTitleStyle}"/>
+                                <TextBlock x:Name="TotalViewsText" Text="-" Style="{StaticResource CardValueStyle}"/>
+                                <TextBlock Text="Last 24 hours" Foreground="{StaticResource TextGrayBrush}" FontSize="11"/>
+                            </StackPanel>
+                            <Border HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    Width="40" Height="40"
+                                    Background="#260F0F"
+                                    CornerRadius="6">
+                                <FontIcon Glyph="&#xE7B3;"
+                                          Foreground="{StaticResource VidoraRedBrush}"
+                                          FontSize="16"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Card 4 -->
+                    <Border Grid.Column="3" Style="{StaticResource StatCardStyle}">
+                        <Grid>
+                            <StackPanel>
+                                <TextBlock Text="Monthly Revenue" Style="{StaticResource CardTitleStyle}"/>
+                                <TextBlock x:Name="RevenueText" Text="0" Style="{StaticResource CardValueStyle}"/>
+                                <TextBlock Text="API chưa trả monthly revenue" Foreground="{StaticResource TextGrayBrush}" FontSize="11"/>
+                            </StackPanel>
+                            <Border HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    Width="40" Height="40"
+                                    Background="#260F0F"
+                                    CornerRadius="6">
+                                <FontIcon Glyph="&#xE4AE;"
+                                          Foreground="{StaticResource VidoraRedBrush}"
+                                          FontSize="16"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- MIDDLE + RIGHT -->
+                <Grid ColumnSpacing="20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Placeholder chart -->
+                    <Border Grid.Column="0"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            CornerRadius="8"
+                            Padding="20"
+                            BorderBrush="{ThemeResource TextFillColorPrimaryBrush}"
+                            BorderThickness="1">
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Monthly Revenue (placeholder)"
+                                       FontWeight="Bold"
+                                       Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+                            <TextBlock Text="API có revenueByDayinCurrentMonth nhưng labels/data đang rỗng"
+                                       Foreground="{StaticResource TextGrayBrush}"
+                                       FontSize="12"/>
+                            <Rectangle Height="200" Fill="#1A1A1A" RadiusX="8" RadiusY="8"/>
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Grid.Column="1" Spacing="20">
+                        <!-- New signups -->
+                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                CornerRadius="8"
+                                Padding="20"
+                                BorderBrush="{ThemeResource TextFillColorPrimaryBrush}"
+                                BorderThickness="1">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <FontIcon Glyph="&#xE77B;" Foreground="{StaticResource SuccessGreenBrush}"/>
+                                    <TextBlock Text="New Signups"
+                                               Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                               FontWeight="SemiBold"/>
+                                </StackPanel>
+                                <TextBlock Text="Today" Foreground="{StaticResource TextGrayBrush}" FontSize="11" Margin="26,-4,0,0"/>
+                                <TextBlock x:Name="NewSignupsText"
+                                           Text="-"
+                                           FontSize="32"
+                                           FontWeight="Bold"
+                                           Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                           Margin="0,15,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Recent signups -->
+                        <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                CornerRadius="8"
+                                Padding="20"
+                                BorderBrush="{ThemeResource TextFillColorPrimaryBrush}"
+                                BorderThickness="1">
+                            <StackPanel>
+                                <TextBlock Text="Recent Signups"
+                                           FontWeight="Bold"
+                                           Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+                                <TextBlock Text="3 Latest Signups"
+                                           Foreground="{StaticResource TextGrayBrush}"
+                                           FontSize="12"
+                                           Margin="0,4,0,20"/>
+
+                                <ItemsControl x:Name="RecentSignupsItems">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <Grid Margin="0,10">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <PersonPicture DisplayName="{Binding FullName}"
+                                                                   ProfilePicture="{Binding Avatar}"
+                                                                   Width="32"
+                                                                   Margin="0,0,10,0"/>
+
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding FullName}"
+                                                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                                                   FontSize="13"
+                                                                   FontWeight="SemiBold"/>
+                                                        <TextBlock Text="{Binding Email}"
+                                                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                                                   FontSize="11"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                                <Rectangle Height="1" Fill="#222" Margin="0,5"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+
+                <!-- BOTTOM LIST -->
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        CornerRadius="8"
+                        Padding="20"
+                        BorderBrush="{ThemeResource TextFillColorPrimaryBrush}"
+                        BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Top 5 Most Watched Movies"
+                                   FontWeight="Bold"
+                                   Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+                        <TextBlock Text="Ranked by total views"
+                                   Foreground="{StaticResource TextGrayBrush}"
+                                   FontSize="12"
+                                   Margin="0,4,0,20"/>
+
+                        <ItemsControl x:Name="MostWatchedMoviesItems">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <Grid Margin="0,10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border Background="{StaticResource VidoraRedBrush}"
+                                                    Width="24"
+                                                    Height="24"
+                                                    CornerRadius="12"
+                                                    VerticalAlignment="Center">
+                                                <TextBlock Text="▶"
+                                                           Foreground="White"
+                                                           FontSize="10"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Border>
+
+                                            <StackPanel Grid.Column="1" Margin="10,0">
+                                                <TextBlock Text="{Binding Title}"
+                                                           Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                                           FontWeight="SemiBold"/>
+                                                <Border Background="#333" CornerRadius="2" Padding="4,0" Margin="0,4,0,0">
+                                                    <TextBlock Text="Movie" Foreground="#CCC" FontSize="10"/>
+                                                </Border>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="2"
+                                                        HorizontalAlignment="Right"
+                                                        VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding AvgRating}"
+                                                           Foreground="#FFD700"
+                                                           FontSize="12"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        <Rectangle Height="1" Fill="#222" Margin="0,5"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
         </ScrollViewer>
     </Grid>
 </Page>
