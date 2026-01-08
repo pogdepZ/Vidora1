@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Vidora.Presentation.Gui.Views.CheckoutPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Vidora.Presentation.Gui.Views"
+    xmlns:models="using:Vidora.Presentation.Gui.Models"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    x:Name="CheckoutPageRoot">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <ScrollViewer VerticalScrollMode="Enabled" VerticalScrollBarVisibility="Hidden">
+            <StackPanel Padding="24" Spacing="24" MinWidth="800" HorizontalAlignment="Center">
+
+                <!-- Header -->
+                <StackPanel Spacing="8">
+                    
+                    <TextBlock
+                        Text="Thanh toán"
+                        FontSize="28"
+                        FontWeight="Bold"/>
+                </StackPanel>
+
+                <!-- Loading -->
+                <StackPanel
+                    HorizontalAlignment="Center"
+                    Spacing="12"
+                    Visibility="{x:Bind ViewModel.IsCreatingOrder, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <ProgressRing IsActive="True" Width="48" Height="48"/>
+                    <TextBlock Text="Đang tạo đơn hàng..." Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                </StackPanel>
+
+                <!-- Order Content -->
+                <StackPanel
+                    Spacing="20"
+                    Visibility="{x:Bind ViewModel.IsCreatingOrder, Mode=OneWay, Converter={StaticResource BoolNegationToVisibilityConverter}}">
+
+                    <!-- Plan Info Card -->
+                    <Border
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="20"
+                        Visibility="{x:Bind ViewModel.ShowPaymentScreen, Mode=OneWay, Converter={StaticResource BoolNegationToVisibilityConverter}}">
+                        <StackPanel Spacing="16">
+                            <TextBlock Text="Thông tin gói" FontSize="16" FontWeight="SemiBold"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock
+                                    Grid.Row="0" Grid.Column="0"
+                                    Text="{x:Bind ViewModel.SelectedPlan.Name, Mode=OneWay}"
+                                    FontSize="18"
+                                    FontWeight="Bold"/>
+                                <TextBlock
+                                    Grid.Row="0" Grid.Column="1"
+                                    FontSize="18"
+                                    FontWeight="Bold"
+                                    Foreground="#E50914">
+                                    <Run Text="{x:Bind ViewModel.SelectedPlan.Price, Mode=OneWay}"/>
+                                    <Run Text="₫"/>
+                                </TextBlock>
+
+                                <TextBlock
+                                    Grid.Row="1" Grid.Column="0"
+                                    Text="{x:Bind ViewModel.SelectedPlan.Description, Mode=OneWay}"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    TextWrapping="Wrap"/>
+                                <TextBlock
+                                    Grid.Row="1" Grid.Column="1"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    VerticalAlignment="Center">
+                                    <Run Text="{x:Bind ViewModel.SelectedPlan.Durations, Mode=OneWay}"/>
+                                    <Run Text="ngày"/>
+                                </TextBlock>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Promo Code Section -->
+                    <Border
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="20"
+                        Visibility="{x:Bind ViewModel.ShowPaymentScreen, Mode=OneWay, Converter={StaticResource BoolNegationToVisibilityConverter}}">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Mã giảm giá" FontSize="16" FontWeight="SemiBold"/>
+
+                            <!-- Promo selection - only show when promos are available -->
+                            <Grid ColumnSpacing="12"
+                                  Visibility="{x:Bind ViewModel.HasNoPromos, Mode=OneWay, Converter={StaticResource BoolNegationToVisibilityConverter}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ComboBox
+                                    Grid.Column="0"
+                                    PlaceholderText="Chọn mã giảm giá"
+                                    ItemsSource="{x:Bind ViewModel.AvailablePromos, Mode=OneWay}"
+                                    SelectedItem="{x:Bind ViewModel.SelectedPromo, Mode=TwoWay}"
+                                    DisplayMemberPath="DisplayText"
+                                    HorizontalAlignment="Stretch"/>
+
+                                <Button
+                                    Grid.Column="1"
+                                    Content="Áp dụng"
+                                    Command="{x:Bind ViewModel.ApplyPromoCommand}"
+                                    IsEnabled="{x:Bind ViewModel.IsApplyingDiscount, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}"
+                                    Style="{StaticResource AccentButtonStyle}"
+                                    Padding="16,8"/>
+                            </Grid>
+
+                            <!-- No promo message - only show when no promos -->
+                            <TextBlock
+                                Text="Không có mã giảm giá khả dụng"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                FontStyle="Italic"
+                                Visibility="{x:Bind ViewModel.HasNoPromos, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Order Summary -->
+                    <Border
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="20"
+                        Visibility="{x:Bind ViewModel.ShowPaymentScreen, Mode=OneWay, Converter={StaticResource BoolNegationToVisibilityConverter}}">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="Chi tiết đơn hàng" FontSize="16" FontWeight="SemiBold"/>
+
+                            <Grid RowSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Giá gốc"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1">
+                                    <Run Text="{x:Bind ViewModel.CurrentOrder.OriginalAmount, Mode=OneWay}"/>
+                                    <Run Text="₫"/>
+                                </TextBlock>
+
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Giảm giá" Foreground="#2D7D46"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Foreground="#2D7D46">
+                                    <Run Text="-"/>
+                                    <Run Text="{x:Bind ViewModel.CurrentOrder.DiscountAmount, Mode=OneWay}"/>
+                                    <Run Text="₫"/>
+                                </TextBlock>
+
+                                <Border Grid.Row="2" Grid.ColumnSpan="2"
+                                        Height="1"
+                                        Background="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                        Margin="0,8"/>
+
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Tổng thanh toán" FontWeight="Bold" FontSize="16"/>
+                                <TextBlock Grid.Row="3" Grid.Column="1" FontWeight="Bold" FontSize="16" Foreground="#E50914">
+                                    <Run Text="{x:Bind ViewModel.CurrentOrder.FinalAmount, Mode=OneWay}"/>
+                                    <Run Text="₫"/>
+                                </TextBlock>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Proceed Button -->
+                    <Button
+                        Content="Tiến hành thanh toán"
+                        Command="{x:Bind ViewModel.ProceedToPaymentCommand}"
+                        Style="{StaticResource AccentButtonStyle}"
+                        HorizontalAlignment="Stretch"
+                        Padding="16,12"
+                        FontSize="16"
+                        CornerRadius="8"
+                        Visibility="{x:Bind ViewModel.ShowPaymentScreen, Mode=OneWay, Converter={StaticResource BoolNegationToVisibilityConverter}}"/>
+
+                    <!-- Payment Screen -->
+                    <StackPanel
+                        Spacing="20"
+                        Visibility="{x:Bind ViewModel.ShowPaymentScreen, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+
+                        <!-- Success Screen -->
+                        <Border
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="#2D7D46"
+                            BorderThickness="2"
+                            CornerRadius="12"
+                            Padding="32"
+                            Visibility="{x:Bind ViewModel.PaymentSuccess, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <StackPanel Spacing="16" HorizontalAlignment="Center">
+                                <FontIcon Glyph="&#xE73E;" FontSize="64" Foreground="#2D7D46"/>
+                                <TextBlock Text="Thanh toán thành công!" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Cảm ơn bạn đã đăng ký gói dịch vụ" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center"/>
+
+                                <Button
+                                    Content="Quay lại danh sách gói"
+                                    Command="{x:Bind ViewModel.BackToSubscriptionsCommand}"
+                                    Style="{StaticResource AccentButtonStyle}"
+                                    HorizontalAlignment="Center"
+                                    Padding="24,12"
+                                    Margin="0,16,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- QR Payment Screen -->
+                        <Border
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="32"
+                            Visibility="{x:Bind ViewModel.PaymentSuccess, Mode=OneWay, Converter={StaticResource BoolNegationToVisibilityConverter}}">
+                            <StackPanel Spacing="20" HorizontalAlignment="Center">
+                                <TextBlock Text="Quét mã QR để thanh toán" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+
+                                <!-- Fake QR Code -->
+                                <Border
+                                    Background="White"
+                                    CornerRadius="8"
+                                    Padding="16"
+                                    HorizontalAlignment="Center">
+                                    <Grid Width="200" Height="200">
+                                        <FontIcon Glyph="&#xED14;" FontSize="150" Foreground="Black"/>
+                                    </Grid>
+                                </Border>
+
+                                <StackPanel Spacing="4" HorizontalAlignment="Center">
+                                    <TextBlock Text="Số tiền thanh toán" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center"/>
+                                    <TextBlock FontSize="28" FontWeight="Bold" Foreground="#E50914" HorizontalAlignment="Center">
+                                        <Run Text="{x:Bind ViewModel.CurrentOrder.FinalAmount, Mode=OneWay}"/>
+                                        <Run Text="₫"/>
+                                    </TextBlock>
+                                </StackPanel>
+
+                                <TextBlock
+                                    Text="Sau khi chuyển khoản thành công, nhấn xác nhận bên dưới"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    TextWrapping="Wrap"
+                                    HorizontalAlignment="Center"
+                                    TextAlignment="Center"/>
+
+                                <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
+                                    <Button
+                                        Content="Hủy"
+                                        Command="{x:Bind ViewModel.CancelPaymentCommand}"
+                                        Padding="24,12"
+                                        CornerRadius="8"/>
+
+                                    <Button
+                                        Command="{x:Bind ViewModel.ConfirmPaymentCommand}"
+                                        Style="{StaticResource AccentButtonStyle}"
+                                        Padding="24,12"
+                                        CornerRadius="8"
+                                        IsEnabled="{x:Bind ViewModel.IsConfirmingPayment, Mode=OneWay, Converter={StaticResource BoolNegationConverter}}">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <ProgressRing
+                                                IsActive="True"
+                                                Width="16" Height="16"
+                                                Visibility="{x:Bind ViewModel.IsConfirmingPayment, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                            <TextBlock Text="Xác nhận đã thanh toán"/>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

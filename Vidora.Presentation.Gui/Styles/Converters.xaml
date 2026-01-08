@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:Vidora.Presentation.Gui.Converters">
+
+    <converters:BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    <converters:BooleanToVisibilityConverter x:Key="BoolToVisibilityConverterInvert" Invert="True"/>
+
+    <converters:BooleanToBackButtonVisibilityConverter x:Key="BoolToBackButtonVisibilityConverter"/>
+    <converters:BooleanToBackButtonVisibilityConverter x:Key="BoolToBackButtonVisibilityConverterInvert" Invert="True"/>
+
+    <converters:BoolNegationToVisibilityConverter x:Key="BoolNegationToVisibilityConverter"/>
+    <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+    <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverterInvert" Invert="True"/>
+    <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
+    <converters:DateTimeToStringConverter x:Key="DateTimeToStringConverter"/>
+    <converters:CurrencyConverter x:Key="CurrencyConverter"/>
+    <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+    <converters:DateTimeToDateTimeOffsetConverter x:Key="DateTimeToDateTimeOffsetConverter"/>
+    <converters:BoolNegationConverter x:Key="BoolNegationConverter"/>
+    <converters:ListStringToStringConverter x:Key="ListStringToStringConverter"/>
+    <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
+    
+    <!-- Watchlist Converters -->
+    <converters:BoolToHeartGlyphConverter x:Key="BoolToHeartGlyphConverter"/>
+    <converters:BoolToHeartColorConverter x:Key="BoolToHeartColorConverter"/>
+    <converters:BoolToWatchlistTextConverter x:Key="BoolToWatchlistTextConverter"/>
+    
+    <!-- Subscription Converters -->
+    <converters:BoolToSubscriptionTextConverter x:Key="BoolToSubscriptionTextConverter"/>
+    <converters:BoolToRenewGlyphConverter x:Key="BoolToRenewGlyphConverter"/>
+</ResourceDictionary>

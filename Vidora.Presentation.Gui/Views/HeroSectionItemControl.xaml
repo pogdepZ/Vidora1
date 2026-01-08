@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Vidora.Presentation.Gui.Views.HeroSectionItemControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Vidora.Presentation.Gui.Views"
+    xmlns:canvas="using:Microsoft.Graphics.Canvas.UI.Xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:Vidora.Presentation.Gui.Converters"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <converters:ListStringToStringConverter x:Key="GenresToStringConverter" Separator=" • " MaxItems="3"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <local:HeroBannerControl
+             Source="{x:Bind ViewModel.Movie.BannerUrl, Mode=OneWay}"
+             VerticalAlignment="Center"/>
+        <Grid Padding="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center" Spacing="10">
+                <TextBlock
+                    x:Name="BannerTitleText"
+                    Text="{x:Bind ViewModel.Movie.Title, Mode=OneWay}"
+                    Style="{StaticResource CaptionLargeTextBlockStyle}"
+                    TextWrapping="Wrap"
+                    FontSize="48" FontWeight="Bold"/>
+
+                <TextBlock
+                    Margin="10,0,0,0"
+                    Text="{x:Bind ViewModel.Movie.Genres, Converter={StaticResource GenresToStringConverter}, Mode=OneWay}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
+
+                <TextBlock
+                    Margin="10,0,0,0"
+                    Text="{x:Bind ViewModel.Movie.Description, Mode=OneWay}"
+                    TextWrapping="Wrap"
+                    Style="{StaticResource CaptionLargeTextBlockStyle}"/>
+
+                <StackPanel Orientation="Horizontal" Spacing="20">
+                    <Button
+                        Command="{x:Bind ViewModel.ExecutePlayVideoCommand}"
+                        CommandParameter="{x:Bind ViewModel.Movie.VideoUrl}"
+                        Visibility="{x:Bind ViewModel.CanPlay, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
+                        Style="{ThemeResource ButtonRevealStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <FontIcon Glyph="&#xE768;" FontSize="12"/>
+                            <TextBlock Text="Play now" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Command="{x:Bind ViewModel.ExecutePlayVideoCommand}"
+                        CommandParameter="{x:Bind ViewModel.Movie.TrailerUrl}"
+                        Visibility="{x:Bind ViewModel.CanWatchTrailer, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
+                        Style="{ThemeResource ButtonRevealStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <FontIcon Glyph="&#xE768;" FontSize="12"/>
+                            <TextBlock Text="Watch trailer" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Command="{x:Bind ViewModel.ViewMovieDetailCommand}"
+                        Style="{ThemeResource ButtonRevealStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <FontIcon Glyph="&#xE946;" FontSize="12"/>
+                            <TextBlock Text="More info" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

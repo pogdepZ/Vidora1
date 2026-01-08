@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Vidora.Presentation.Gui.Views.LoginPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Vidora.Presentation.Gui.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.Background>
+        <ImageBrush
+            ImageSource="/Assets/AppSplash.png"
+            Stretch="UniformToFill"/>
+    </Page.Background>
+
+    <Grid Background="#CC000000">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="WindowSizeStates">
+                <VisualState x:Name="SmallState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0"/>
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="LoginForm.MinWidth" Value="400"/>
+                    </VisualState.Setters>
+                </VisualState>
+
+                <VisualState x:Name="LargeState">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="800"/>
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="LoginForm.MinWidth" Value="480"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <ScrollViewer
+            VerticalScrollMode="Enabled"
+            VerticalScrollBarVisibility="Hidden">
+            <StackPanel
+                x:Name="LoginForm" 
+                MinWidth="380" Spacing="30" Padding="40,20" CornerRadius="5"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Background="{ThemeResource AcrylicBackgroundFillColorBaseBrush}">
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock 
+                        Style="{StaticResource HeaderExtraLargeTextBlockStyle}"
+                        Text="Sign In"/>
+                    <HyperlinkButton
+                        Grid.Column="1" Padding="0" CornerRadius="100"
+                        NavigateUri="https://hcmus.edu.vn/">
+                        <FontIcon Glyph="&#xF167;"/>
+                    </HyperlinkButton>
+                </Grid>
+
+                <StackPanel Spacing="10">
+                    <TextBox
+                        PlaceholderText="Enter your email"
+                        Padding="10"
+                        FontSize="14"
+                        IsSpellCheckEnabled="False"
+                        Text="{x:Bind ViewModel.Email, Mode=TwoWay}"
+                        BeforeTextChanging="EmailTextBox_BeforeTextChanging"
+                        />
+
+                    <PasswordBox
+                        x:Name="Password_PasswordBox"
+                        PlaceholderText="Enter your password"
+                        Padding="10"
+                        Password="{x:Bind ViewModel.Password, Mode=TwoWay}"
+                        />
+
+                    <CheckBox
+                        x:Name="RememberMe_CheckBox"
+                        Content="Remember me"
+                        HorizontalAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        FontSize="12"
+                        Padding="5,0"
+                        Margin="0,15,0,5"
+                        Foreground="Gray"
+                        IsChecked="{x:Bind ViewModel.IsRememberMe, Mode=TwoWay}"
+                        />
+
+                    <Button 
+                        Content="Login" 
+                        Style="{StaticResource BrandButtonStyle}"
+                        Command="{x:Bind ViewModel.ExecuteLoginCommand}"/>
+
+                </StackPanel>
+
+
+                <StackPanel
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Spacing="5">
+                    <TextBlock
+                        Style="{StaticResource BodySmallTextBlockStyle}"
+                        Text="Don't have account?"/>
+                    <HyperlinkButton
+                        FontSize="12"
+                        Padding="0"
+                        Content="Sign up"
+                        Command="{x:Bind ViewModel.ExecuteNavigateToRegisterCommand}"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>
