@@ -171,21 +171,34 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Placeholder chart -->
-                    <Border Grid.Column="0"
-                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            CornerRadius="8"
-                            Padding="20"
-                            BorderBrush="{ThemeResource TextFillColorPrimaryBrush}"
-                            BorderThickness="1">
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Monthly Revenue (placeholder)"
-                                       FontWeight="Bold"
-                                       Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
-                            <TextBlock Text="API có revenueByDayinCurrentMonth nhưng labels/data đang rỗng"
-                                       Foreground="{StaticResource TextGrayBrush}"
-                                       FontSize="12"/>
-                            <Rectangle Height="200" Fill="#1A1A1A" RadiusX="8" RadiusY="8"/>
-                        </StackPanel>
+                    <Border Grid.Column="0" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="8" Padding="20" BorderBrush="{ThemeResource TextFillColorPrimaryBrush}" BorderThickness="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Monthly Revenue" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+                                <TextBlock Text="Revenue chart for the last 30 days" Foreground="{StaticResource TextGrayBrush}" FontSize="12" Margin="0,4,0,0"/>
+                            </StackPanel>
+
+                            <Grid Grid.Row="1" Margin="0,20,0,0" Height="200">
+                                <StackPanel VerticalAlignment="Stretch" Spacing="40">
+                                    <Border BorderBrush="#333" BorderThickness="0,1,0,0"/>
+                                    <Border BorderBrush="#333" BorderThickness="0,1,0,0"/>
+                                    <Border BorderBrush="#333" BorderThickness="0,1,0,0"/>
+                                    <Border BorderBrush="#333" BorderThickness="0,1,0,0"/>
+                                    <Border BorderBrush="#333" BorderThickness="0,1,0,0"/>
+                                </StackPanel>
+                                <Polyline 
+                Points="{x:Bind ViewModel.RevenueData, Mode=OneWay, Converter={StaticResource RevenueConverter}}"
+                Stroke="{StaticResource VidoraRedBrush}" 
+                StrokeThickness="3" 
+                VerticalAlignment="Bottom" 
+                Stretch="Fill" 
+                StrokeLineJoin="Round"/>
+                            </Grid>
+                        </Grid>
                     </Border>
 
                     <StackPanel Grid.Column="1" Spacing="20">

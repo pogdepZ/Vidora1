@@ -3,12 +3,14 @@ using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Vidora.Core.Contracts.Services;
 using Vidora.Presentation.Gui.Contracts.ViewModels;
+using Windows.Devices.Geolocation;
 
 namespace Vidora.Presentation.Gui.ViewModels;
 
@@ -41,6 +43,8 @@ public partial class AdminDashboardViewModel : ObservableRecipient, INavigationA
     [ObservableProperty]
     private ObservableCollection<MovieDto> _highestRatedMovies = [];
 
+    [ObservableProperty] private ObservableCollection<double> _revenueData = [];
+    [ObservableProperty] private ObservableCollection<string> _revenueLabels = [];
     public AdminDashboardViewModel(ISessionStateService sessionStateService)
     {
         _sessionStateService = sessionStateService;
@@ -84,7 +88,15 @@ public partial class AdminDashboardViewModel : ObservableRecipient, INavigationA
             TotalViewsText = dto.TodayViews.ToString();
             NewSignupsText = dto.TotalTodayNewUsers.ToString();
 
-            RevenueText = "0";
+            var labels = dto.RevenueByDayinCurrentMonth?.Labels ?? new List<string>();
+            var data = dto.RevenueByDayinCurrentMonth?.Data ?? new List<double>();
+
+            RevenueLabels = new ObservableCollection<string>(labels);
+            RevenueData = new ObservableCollection<double>(data);
+
+            // ✅ RevenueText: tổng doanh thu tháng (sum)
+            var totalRevenue = data.Sum();
+            RevenueText = totalRevenue.ToString("N0");
 
             RecentSignups = new ObservableCollection<UserDto>(dto.NewUsers ?? new List<UserDto>());
             HighestRatedMovies = new ObservableCollection<MovieDto>(dto.HighestRatedMovies ?? new List<MovieDto>());
