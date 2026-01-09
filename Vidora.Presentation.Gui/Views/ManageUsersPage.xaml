@@ -8,11 +8,276 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid>
-        <ScrollViewer VerticalScrollMode="Enabled" VerticalScrollBarVisibility="Hidden">
+    <Grid Background="Transparent" Margin="0 20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ===== INFOBAR ===== -->
+        <InfoBar x:Name="NotificationInfoBar"
+                 Grid.Row="0"
+                 VerticalAlignment="Top"
+                 HorizontalAlignment="Center"
+                 Margin="0,10,0,0"
+                 Canvas.ZIndex="999"
+                 IsOpen="False"
+                 IsClosable="True"
+                 Severity="Success"
+                 Width="520"/>
+
+        <!-- ===== HEADER ===== -->
+        <Grid Grid.Row="0" Padding="40,30,40,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Spacing="8">
+                <TextBlock Text="Manage Users"
+                           FontSize="30"
+                           FontWeight="SemiBold"/>
+                <TextBlock Foreground="Gray" FontSize="14">
+                    <Run Text="Total: "/>
+                    <Run x:Name="TotalUsersRun" Text="0" FontWeight="SemiBold"/>
+                    <Run Text=" users"/>
+                </TextBlock>
+            </StackPanel>
+
+            <Button Grid.Column="1"
+                    Padding="18,10"
+                    Click="Reload_Click">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE72C;" FontSize="14"/>
+                    <TextBlock Text="Reload" FontWeight="SemiBold"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- ===== FILTER ===== -->
+        <Border Grid.Row="1"
+                Margin="40,0,40,20"
+                Padding="20"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                CornerRadius="12"
+                BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+                BorderThickness="1">
             <Grid>
-                <TextBlock Text="Manage Users" Style="{StaticResource PageTitleTextBlockStyle}" FontSize="50" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <AutoSuggestBox x:Name="SearchBox"
+                                Grid.Column="0"
+                                PlaceholderText="Search by name, email, username..."
+                                QueryIcon="Find"
+                                MinWidth="320"
+                                VerticalAlignment="Center"
+                                QuerySubmitted="SearchBox_QuerySubmitted"/>
+
+                <ComboBox x:Name="StatusCombo"
+                          Grid.Column="1"
+                          Margin="16,0,0,0"
+                          MinWidth="160"
+                          PlaceholderText="Status"
+                          VerticalAlignment="Center"/>
+
+                <Button Grid.Column="2"
+                        Margin="16,0,0,0"
+                        Padding="18,10"
+                        Click="Search_Click"
+                        VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon Glyph="&#xE721;" FontSize="14"/>
+                        <TextBlock Text="Search"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Grid.Column="3"
+                        Margin="8,0,0,0"
+                        Padding="18,10"
+                        Click="Clear_Click"
+                        VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon Glyph="&#xE894;" FontSize="14"/>
+                        <TextBlock Text="Clear"/>
+                    </StackPanel>
+                </Button>
             </Grid>
-        </ScrollViewer>
+        </Border>
+
+        <!-- ===== TABLE + LIST ===== -->
+        <Border Grid.Row="2"
+                Margin="40,0,40,20"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                CornerRadius="12"
+                BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+                BorderThickness="1">
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="48"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header -->
+                <Grid Grid.Row="0"
+                      Padding="30,10"
+                      BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+                      BorderThickness="0,0,0,1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2.5*"/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="1.5*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="USER" FontWeight="Bold" Foreground="Gray"/>
+                    <TextBlock Grid.Column="1" Text="EMAIL" FontWeight="Bold" Foreground="Gray" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="2" Text="ROLE" FontWeight="Bold" Foreground="Gray" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="3" Text="STATUS" FontWeight="Bold" Foreground="Gray" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="4" Text="CREATED" FontWeight="Bold" Foreground="Gray" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Column="5" Text="ACTIONS" FontWeight="Bold" Foreground="Gray" HorizontalAlignment="Center"/>
+                </Grid>
+
+                <ListView x:Name="UsersList"
+                          Grid.Row="1"
+                          SelectionMode="None"
+                          Padding="0">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Margin" Value="0"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Padding="20,14"
+                                  BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+                                  BorderThickness="0,0,0,1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2.5*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="1.5*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- USER -->
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="14">
+                                    <PersonPicture Width="40" Height="40"
+                                                   DisplayName="{Binding FullName}"/>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding FullName}"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="14"/>
+                                        <TextBlock Text="{Binding Username}"
+                                                   Foreground="Gray"
+                                                   FontSize="12"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- EMAIL -->
+                                <TextBlock Grid.Column="1"
+                                           Text="{Binding Email}"
+                                           VerticalAlignment="Center"
+                                           Foreground="Gray"
+                                           HorizontalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"/>
+
+                                <!-- ROLE -->
+                                <Border Grid.Column="2"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Padding="10,4"
+                                        CornerRadius="4"
+                                        Background="{ThemeResource SystemAccentColorLight2}">
+                                    <TextBlock Text="{Binding Role}"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"/>
+                                </Border>
+
+                                <!-- STATUS -->
+                                <Border Grid.Column="3"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Padding="10,4"
+                                        CornerRadius="4"
+                                        Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}">
+                                    <TextBlock Text="{Binding Status}"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"/>
+                                </Border>
+
+                                <!-- CREATED -->
+                                <TextBlock Grid.Column="4"
+                                           Text="{Binding CreatedAtDisplay}"
+                                           VerticalAlignment="Center"
+                                           Foreground="Gray"
+                                           HorizontalAlignment="Center"
+                                           FontSize="12"/>
+
+                                <!-- ACTIONS -->
+                                <StackPanel Grid.Column="5"
+                                            Orientation="Horizontal"
+                                            Spacing="8"
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Center">
+                                    <Button Background="Transparent"
+                                            BorderThickness="0"
+                                            Tag="{Binding UserId}"
+                                            Click="ViewDetail_Click"
+                                            ToolTipService.ToolTip="View Details">
+                                        <FontIcon Glyph="&#xE890;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontSize="16"/>
+                                    </Button>
+
+                                    <Button Background="Transparent"
+                                            BorderThickness="0"
+                                            Tag="{Binding UserId}"
+                                            Click="ToggleStatus_Click"
+                                            ToolTipService.ToolTip="Lock/Unlock">
+                                        <FontIcon Glyph="&#xE72E;" Foreground="Orange" FontSize="16"/>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <!-- Loading -->
+                <ProgressRing x:Name="LoadingRing"
+                              Grid.Row="1"
+                              IsActive="False"
+                              Visibility="Collapsed"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- ===== PAGINATION ===== -->
+        <StackPanel Grid.Row="3"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="12"
+                    Padding="40,0,40,20">
+            <Button x:Name="PrevBtn" Content="◀" Click="Prev_Click"/>
+            <TextBlock VerticalAlignment="Center">
+                <Run Text="Page "/>
+                <Run x:Name="PageRun" Text="1" FontWeight="Bold"/>
+                <Run Text=" / "/>
+                <Run x:Name="TotalPagesRun" Text="1" FontWeight="Bold"/>
+            </TextBlock>
+            <Button x:Name="NextBtn" Content="▶" Click="Next_Click"/>
+        </StackPanel>
     </Grid>
 </Page>

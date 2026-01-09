@@ -1,18 +1,19 @@
-﻿using System;
+﻿// Excel
+using ClosedXML.Excel;
+using Microsoft.UI;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Vidora.Core.Contracts.Services;
-
-// Excel
-using ClosedXML.Excel;
-
 // File picker (WinUI 3)
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -22,6 +23,11 @@ namespace Vidora.Presentation.Gui.Views
 {
     public sealed partial class ManageMoviesPage : Page
     {
+        private static readonly JsonSerializerOptions _jsonLowerOptions =
+        new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
         private readonly ISessionStateService _sessionState = App.GetService<ISessionStateService>();
         private static readonly HttpClient _http = new HttpClient();
 
@@ -77,6 +83,28 @@ namespace Vidora.Presentation.Gui.Views
             }
         }
 
+        private async Task<int?> GetDirectorMemberIdFromDetailAsync(int movieId)
+        {
+            try
+            {
+                var json = await _http.GetStringAsync($"{BaseUrl}/api/movies/{movieId}");
+                var detailRes = JsonSerializer.Deserialize<ApiSingleResponse<MovieDetailDto>>(
+                    json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                var directorId = detailRes?.Data?.Actors?
+                    .FirstOrDefault(x => string.Equals(x.Role, "Director", StringComparison.OrdinalIgnoreCase))
+                    ?.MemberId;
+
+                return directorId;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetDirectorMemberIdFromDetailAsync fail movieId={movieId}: {ex.Message}");
+                return null;
+            }
+        }
+
         private async Task LoadMoviesAsync(bool resetPage)
         {
             try
@@ -118,19 +146,40 @@ namespace Vidora.Presentation.Gui.Views
                     return;
                 }
 
-                var rows = (dto.Data ?? new List<MovieDto>())
-                    .Select(m => new MovieRow
-                    {
-                        MovieId = m.MovieId,
-                        Title = m.Title ?? "",
-                        ReleaseYear = m.ReleaseYear,
-                        PosterUrl = m.PosterUrl,
-                        GenresText = m.Genres != null ? string.Join(", ", m.Genres) : "",
-                        DirectorName = "" // list API hiện chưa có director
-                    })
-                    .ToList();
+                var movies = dto.Data ?? new List<MovieDto>();
+
+                // load members 1 lần để map id -> name
+                var members = await LoadMembersAsync();
+                var memberNameById = members.ToDictionary(x => x.Id, x => x.Name);
+
+                // gọi detail song song để lấy directorId
+                var directorTasks = movies.Select(async m =>
+                {
+                    var directorId = await GetDirectorMemberIdFromDetailAsync(m.MovieId);
+
+                    string directorName = "";
+                    if (directorId.HasValue && memberNameById.TryGetValue(directorId.Value, out var name))
+                        directorName = name;
+
+                    return new { m.MovieId, DirectorName = directorName };
+                }).ToList();
+
+                var directors = await Task.WhenAll(directorTasks);
+                var directorNameByMovieId = directors.ToDictionary(x => x.MovieId, x => x.DirectorName);
+
+                // build rows
+                var rows = movies.Select(m => new MovieRow
+                {
+                    MovieId = m.MovieId,
+                    Title = m.Title ?? "",
+                    ReleaseYear = m.ReleaseYear,
+                    PosterUrl = m.PosterUrl,
+                    GenresText = m.Genres != null ? string.Join(", ", m.Genres) : "",
+                    DirectorName = directorNameByMovieId.TryGetValue(m.MovieId, out var dn) ? dn : ""
+                }).ToList();
 
                 MoviesList.ItemsSource = rows;
+
 
                 _page = dto.Pagination?.Page ?? _page;
                 _totalPages = dto.Pagination?.TotalPages ?? 1;
@@ -223,80 +272,173 @@ namespace Vidora.Presentation.Gui.Views
             {
                 SetAuthHeader();
 
-                // GET detail
+                // 1) Load movie detail
                 var json = await _http.GetStringAsync($"{BaseUrl}/api/movies/{movieId}");
-                var detail = JsonSerializer.Deserialize<ApiSingleResponse<MovieDetailDto>>(json,
+                var detailRes = JsonSerializer.Deserialize<ApiSingleResponse<MovieDetailDto>>(json,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                if (detail?.Success != true || detail.Data == null)
+                // DEBUG: log raw json để xem field "actors" có về không
+                System.Diagnostics.Debug.WriteLine("=== MOVIE DETAIL RAW JSON ===");
+                System.Diagnostics.Debug.WriteLine(json);
+                System.Diagnostics.Debug.WriteLine("=============================");
+
+                System.Diagnostics.Debug.WriteLine($"Actors null? {detailRes?.Data?.Actors == null}");
+                System.Diagnostics.Debug.WriteLine($"Actors count: {detailRes?.Data?.Actors?.Count ?? 0}");
+
+
+                var movieDetail = detailRes?.Data;
+                if (detailRes?.Success != true || movieDetail == null)
                 {
-                    ShowInfo("Không lấy được movie detail.", isError: true);
+                    ShowInfo("Không thể tải thông tin chi tiết phim.", isError: true);
                     return;
                 }
 
-                var m = detail.Data;
+                // 2) Load genres + members
+                // genres bạn đã có GenreCombo.ItemsSource rồi, nhưng để chắc chắn ta lấy từ đó
+                var availableGenres = (GenreCombo.ItemsSource as IEnumerable<GenreDto>)?.ToList()
+                                     ?? new List<GenreDto>();
 
-                // Dialog UI
-                var titleBox = new TextBox { Text = m.Title ?? "", PlaceholderText = "Title" };
-                var yearBox = new TextBox { Text = m.ReleaseYear.ToString(), PlaceholderText = "ReleaseYear" };
-                var posterBox = new TextBox { Text = m.PosterUrl ?? "", PlaceholderText = "PosterUrl" };
-                var bannerBox = new TextBox { Text = m.BannerUrl ?? "", PlaceholderText = "BannerUrl" };
-                var descBox = new TextBox
+                var availableMembers = await LoadMembersAsync(); // endpoint tuỳ BE
+
+                // 3) State edit
+                var selectedGenres = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                if (movieDetail.Genres != null)
+                    foreach (var g in movieDetail.Genres) selectedGenres.Add(g);
+
+                var selectedCast = new System.Collections.ObjectModel.ObservableCollection<(MemberResult Member, string Role)>();
+
+                // 4) Build UI dialog
+                var stackPanel = new StackPanel { Width = 500, Padding = new Thickness(0, 0, 15, 0) };
+
+                var titleBox = new TextBox { Header = "Tiêu đề phim", Text = movieDetail.Title ?? "", Margin = new Thickness(0, 0, 0, 10) };
+                var descBox = new TextBox { Header = "Mô tả phim", Text = movieDetail.Description ?? "", AcceptsReturn = true, Height = 60, Margin = new Thickness(0, 0, 0, 10) };
+                var posterBox = new TextBox { Header = "Link Poster", Text = movieDetail.PosterUrl ?? "", Margin = new Thickness(0, 0, 0, 10) };
+                var bannerBox = new TextBox { Header = "Link Banner", Text = movieDetail.BannerUrl ?? "", Margin = new Thickness(0, 0, 0, 10) };
+
+                // Nếu bạn chưa có TrailerUrl/MovieUrl trong DTO thì để trống hoặc thêm vào DTO
+                var trailerBox = new TextBox { Header = "Link Trailer", Text = "", Margin = new Thickness(0, 0, 0, 10) };
+                var movieUrlBox = new TextBox { Header = "Link Phim (Stream)", Text = "", Margin = new Thickness(0, 0, 0, 10) };
+
+                var yearBox = new NumberBox { Header = "Năm phát hành", Value = movieDetail.ReleaseYear, Margin = new Thickness(0, 0, 0, 10) };
+
+                stackPanel.Children.Add(titleBox);
+                stackPanel.Children.Add(descBox);
+                stackPanel.Children.Add(posterBox);
+                stackPanel.Children.Add(bannerBox);
+                stackPanel.Children.Add(trailerBox);
+                stackPanel.Children.Add(movieUrlBox);
+                stackPanel.Children.Add(yearBox);
+
+                // ===== GENRES (checkbox pre-check) =====
+                var genreHeader = new TextBlock
                 {
-                    Text = m.Description ?? "",
-                    PlaceholderText = "Description",
-                    AcceptsReturn = true,
-                    TextWrapping = TextWrapping.Wrap,
-                    Height = 120
-                };
-                var genresBox = new TextBox
-                {
-                    Text = m.Genres != null ? string.Join(", ", m.Genres) : "",
-                    PlaceholderText = "Genres (comma separated)"
+                    Text = "Chọn thể loại",
+                    Margin = new Thickness(0, 10, 0, 5),
+                    FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
                 };
 
-                var panel = new StackPanel { Spacing = 10 };
-                panel.Children.Add(titleBox);
-                panel.Children.Add(yearBox);
-                panel.Children.Add(posterBox);
-                panel.Children.Add(bannerBox);
-                panel.Children.Add(genresBox);
-                panel.Children.Add(descBox);
+                var genreContainer = new StackPanel { Margin = new Thickness(5, 0, 0, 15) };
+
+                foreach (var genre in availableGenres)
+                {
+                    var name = genre.Name ?? "";
+                    if (string.IsNullOrWhiteSpace(name)) continue;
+
+                    var isChecked = selectedGenres.Contains(name);
+                    var cb = new CheckBox
+                    {
+                        Content = name,
+                        IsChecked = isChecked,
+                        Margin = new Thickness(0, 0, 0, 5)
+                    };
+
+                    cb.Checked += (_, __) => selectedGenres.Add(name);
+                    cb.Unchecked += (_, __) => selectedGenres.Remove(name);
+
+                    genreContainer.Children.Add(cb);
+                }
+
+                stackPanel.Children.Add(genreHeader);
+                stackPanel.Children.Add(genreContainer);
+
+                // ===== CAST / CREW =====
+                var selectedCastList = new StackPanel { Margin = new Thickness(5, 5, 0, 15), Spacing = 4 };
+                BuildCastAndCrewSection(stackPanel, selectedCastList, selectedCast, availableMembers);
+
+                // Pre-populate existing cast
+                if (movieDetail.Actors != null)
+                {
+                    System.Diagnostics.Debug.WriteLine("=== PREPOP CAST FROM API ===");
+                    foreach (var a in movieDetail.Actors)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"API actor -> memberId={a.MemberId}, role={a.Role}");
+
+                        var member = availableMembers.FirstOrDefault(m => m.Id == a.MemberId);
+                        if (member != null)
+                        {
+                            selectedCast.Add((member, a.Role));
+                            AddCastRowToUI(selectedCastList, member, a.Role, selectedCast);
+                        }
+                    }
+                }
+
+                var scrollViewer = new ScrollViewer
+                {
+                    Content = stackPanel,
+                    MaxHeight = 600,
+                    VerticalScrollBarVisibility = ScrollBarVisibility.Auto
+                };
+
+                var movieTitle = movieDetail.Title ?? $"#{movieId}";
 
                 var dialog = new ContentDialog
                 {
-                    Title = $"Edit Movie #{movieId}",
-                    Content = panel,
-                    PrimaryButtonText = "Save",
-                    CloseButtonText = "Cancel",
+                    Title = $"Chi tiết phim: {movieTitle}",
+                    Content = scrollViewer,
+                    PrimaryButtonText = "Lưu thay đổi",
+                    CloseButtonText = "Hủy",
+                    DefaultButton = ContentDialogButton.Primary,
                     XamlRoot = this.XamlRoot
                 };
 
                 var result = await dialog.ShowAsync();
                 if (result != ContentDialogResult.Primary) return;
 
-                if (!int.TryParse(yearBox.Text.Trim(), out var year))
-                {
-                    ShowInfo("ReleaseYear không hợp lệ.", isError: true);
-                    return;
-                }
-
+                // 5) Build request body và gọi PUT
                 var reqBody = new MovieUpsertRequest
                 {
                     Title = titleBox.Text.Trim(),
                     Description = descBox.Text,
-                    ReleaseYear = year,
+                    ReleaseYear = (int)yearBox.Value,
                     PosterUrl = posterBox.Text.Trim(),
                     BannerUrl = bannerBox.Text.Trim(),
-                    Genres = SplitGenres(genresBox.Text)
+                    TrailerUrl = trailerBox.Text.Trim(),
+                    MovieUrl = movieUrlBox.Text.Trim(),
+
+                    Genres = selectedGenres
+        .Select(name => availableGenres.FirstOrDefault(g =>
+            string.Equals(g.Name, name, StringComparison.OrdinalIgnoreCase)))
+        .Where(g => g != null)
+        .Select(g => new GenreIdRequest { GenresId = g!.GenreId })
+        .DistinctBy(x => x.GenresId)
+        .ToList(),
+
+                    CastAndCrew = selectedCast
+        .Select(x => new CastAndCrewRequest
+        {
+            MemberId = x.Member.Id,
+            Role = x.Role
+        })
+        .ToList()
                 };
+
 
                 var put = new HttpRequestMessage(HttpMethod.Put, $"{BaseUrl}/api/movies/{movieId}")
                 {
                     Content = new StringContent(
-                        JsonSerializer.Serialize(reqBody),
-                        Encoding.UTF8,
-                        "application/json")
+                    JsonSerializer.Serialize(reqBody, _jsonLowerOptions),
+                    Encoding.UTF8,
+                    "application/json")
                 };
 
                 var res = await _http.SendAsync(put);
@@ -307,7 +449,7 @@ namespace Vidora.Presentation.Gui.Views
                     return;
                 }
 
-                ShowInfo("Update movie thành công.", isError: false);
+                ShowInfo($"Đã cập nhật phim '{movieTitle}' thành công!", isError: false);
                 await LoadMoviesAsync(resetPage: false);
             }
             catch (Exception ex)
@@ -316,65 +458,263 @@ namespace Vidora.Presentation.Gui.Views
             }
         }
 
+        private void BuildCastAndCrewSection(
+    StackPanel stackPanel,
+    StackPanel selectedCastList,
+    System.Collections.ObjectModel.ObservableCollection<(MemberResult Member, string Role)> targetCastCollection,
+    List<MemberResult> availableMembers)
+        {
+            var castHeader = new TextBlock
+            {
+                Text = "Diễn viên & Đoàn làm phim",
+                Margin = new Thickness(0, 10, 0, 5),
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
+            };
+
+            var memberCombo = new ComboBox
+            {
+                Header = "1. Chọn Nghệ sĩ",
+                PlaceholderText = "Chọn nghệ sĩ...",
+                ItemsSource = availableMembers,
+                DisplayMemberPath = "Name",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Margin = new Thickness(0, 0, 0, 10)
+            };
+
+            var roleCombo = new ComboBox
+            {
+                Header = "2. Chọn Vai trò",
+                ItemsSource = new string[] { "Director", "Actor", "Producer" },
+                SelectedIndex = 1,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Margin = new Thickness(0, 0, 0, 10)
+            };
+
+            var addButton = new Button
+            {
+                Content = "Thêm",
+                Style = (Style)Application.Current.Resources["AccentButtonStyle"],
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(0, 0, 0, 10)
+            };
+
+            addButton.Click += (s, arg) =>
+            {
+                var selectedMember = memberCombo.SelectedItem as MemberResult;
+                var selectedRole = roleCombo.SelectedItem as string;
+
+                if (selectedMember != null && !string.IsNullOrEmpty(selectedRole))
+                {
+                    targetCastCollection.Add((selectedMember, selectedRole));
+                    AddCastRowToUI(selectedCastList, selectedMember, selectedRole, targetCastCollection);
+                    memberCombo.SelectedIndex = -1;
+                }
+            };
+
+            var selectedCastScrollViewer = new ScrollViewer
+            {
+                Content = selectedCastList,
+                MaxHeight = 150,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto
+            };
+
+            stackPanel.Children.Add(castHeader);
+            stackPanel.Children.Add(memberCombo);
+            stackPanel.Children.Add(roleCombo);
+            stackPanel.Children.Add(addButton);
+            stackPanel.Children.Add(selectedCastScrollViewer);
+        }
+
+        private void AddCastRowToUI(
+            StackPanel selectedCastList,
+            MemberResult member,
+            string role,
+            System.Collections.ObjectModel.ObservableCollection<(MemberResult Member, string Role)> targetCastCollection)
+        {
+            var row = new Grid { Margin = new Thickness(0, 2, 0, 2) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            var roleBadge = new Border
+            {
+                Background = new SolidColorBrush(Colors.LightGray),
+                CornerRadius = new CornerRadius(4),
+                Padding = new Thickness(6, 2, 6, 2),
+                Margin = new Thickness(0, 0, 10, 0),
+                Child = new TextBlock
+                {
+                    Text = role,
+                    FontSize = 11,
+                    Foreground = new SolidColorBrush(Colors.Black),
+                    FontWeight = Microsoft.UI.Text.FontWeights.Bold
+                }
+            };
+
+            var nameTxt = new TextBlock { Text = member.Name, VerticalAlignment = VerticalAlignment.Center };
+
+            var removeBtn = new Button { Content = "X", FontSize = 10, Padding = new Thickness(5, 2, 5, 2) };
+            removeBtn.Click += (_, __) =>
+            {
+                var itemToRemove = targetCastCollection.FirstOrDefault(x => x.Member.Id == member.Id && x.Role == role);
+                if (itemToRemove.Member != null)
+                    targetCastCollection.Remove(itemToRemove);
+
+                selectedCastList.Children.Remove(row);
+            };
+
+            row.Children.Add(roleBadge);
+            row.Children.Add(nameTxt);
+            row.Children.Add(removeBtn);
+
+            Grid.SetColumn(nameTxt, 1);
+            Grid.SetColumn(removeBtn, 2);
+
+            selectedCastList.Children.Add(row);
+        }
+
+
         private async void OnAddMovieButtonClick(object sender, RoutedEventArgs e)
         {
             try
             {
-                var titleBox = new TextBox { PlaceholderText = "Title" };
-                var yearBox = new TextBox { PlaceholderText = "ReleaseYear" };
-                var posterBox = new TextBox { PlaceholderText = "PosterUrl" };
-                var bannerBox = new TextBox { PlaceholderText = "BannerUrl" };
-                var genresBox = new TextBox { PlaceholderText = "Genres (comma separated)" };
+                SetAuthHeader();
+
+                // lấy list genres + members để build popup giống edit
+                var availableGenres = (GenreCombo.ItemsSource as IEnumerable<GenreDto>)?.ToList()
+                                     ?? new List<GenreDto>();
+
+                var availableMembers = await LoadMembersAsync();
+
+                // state
+                var selectedGenres = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var selectedCast = new System.Collections.ObjectModel.ObservableCollection<(MemberResult Member, string Role)>();
+
+                // UI
+                var stackPanel = new StackPanel { Width = 500, Padding = new Thickness(0, 0, 15, 0) };
+
+                var titleBox = new TextBox { Header = "Tiêu đề phim", Margin = new Thickness(0, 0, 0, 10) };
                 var descBox = new TextBox
                 {
-                    PlaceholderText = "Description",
+                    Header = "Mô tả phim",
                     AcceptsReturn = true,
-                    TextWrapping = TextWrapping.Wrap,
-                    Height = 120
+                    Height = 60,
+                    Margin = new Thickness(0, 0, 0, 10)
+                };
+                var posterBox = new TextBox { Header = "Link Poster", Margin = new Thickness(0, 0, 0, 10) };
+                var bannerBox = new TextBox { Header = "Link Banner", Margin = new Thickness(0, 0, 0, 10) };
+                var trailerBox = new TextBox { Header = "Link Trailer", Margin = new Thickness(0, 0, 0, 10) };
+                var movieUrlBox = new TextBox { Header = "Link Phim (Stream)", Margin = new Thickness(0, 0, 0, 10) };
+
+                var yearBox = new NumberBox
+                {
+                    Header = "Năm phát hành",
+                    Value = DateTime.Now.Year,
+                    Margin = new Thickness(0, 0, 0, 10)
                 };
 
-                var panel = new StackPanel { Spacing = 10 };
-                panel.Children.Add(titleBox);
-                panel.Children.Add(yearBox);
-                panel.Children.Add(posterBox);
-                panel.Children.Add(bannerBox);
-                panel.Children.Add(genresBox);
-                panel.Children.Add(descBox);
+                stackPanel.Children.Add(titleBox);
+                stackPanel.Children.Add(descBox);
+                stackPanel.Children.Add(posterBox);
+                stackPanel.Children.Add(bannerBox);
+                stackPanel.Children.Add(trailerBox);
+                stackPanel.Children.Add(movieUrlBox);
+                stackPanel.Children.Add(yearBox);
+
+                // ===== GENRES (checkbox) =====
+                var genreHeader = new TextBlock
+                {
+                    Text = "Chọn thể loại",
+                    Margin = new Thickness(0, 10, 0, 5),
+                    FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
+                };
+
+                var genreContainer = new StackPanel { Margin = new Thickness(5, 0, 0, 15) };
+
+                foreach (var genre in availableGenres)
+                {
+                    var name = genre.Name ?? "";
+                    if (string.IsNullOrWhiteSpace(name)) continue;
+
+                    var cb = new CheckBox
+                    {
+                        Content = name,
+                        Margin = new Thickness(0, 0, 0, 5)
+                    };
+
+                    cb.Checked += (_, __) => selectedGenres.Add(name);
+                    cb.Unchecked += (_, __) => selectedGenres.Remove(name);
+
+                    genreContainer.Children.Add(cb);
+                }
+
+                stackPanel.Children.Add(genreHeader);
+                stackPanel.Children.Add(genreContainer);
+
+                // ===== CAST / CREW =====
+                var selectedCastList = new StackPanel { Margin = new Thickness(5, 5, 0, 15), Spacing = 4 };
+                BuildCastAndCrewSection(stackPanel, selectedCastList, selectedCast, availableMembers);
+
+                var scrollViewer = new ScrollViewer
+                {
+                    Content = stackPanel,
+                    MaxHeight = 600,
+                    VerticalScrollBarVisibility = ScrollBarVisibility.Auto
+                };
 
                 var dialog = new ContentDialog
                 {
                     Title = "Add New Movie",
-                    Content = panel,
+                    Content = scrollViewer,
                     PrimaryButtonText = "Create",
                     CloseButtonText = "Cancel",
+                    DefaultButton = ContentDialogButton.Primary,
                     XamlRoot = this.XamlRoot
                 };
 
                 var result = await dialog.ShowAsync();
                 if (result != ContentDialogResult.Primary) return;
 
-                if (!int.TryParse(yearBox.Text.Trim(), out var year))
+                // validate
+                var title = titleBox.Text.Trim();
+                if (string.IsNullOrWhiteSpace(title))
                 {
-                    ShowInfo("ReleaseYear không hợp lệ.", isError: true);
+                    ShowInfo("Title không được để trống.", isError: true);
                     return;
                 }
 
-                SetAuthHeader();
-
+                // build body theo mẫu
                 var reqBody = new MovieUpsertRequest
                 {
-                    Title = titleBox.Text.Trim(),
+                    Title = title,
                     Description = descBox.Text,
-                    ReleaseYear = year,
+                    ReleaseYear = (int)yearBox.Value,
                     PosterUrl = posterBox.Text.Trim(),
                     BannerUrl = bannerBox.Text.Trim(),
-                    Genres = SplitGenres(genresBox.Text)
+                    TrailerUrl = trailerBox.Text.Trim(),
+                    MovieUrl = movieUrlBox.Text.Trim(),
+
+                    Genres = selectedGenres
+                        .Select(name => availableGenres.FirstOrDefault(g =>
+                            string.Equals(g.Name, name, StringComparison.OrdinalIgnoreCase)))
+                        .Where(g => g != null)
+                        .Select(g => new GenreIdRequest { GenresId = g!.GenreId })
+                        .DistinctBy(x => x.GenresId)
+                        .ToList(),
+
+                    CastAndCrew = selectedCast
+                        .Select(x => new CastAndCrewRequest
+                        {
+                            MemberId = x.Member.Id,
+                            Role = x.Role
+                        })
+                        .ToList()
                 };
 
                 var post = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/api/movies/")
                 {
                     Content = new StringContent(
-                        JsonSerializer.Serialize(reqBody),
+                        JsonSerializer.Serialize(reqBody, _jsonLowerOptions),
                         Encoding.UTF8,
                         "application/json")
                 };
@@ -387,7 +727,7 @@ namespace Vidora.Presentation.Gui.Views
                     return;
                 }
 
-                ShowInfo("Tạo movie thành công.", isError: false);
+                ShowInfo($"Tạo movie '{title}' thành công.", isError: false);
                 await LoadMoviesAsync(resetPage: true);
             }
             catch (Exception ex)
@@ -395,6 +735,7 @@ namespace Vidora.Presentation.Gui.Views
                 ShowInfo($"Add movie error: {ex.Message}", isError: true);
             }
         }
+
         private async void OnImportExcelButtonClick(object sender, RoutedEventArgs e)
         {
             try
@@ -437,7 +778,7 @@ namespace Vidora.Presentation.Gui.Views
                         var post = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/api/movies/")
                         {
                             Content = new StringContent(
-                                JsonSerializer.Serialize(r),
+                                JsonSerializer.Serialize(r, _jsonLowerOptions),
                                 Encoding.UTF8,
                                 "application/json")
                         };
@@ -498,7 +839,8 @@ namespace Vidora.Presentation.Gui.Views
                     ReleaseYear = year == 0 ? DateTime.Now.Year : year,
                     PosterUrl = poster,
                     BannerUrl = banner,
-                    Genres = SplitGenres(genres)
+                    Genres = new List<GenreIdRequest>(),
+                    CastAndCrew = new List<CastAndCrewRequest>()
                 });
             }
 
@@ -536,6 +878,19 @@ namespace Vidora.Presentation.Gui.Views
             NotificationInfoBar.IsOpen = true;
         }
 
+        private async Task<List<MemberResult>> LoadMembersAsync()
+        {
+            SetAuthHeader();
+            var json = await _http.GetStringAsync($"{BaseUrl}/api/movies/members"); // <-- đổi theo BE
+            var dto = JsonSerializer.Deserialize<ApiListResponse2<MemberResult>>(json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            System.Diagnostics.Debug.WriteLine("=== MEMBERS RAW JSON ===");
+            System.Diagnostics.Debug.WriteLine(json);
+            System.Diagnostics.Debug.WriteLine("========================");
+            return dto?.Data ?? new List<MemberResult>();
+        }
+
+
         public sealed class MoviesResponse
         {
             public bool Success { get; set; }
@@ -555,6 +910,26 @@ namespace Vidora.Presentation.Gui.Views
             public List<string>? Genres { get; set; }
         }
 
+        public sealed class MemberResult
+        {
+            [JsonPropertyName("memberId")]
+            public int Id { get; set; }
+            public string Name { get; set; } = "";
+        }
+
+        public sealed class ApiListResponse2<T>
+        {
+            public bool Success { get; set; }
+            public List<T>? Data { get; set; }
+        }
+
+
+        public sealed class MovieActorDto
+        {
+            public int MemberId { get; set; }
+            public string Role { get; set; } = ""; // "Director"/"Actor"/"Producer"
+        }
+
         public sealed class MovieDetailDto
         {
             public int MovieId { get; set; }
@@ -564,6 +939,8 @@ namespace Vidora.Presentation.Gui.Views
             public string? PosterUrl { get; set; }
             public string? BannerUrl { get; set; }
             public List<string>? Genres { get; set; }
+
+            public List<MovieActorDto>? Actors { get; set; }
         }
 
         public sealed class PaginationDto
@@ -603,7 +980,6 @@ namespace Vidora.Presentation.Gui.Views
             public string DirectorName { get; set; } = "";
         }
 
-     
         public sealed class MovieUpsertRequest
         {
             public string Title { get; set; } = "";
@@ -611,7 +987,27 @@ namespace Vidora.Presentation.Gui.Views
             public int ReleaseYear { get; set; }
             public string? PosterUrl { get; set; }
             public string? BannerUrl { get; set; }
-            public List<string> Genres { get; set; } = new();
+            public string? TrailerUrl { get; set; }
+            public string? MovieUrl { get; set; }
+
+            // genres: [{ "genresId": 1 }, { "genresId": 2 }]
+            public List<GenreIdRequest> Genres { get; set; } = new();
+
+            // castAndCrew: [{ "memberId": 1, "role": "Actor" }, ...]
+            public List<CastAndCrewRequest> CastAndCrew { get; set; } = new();
+        }
+
+        public sealed class GenreIdRequest
+        {
+            // đúng theo mẫu: "genresId"
+            public int GenresId { get; set; }
+        }
+
+        public sealed class CastAndCrewRequest
+        {
+            [JsonPropertyName("memberId")]
+            public int MemberId { get; set; }
+            public string Role { get; set; } = "";
         }
     }
 }

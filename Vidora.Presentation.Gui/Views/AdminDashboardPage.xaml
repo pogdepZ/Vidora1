@@ -66,8 +66,7 @@
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                                 CornerRadius="4"
                                 Padding="12,6">
-                            <TextBlock x:Name="CurrentDateText"
-                                       Text="-"
+                            <TextBlock Text="{x:Bind ViewModel.CurrentDateText, Mode=OneWay}"
                                        Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                                        FontSize="12"/>
                         </Border>
@@ -88,7 +87,7 @@
                         <Grid>
                             <StackPanel>
                                 <TextBlock Text="Total Movies" Style="{StaticResource CardTitleStyle}"/>
-                                <TextBlock x:Name="TotalMoviesText" Text="-" Style="{StaticResource CardValueStyle}"/>
+                                <TextBlock Text="{x:Bind ViewModel.TotalMoviesText, Mode=OneWay}" Style="{StaticResource CardValueStyle}"/>
                                 <TextBlock Text="(from API)" Foreground="{StaticResource TextGrayBrush}" FontSize="11"/>
                             </StackPanel>
                             <Border HorizontalAlignment="Right"
@@ -108,7 +107,7 @@
                         <Grid>
                             <StackPanel>
                                 <TextBlock Text="Users" Style="{StaticResource CardTitleStyle}"/>
-                                <TextBlock x:Name="TotalUsersText" Text="-" Style="{StaticResource CardValueStyle}"/>
+                                <TextBlock Text="{x:Bind ViewModel.TotalUsersText, Mode=OneWay}" Style="{StaticResource CardValueStyle}"/>
                                 <TextBlock Text="Total accounts" Foreground="{StaticResource TextGrayBrush}" FontSize="11"/>
                             </StackPanel>
                             <Border HorizontalAlignment="Right"
@@ -128,7 +127,7 @@
                         <Grid>
                             <StackPanel>
                                 <TextBlock Text="Today's Views" Style="{StaticResource CardTitleStyle}"/>
-                                <TextBlock x:Name="TotalViewsText" Text="-" Style="{StaticResource CardValueStyle}"/>
+                                <TextBlock Text="{x:Bind ViewModel.TotalViewsText, Mode=OneWay}" Style="{StaticResource CardValueStyle}"/>
                                 <TextBlock Text="Last 24 hours" Foreground="{StaticResource TextGrayBrush}" FontSize="11"/>
                             </StackPanel>
                             <Border HorizontalAlignment="Right"
@@ -148,7 +147,7 @@
                         <Grid>
                             <StackPanel>
                                 <TextBlock Text="Monthly Revenue" Style="{StaticResource CardTitleStyle}"/>
-                                <TextBlock x:Name="RevenueText" Text="0" Style="{StaticResource CardValueStyle}"/>
+                                <TextBlock Text="{x:Bind ViewModel.RevenueText, Mode=OneWay}" Style="{StaticResource CardValueStyle}"/>
                                 <TextBlock Text="API chưa trả monthly revenue" Foreground="{StaticResource TextGrayBrush}" FontSize="11"/>
                             </StackPanel>
                             <Border HorizontalAlignment="Right"
@@ -172,21 +171,34 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Placeholder chart -->
-                    <Border Grid.Column="0"
-                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            CornerRadius="8"
-                            Padding="20"
-                            BorderBrush="{ThemeResource TextFillColorPrimaryBrush}"
-                            BorderThickness="1">
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Monthly Revenue (placeholder)"
-                                       FontWeight="Bold"
-                                       Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
-                            <TextBlock Text="API có revenueByDayinCurrentMonth nhưng labels/data đang rỗng"
-                                       Foreground="{StaticResource TextGrayBrush}"
-                                       FontSize="12"/>
-                            <Rectangle Height="200" Fill="#1A1A1A" RadiusX="8" RadiusY="8"/>
-                        </StackPanel>
+                    <Border Grid.Column="0" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="8" Padding="20" BorderBrush="{ThemeResource TextFillColorPrimaryBrush}" BorderThickness="1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Monthly Revenue" FontWeight="Bold" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+                                <TextBlock Text="Revenue chart for the last 30 days" Foreground="{StaticResource TextGrayBrush}" FontSize="12" Margin="0,4,0,0"/>
+                            </StackPanel>
+
+                            <Grid Grid.Row="1" Margin="0,20,0,0" Height="200">
+                                <StackPanel VerticalAlignment="Stretch" Spacing="40">
+                                    <Border BorderBrush="#333" BorderThickness="0,1,0,0"/>
+                                    <Border BorderBrush="#333" BorderThickness="0,1,0,0"/>
+                                    <Border BorderBrush="#333" BorderThickness="0,1,0,0"/>
+                                    <Border BorderBrush="#333" BorderThickness="0,1,0,0"/>
+                                    <Border BorderBrush="#333" BorderThickness="0,1,0,0"/>
+                                </StackPanel>
+                                <Polyline 
+                Points="{x:Bind ViewModel.RevenueData, Mode=OneWay, Converter={StaticResource RevenueConverter}}"
+                Stroke="{StaticResource VidoraRedBrush}" 
+                StrokeThickness="3" 
+                VerticalAlignment="Bottom" 
+                Stretch="Fill" 
+                StrokeLineJoin="Round"/>
+                            </Grid>
+                        </Grid>
                     </Border>
 
                     <StackPanel Grid.Column="1" Spacing="20">
@@ -204,8 +216,7 @@
                                                FontWeight="SemiBold"/>
                                 </StackPanel>
                                 <TextBlock Text="Today" Foreground="{StaticResource TextGrayBrush}" FontSize="11" Margin="26,-4,0,0"/>
-                                <TextBlock x:Name="NewSignupsText"
-                                           Text="-"
+                                <TextBlock Text="{x:Bind ViewModel.NewSignupsText, Mode=OneWay}"
                                            FontSize="32"
                                            FontWeight="Bold"
                                            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
@@ -228,7 +239,7 @@
                                            FontSize="12"
                                            Margin="0,4,0,20"/>
 
-                                <ItemsControl x:Name="RecentSignupsItems">
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.RecentSignups, Mode=OneWay}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel>
@@ -279,7 +290,7 @@
                                    FontSize="12"
                                    Margin="0,4,0,20"/>
 
-                        <ItemsControl x:Name="MostWatchedMoviesItems">
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.HighestRatedMovies, Mode=OneWay}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel>
