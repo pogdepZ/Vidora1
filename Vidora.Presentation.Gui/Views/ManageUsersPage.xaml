@@ -23,9 +23,11 @@
                  HorizontalAlignment="Center"
                  Margin="0,10,0,0"
                  Canvas.ZIndex="999"
-                 IsOpen="False"
+                 IsOpen="{x:Bind ViewModel.IsInfoOpen, Mode=TwoWay}"
                  IsClosable="True"
-                 Severity="Success"
+                 Severity="{x:Bind ViewModel.InfoSeverity, Mode=OneWay}"
+                 Title="{x:Bind ViewModel.InfoTitle, Mode=OneWay}"
+                 Message="{x:Bind ViewModel.InfoMessage, Mode=OneWay}"
                  Width="520"/>
 
         <!-- ===== HEADER ===== -->
@@ -41,14 +43,14 @@
                            FontWeight="SemiBold"/>
                 <TextBlock Foreground="Gray" FontSize="14">
                     <Run Text="Total: "/>
-                    <Run x:Name="TotalUsersRun" Text="0" FontWeight="SemiBold"/>
+                    <Run x:Name="TotalUsersRun" Text="{x:Bind ViewModel.TotalUsers, Mode=OneWay}" FontWeight="SemiBold"/>
                     <Run Text=" users"/>
                 </TextBlock>
             </StackPanel>
 
             <Button Grid.Column="1"
                     Padding="18,10"
-                    Click="Reload_Click">
+                    Command="{x:Bind ViewModel.ReloadCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <FontIcon Glyph="&#xE72C;" FontSize="14"/>
                     <TextBlock Text="Reload" FontWeight="SemiBold"/>
@@ -78,19 +80,22 @@
                                 QueryIcon="Find"
                                 MinWidth="320"
                                 VerticalAlignment="Center"
-                                QuerySubmitted="SearchBox_QuerySubmitted"/>
+                                Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                QuerySubmitted="{x:Bind ViewModel.SearchQuerySubmitted}"/>
 
                 <ComboBox x:Name="StatusCombo"
                           Grid.Column="1"
                           Margin="16,0,0,0"
                           MinWidth="160"
                           PlaceholderText="Status"
-                          VerticalAlignment="Center"/>
+                          VerticalAlignment="Center"
+                          ItemsSource="{x:Bind ViewModel.StatusOptions, Mode=OneWay}"
+                          SelectedItem="{x:Bind ViewModel.SelectedStatus, Mode=TwoWay}"/>
 
                 <Button Grid.Column="2"
                         Margin="16,0,0,0"
                         Padding="18,10"
-                        Click="Search_Click"
+                        Command="{x:Bind ViewModel.SearchCommand}"
                         VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon Glyph="&#xE721;" FontSize="14"/>
@@ -101,7 +106,7 @@
                 <Button Grid.Column="3"
                         Margin="8,0,0,0"
                         Padding="18,10"
-                        Click="Clear_Click"
+                        Command="{x:Bind ViewModel.ClearCommand}"
                         VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon Glyph="&#xE894;" FontSize="14"/>
@@ -150,6 +155,7 @@
                 <ListView x:Name="UsersList"
                           Grid.Row="1"
                           SelectionMode="None"
+                          ItemsSource="{x:Bind ViewModel.Users, Mode=OneWay}"
                           Padding="0">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
@@ -235,16 +241,16 @@
                                             HorizontalAlignment="Center">
                                     <Button Background="Transparent"
                                             BorderThickness="0"
-                                            Tag="{Binding UserId}"
-                                            Click="ViewDetail_Click"
+                                            Command="{x:Bind ViewModel.ViewDetailCommand}"
+                                            CommandParameter="{Binding UserId}"
                                             ToolTipService.ToolTip="View Details">
                                         <FontIcon Glyph="&#xE890;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontSize="16"/>
                                     </Button>
 
                                     <Button Background="Transparent"
                                             BorderThickness="0"
-                                            Tag="{Binding UserId}"
-                                            Click="ToggleStatus_Click"
+                                            Command="{x:Bind ViewModel.ToggleStatusCommand}"
+                                            CommandParameter="{Binding UserId}"
                                             ToolTipService.ToolTip="Lock/Unlock">
                                         <FontIcon Glyph="&#xE72E;" Foreground="Orange" FontSize="16"/>
                                     </Button>
@@ -257,8 +263,8 @@
                 <!-- Loading -->
                 <ProgressRing x:Name="LoadingRing"
                               Grid.Row="1"
-                              IsActive="False"
-                              Visibility="Collapsed"
+                              IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+                              Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                               HorizontalAlignment="Center"
                               VerticalAlignment="Center"/>
             </Grid>
@@ -270,14 +276,14 @@
                     HorizontalAlignment="Right"
                     Spacing="12"
                     Padding="40,0,40,20">
-            <Button x:Name="PrevBtn" Content="◀" Click="Prev_Click"/>
+            <Button x:Name="PrevBtn" Content="◀" Command="{x:Bind ViewModel.PrevCommand}" IsEnabled="{x:Bind ViewModel.CanPrev, Mode=OneWay}"/>
             <TextBlock VerticalAlignment="Center">
                 <Run Text="Page "/>
-                <Run x:Name="PageRun" Text="1" FontWeight="Bold"/>
+                <Run x:Name="PageRun" Text="{x:Bind ViewModel.PageText, Mode=OneWay}" FontWeight="Bold"/>
                 <Run Text=" / "/>
-                <Run x:Name="TotalPagesRun" Text="1" FontWeight="Bold"/>
+                <Run x:Name="TotalPagesRun" Text="{x:Bind ViewModel.TotalPagesText, Mode=OneWay}" FontWeight="Bold"/>
             </TextBlock>
-            <Button x:Name="NextBtn" Content="▶" Click="Next_Click"/>
+            <Button x:Name="NextBtn" Content="▶" Command="{x:Bind ViewModel.NextCommand}" IsEnabled="{x:Bind ViewModel.CanNext, Mode=OneWay}"/>
         </StackPanel>
     </Grid>
 </Page>
