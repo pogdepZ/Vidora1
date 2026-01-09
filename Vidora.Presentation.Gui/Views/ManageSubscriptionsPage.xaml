@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="using:Vidora.Presentation.Gui.Views"
+    xmlns:viewModels="using:Vidora.Presentation.Gui.ViewModels"
     mc:Ignorable="d">
 
     <Grid Background="Transparent" Margin="0,20">
@@ -16,16 +17,17 @@
         </Grid.RowDefinitions>
 
         <!-- ===== INFOBAR THÔNG BÁO ===== -->
-        <InfoBar x:Name="NotificationInfoBar"
+        <InfoBar
                  Grid.Row="0"
                  Grid.RowSpan="2"
                  VerticalAlignment="Top"
                  HorizontalAlignment="Center"
                  Margin="0,10,0,0"
                  Canvas.ZIndex="999"
-                 IsOpen="False"
+                 IsOpen="{x:Bind ViewModel.IsNotificationOpen, Mode=TwoWay}"
                  IsClosable="True"
-                 Severity="Success"
+                 Severity="{x:Bind ViewModel.NotificationSeverity, Mode=OneWay}"
+                 Message="{x:Bind ViewModel.NotificationMessage, Mode=OneWay}"
                  Width="600"/>
 
         <!-- ===== HEADER ===== -->
@@ -41,11 +43,11 @@
                            FontWeight="SemiBold"/>
                 <TextBlock Foreground="Gray" FontSize="14">
                     <Run Text="Plans: "/>
-                    <Run Text="{x:Bind PlansCountText, Mode=OneWay}" FontWeight="SemiBold"/>
+                    <Run Text="{x:Bind ViewModel.PlansCountText, Mode=OneWay}" FontWeight="SemiBold"/>
                     <Run Text=" | Promos: "/>
-                    <Run Text="{x:Bind PromosTotalText, Mode=OneWay}" FontWeight="SemiBold"/>
+                    <Run Text="{x:Bind ViewModel.PromosTotalText, Mode=OneWay}" FontWeight="SemiBold"/>
                     <Run Text=" | Orders: "/>
-                    <Run Text="{x:Bind OrdersTotalText, Mode=OneWay}" FontWeight="SemiBold"/>
+                    <Run Text="{x:Bind ViewModel.OrdersTotalText, Mode=OneWay}" FontWeight="SemiBold"/>
                 </TextBlock>
             </StackPanel>
 
@@ -85,18 +87,18 @@
                             </StackPanel>
 
                             <Button Grid.Column="1"
-                                    Click="OnRefreshPlansClick"
+                                    Command="{x:Bind ViewModel.RefreshPlansCommand}"
                                     ToolTipService.ToolTip="Refresh">
                                 <FontIcon Glyph="&#xE72C;" FontSize="14"/>
                             </Button>
                         </Grid>
 
                         <Grid HorizontalAlignment="Center">
-                            <ProgressRing IsActive="{x:Bind IsLoadingPlans, Mode=OneWay}"
-                                          Visibility="{x:Bind IsLoadingPlans, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            <ProgressRing IsActive="{x:Bind ViewModel.IsLoadingPlans, Mode=OneWay}"
+                                          Visibility="{x:Bind ViewModel.IsLoadingPlans, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
-                            <ItemsControl ItemsSource="{x:Bind Plans, Mode=OneWay}"
-                                          Visibility="{x:Bind IsLoadingPlans, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverterInvert}}">
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.Plans, Mode=OneWay}"
+                                          Visibility="{x:Bind ViewModel.IsLoadingPlans, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverterInvert}}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel Orientation="Horizontal" Spacing="16"/>
@@ -104,7 +106,7 @@
                                 </ItemsControl.ItemsPanel>
 
                                 <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="local:SubscriptionPlanVm">
+                                    <DataTemplate x:DataType="viewModels:SubscriptionPlanVm">
                                         <Border Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
                                                 CornerRadius="8"
                                                 Padding="20"
@@ -168,7 +170,7 @@
                             </StackPanel>
 
                             <Button Grid.Column="1"
-                                    Click="OnRefreshOrdersClick"
+                                    Command="{x:Bind ViewModel.RefreshOrdersCommand}"
                                     ToolTipService.ToolTip="Refresh">
                                 <FontIcon Glyph="&#xE72C;" FontSize="14"/>
                             </Button>
@@ -186,29 +188,31 @@
                             <TextBox Grid.Column="0"
                                      x:Name="OrderSearchTextBox"
                                      PlaceholderText="Search name/email/plan..."
+                                     Text="{x:Bind ViewModel.OrderSearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      KeyDown="OnOrderSearchKeyDown"/>
 
                             <ComboBox Grid.Column="1"
                                       x:Name="OrderStatusComboBox"
                                       Header="Status"
                                       MinWidth="160"
+                                      ItemsSource="{x:Bind ViewModel.OrderStatusOptions, Mode=OneWay}"
+                                      SelectedItem="{x:Bind ViewModel.SelectedOrderStatus, Mode=TwoWay}"
+                                      DisplayMemberPath="Label"
                                       SelectionChanged="OnOrderFilterChanged">
-                                <ComboBoxItem Content="All" Tag=""/>
-                                <ComboBoxItem Content="PENDING" Tag="PENDING"/>
-                                <ComboBoxItem Content="PAID" Tag="PAID"/>
-                                <ComboBoxItem Content="COMPLETED" Tag="COMPLETED"/>
-                                <ComboBoxItem Content="CANCELLED" Tag="CANCELLED"/>
                             </ComboBox>
 
                             <ComboBox Grid.Column="2"
                                       x:Name="OrderPlanComboBox"
                                       Header="Plan"
                                       MinWidth="160"
+                                      ItemsSource="{x:Bind ViewModel.OrderPlanOptions, Mode=OneWay}"
+                                      SelectedItem="{x:Bind ViewModel.SelectedOrderPlan, Mode=TwoWay}"
+                                      DisplayMemberPath="Label"
                                       SelectionChanged="OnOrderFilterChanged"/>
 
                             <Button Grid.Column="3"
                                     Margin="0,20,0,0"
-                                    Click="OnClearOrderFiltersClick"
+                                    Command="{x:Bind ViewModel.ClearOrderFiltersCommand}"
                                     ToolTipService.ToolTip="Clear Filters">
                                 <FontIcon Glyph="&#xE711;" FontSize="12"/>
                             </Button>
@@ -238,13 +242,13 @@
 
                         <!-- List -->
                         <Grid Grid.Row="3" MinHeight="200">
-                            <ProgressRing IsActive="{x:Bind IsLoadingOrders, Mode=OneWay}"
-                                          Visibility="{x:Bind IsLoadingOrders, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            <ProgressRing IsActive="{x:Bind ViewModel.IsLoadingOrders, Mode=OneWay}"
+                                          Visibility="{x:Bind ViewModel.IsLoadingOrders, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
-                            <ListView ItemsSource="{x:Bind Orders, Mode=OneWay}"
+                            <ListView ItemsSource="{x:Bind ViewModel.Orders, Mode=OneWay}"
                                       SelectionMode="None"
                                       Padding="0"
-                                      Visibility="{x:Bind IsLoadingOrders, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverterInvert}}">
+                                      Visibility="{x:Bind ViewModel.IsLoadingOrders, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverterInvert}}">
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">
                                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -254,7 +258,7 @@
                                 </ListView.ItemContainerStyle>
 
                                 <ListView.ItemTemplate>
-                                    <DataTemplate x:DataType="local:OrderVm">
+                                    <DataTemplate x:DataType="viewModels:OrderVm">
                                         <Grid Padding="24,14"
                                               BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
                                               BorderThickness="0,0,0,1">
@@ -300,12 +304,16 @@
 
                         <!-- Pagination -->
                         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12" Padding="24">
-                            <Button Content="◀" Click="OnOrderPrevClick" IsEnabled="{x:Bind OrderCanPrev, Mode=OneWay}"/>
+                            <Button Content="◀"
+                                    Command="{x:Bind ViewModel.OrderPrevCommand}"
+                                    IsEnabled="{x:Bind ViewModel.OrderCanPrev, Mode=OneWay}"/>
                             <TextBlock VerticalAlignment="Center">
                                 <Run Text="Page "/>
-                                <Run Text="{x:Bind OrderPageText, Mode=OneWay}" FontWeight="Bold"/>
+                                <Run Text="{x:Bind ViewModel.OrderPageText, Mode=OneWay}" FontWeight="Bold"/>
                             </TextBlock>
-                            <Button Content="▶" Click="OnOrderNextClick" IsEnabled="{x:Bind OrderCanNext, Mode=OneWay}"/>
+                            <Button Content="▶"
+                                    Command="{x:Bind ViewModel.OrderNextCommand}"
+                                    IsEnabled="{x:Bind ViewModel.OrderCanNext, Mode=OneWay}"/>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -337,7 +345,7 @@
                             </StackPanel>
 
                             <Button Grid.Column="1"
-                                    Click="OnRefreshPromosClick"
+                                    Command="{x:Bind ViewModel.RefreshPromosCommand}"
                                     ToolTipService.ToolTip="Refresh">
                                 <FontIcon Glyph="&#xE72C;" FontSize="14"/>
                             </Button>
@@ -355,31 +363,32 @@
                             <TextBox Grid.Column="0"
                                      x:Name="PromoSearchTextBox"
                                      PlaceholderText="Search code..."
+                                     Text="{x:Bind ViewModel.PromoSearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                      KeyDown="OnPromoSearchKeyDown"/>
 
                             <ComboBox Grid.Column="1"
                                       x:Name="PromoTypeFilterComboBox"
                                       Header="Type"
                                       MinWidth="160"
+                                      ItemsSource="{x:Bind ViewModel.PromoTypeOptions, Mode=OneWay}"
+                                      SelectedItem="{x:Bind ViewModel.SelectedPromoType, Mode=TwoWay}"
+                                      DisplayMemberPath="Label"
                                       SelectionChanged="OnPromoFilterChanged">
-                                <ComboBoxItem Content="All" Tag=""/>
-                                <ComboBoxItem Content="percentage" Tag="percentage"/>
-                                <ComboBoxItem Content="fixed_amount" Tag="fixed_amount"/>
                             </ComboBox>
 
                             <ComboBox Grid.Column="2"
                                       x:Name="PromoActiveFilterComboBox"
                                       Header="Active"
                                       MinWidth="140"
+                                      ItemsSource="{x:Bind ViewModel.PromoActiveOptions, Mode=OneWay}"
+                                      SelectedItem="{x:Bind ViewModel.SelectedPromoActive, Mode=TwoWay}"
+                                      DisplayMemberPath="Label"
                                       SelectionChanged="OnPromoFilterChanged">
-                                <ComboBoxItem Content="All" Tag=""/>
-                                <ComboBoxItem Content="Active" Tag="true"/>
-                                <ComboBoxItem Content="Inactive" Tag="false"/>
                             </ComboBox>
 
                             <Button Grid.Column="3"
                                     Margin="0,20,0,0"
-                                    Click="OnClearPromoFiltersClick"
+                                    Command="{x:Bind ViewModel.ClearPromoFiltersCommand}"
                                     ToolTipService.ToolTip="Clear Filters">
                                 <FontIcon Glyph="&#xE711;" FontSize="12"/>
                             </Button>
@@ -408,13 +417,13 @@
                         </Grid>
 
                         <Grid Grid.Row="3" MinHeight="200">
-                            <ProgressRing IsActive="{x:Bind IsLoadingPromos, Mode=OneWay}"
-                                          Visibility="{x:Bind IsLoadingPromos, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            <ProgressRing IsActive="{x:Bind ViewModel.IsLoadingPromos, Mode=OneWay}"
+                                          Visibility="{x:Bind ViewModel.IsLoadingPromos, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
-                            <ListView ItemsSource="{x:Bind Promos, Mode=OneWay}"
+                            <ListView ItemsSource="{x:Bind ViewModel.Promos, Mode=OneWay}"
                                       SelectionMode="None"
                                       Padding="0"
-                                      Visibility="{x:Bind IsLoadingPromos, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverterInvert}}">
+                                      Visibility="{x:Bind ViewModel.IsLoadingPromos, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverterInvert}}">
                                 <ListView.ItemContainerStyle>
                                     <Style TargetType="ListViewItem">
                                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
@@ -424,7 +433,7 @@
                                 </ListView.ItemContainerStyle>
 
                                 <ListView.ItemTemplate>
-                                    <DataTemplate x:DataType="local:PromoVm">
+                                    <DataTemplate x:DataType="viewModels:PromoVm">
                                         <Grid Padding="24,14"
                                               BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
                                               BorderThickness="0,0,0,1">
@@ -452,12 +461,16 @@
 
                         <!-- Pagination -->
                         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12" Padding="24">
-                            <Button Content="◀" Click="OnPromoPrevClick" IsEnabled="{x:Bind PromoCanPrev, Mode=OneWay}"/>
+                            <Button Content="◀"
+                                    Command="{x:Bind ViewModel.PromoPrevCommand}"
+                                    IsEnabled="{x:Bind ViewModel.PromoCanPrev, Mode=OneWay}"/>
                             <TextBlock VerticalAlignment="Center">
                                 <Run Text="Page "/>
-                                <Run Text="{x:Bind PromoPageText, Mode=OneWay}" FontWeight="Bold"/>
+                                <Run Text="{x:Bind ViewModel.PromoPageText, Mode=OneWay}" FontWeight="Bold"/>
                             </TextBlock>
-                            <Button Content="▶" Click="OnPromoNextClick" IsEnabled="{x:Bind PromoCanNext, Mode=OneWay}"/>
+                            <Button Content="▶"
+                                    Command="{x:Bind ViewModel.PromoNextCommand}"
+                                    IsEnabled="{x:Bind ViewModel.PromoCanNext, Mode=OneWay}"/>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -476,41 +489,43 @@
 
             <StackPanel Spacing="12" MinWidth="420">
 
-                <InfoBar x:Name="AddPromoInfoBar"
-                         IsOpen="False"
+                <InfoBar
+                         IsOpen="{x:Bind ViewModel.IsAddPromoErrorOpen, Mode=TwoWay}"
                          IsClosable="True"
                          Severity="Error"
-                         Message=""/>
+                         Message="{x:Bind ViewModel.AddPromoErrorMessage, Mode=OneWay}"/>
 
-                <TextBox x:Name="PromoCodeTextBox"
+                <TextBox
                          Header="Code"
                          PlaceholderText="e.g. SALE25"
-                         MaxLength="30"/>
+                         MaxLength="30"
+                         Text="{x:Bind ViewModel.PromoCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
-                <ComboBox x:Name="PromoTypeComboBox"
+                <ComboBox
                           Header="Discount Type"
-                          SelectedIndex="0">
-                    <ComboBoxItem Content="percentage"/>
-                    <ComboBoxItem Content="fixed_amount"/>
-                </ComboBox>
+                          ItemsSource="{x:Bind ViewModel.PromoCreateTypeOptions, Mode=OneWay}"
+                          SelectedItem="{x:Bind ViewModel.SelectedPromoCreateType, Mode=TwoWay}"/>
 
-                <NumberBox x:Name="PromoValueNumberBox"
+                <NumberBox
                            Header="Value"
                            SpinButtonPlacementMode="Hidden"
                            Minimum="0"
-                           PlaceholderText="percentage: 1-100 | fixed_amount: >= 0"/>
+                           PlaceholderText="percentage: 1-100 | fixed_amount: >= 0"
+                           Value="{x:Bind ViewModel.PromoValue, Mode=TwoWay}"/>
 
-                    <NumberBox x:Name="PromoMinOrderNumberBox"
+                    <NumberBox
                                Header="Min Order Value"
                                SpinButtonPlacementMode="Hidden"
                                Minimum="0"
-                               PlaceholderText="e.g. 200000"/>
+                               PlaceholderText="e.g. 200000"
+                               Value="{x:Bind ViewModel.PromoMinOrderValue, Mode=TwoWay}"/>
 
-                    <NumberBox x:Name="PromoMaxDiscountNumberBox"
+                    <NumberBox
                                Header="Max Discount (optional)"
                                SpinButtonPlacementMode="Hidden"
                                Minimum="0"
-                               PlaceholderText="e.g. 50000"/>
+                               PlaceholderText="e.g. 50000"
+                               Value="{x:Bind ViewModel.PromoMaxDiscount, Mode=TwoWay}"/>
 
                     <Grid ColumnSpacing="12">
                         <Grid.ColumnDefinitions>
@@ -518,13 +533,15 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <DatePicker x:Name="PromoStartDatePicker"
+                        <DatePicker
                                     Grid.Column="0"
-                                    Header="Start Date"/>
+                                    Header="Start Date"
+                                    Date="{x:Bind ViewModel.PromoStartDate, Mode=TwoWay}"/>
 
-                        <DatePicker x:Name="PromoEndDatePicker"
+                        <DatePicker
                                     Grid.Column="1"
-                                    Header="End Date"/>
+                                    Header="End Date"
+                                    Date="{x:Bind ViewModel.PromoEndDate, Mode=TwoWay}"/>
                     </Grid>
 
                 </StackPanel>

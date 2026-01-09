@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="Vidora.Presentation.Gui.Views.ManageUsersPage"
+    x:Name="PageRoot"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Vidora.Presentation.Gui.Views"
+    xmlns:viewModels="using:Vidora.Presentation.Gui.ViewModels"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
@@ -17,15 +19,17 @@
         </Grid.RowDefinitions>
 
         <!-- ===== INFOBAR ===== -->
-        <InfoBar x:Name="NotificationInfoBar"
+        <InfoBar
                  Grid.Row="0"
                  VerticalAlignment="Top"
                  HorizontalAlignment="Center"
                  Margin="0,10,0,0"
                  Canvas.ZIndex="999"
-                 IsOpen="False"
+                 IsOpen="{x:Bind ViewModel.IsInfoBarOpen, Mode=TwoWay}"
                  IsClosable="True"
-                 Severity="Success"
+                 Severity="{x:Bind ViewModel.InfoBarSeverity, Mode=OneWay}"
+                 Title="{x:Bind ViewModel.InfoBarTitle, Mode=OneWay}"
+                 Message="{x:Bind ViewModel.InfoBarMessage, Mode=OneWay}"
                  Width="520"/>
 
         <!-- ===== HEADER ===== -->
@@ -41,14 +45,14 @@
                            FontWeight="SemiBold"/>
                 <TextBlock Foreground="Gray" FontSize="14">
                     <Run Text="Total: "/>
-                    <Run x:Name="TotalUsersRun" Text="0" FontWeight="SemiBold"/>
+                    <Run Text="{x:Bind ViewModel.TotalUsers, Mode=OneWay}" FontWeight="SemiBold"/>
                     <Run Text=" users"/>
                 </TextBlock>
             </StackPanel>
 
             <Button Grid.Column="1"
                     Padding="18,10"
-                    Click="Reload_Click">
+                    Command="{x:Bind ViewModel.ReloadCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <FontIcon Glyph="&#xE72C;" FontSize="14"/>
                     <TextBlock Text="Reload" FontWeight="SemiBold"/>
@@ -77,20 +81,23 @@
                                 PlaceholderText="Search by name, email, username..."
                                 QueryIcon="Find"
                                 MinWidth="320"
+                                Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 VerticalAlignment="Center"
                                 QuerySubmitted="SearchBox_QuerySubmitted"/>
 
-                <ComboBox x:Name="StatusCombo"
+                <ComboBox
                           Grid.Column="1"
                           Margin="16,0,0,0"
                           MinWidth="160"
                           PlaceholderText="Status"
-                          VerticalAlignment="Center"/>
+                          VerticalAlignment="Center"
+                          ItemsSource="{x:Bind ViewModel.StatusOptions, Mode=OneWay}"
+                          SelectedItem="{x:Bind ViewModel.SelectedStatus, Mode=TwoWay}"/>
 
                 <Button Grid.Column="2"
                         Margin="16,0,0,0"
                         Padding="18,10"
-                        Click="Search_Click"
+                        Command="{x:Bind ViewModel.SearchCommand}"
                         VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon Glyph="&#xE721;" FontSize="14"/>
@@ -101,7 +108,7 @@
                 <Button Grid.Column="3"
                         Margin="8,0,0,0"
                         Padding="18,10"
-                        Click="Clear_Click"
+                        Command="{x:Bind ViewModel.ClearCommand}"
                         VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon Glyph="&#xE894;" FontSize="14"/>
@@ -147,7 +154,7 @@
                     <TextBlock Grid.Column="5" Text="ACTIONS" FontWeight="Bold" Foreground="Gray" HorizontalAlignment="Center"/>
                 </Grid>
 
-                <ListView x:Name="UsersList"
+                <ListView ItemsSource="{x:Bind ViewModel.Users, Mode=OneWay}"
                           Grid.Row="1"
                           SelectionMode="None"
                           Padding="0">
@@ -160,7 +167,7 @@
                     </ListView.ItemContainerStyle>
 
                     <ListView.ItemTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="viewModels:UserItem">
                             <Grid Padding="20,14"
                                   BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
                                   BorderThickness="0,0,0,1">
@@ -176,12 +183,12 @@
                                 <!-- USER -->
                                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="14">
                                     <PersonPicture Width="40" Height="40"
-                                                   DisplayName="{Binding FullName}"/>
+                                                   DisplayName="{x:Bind FullName}"/>
                                     <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding FullName}"
+                                        <TextBlock Text="{x:Bind FullName}"
                                                    FontWeight="SemiBold"
                                                    FontSize="14"/>
-                                        <TextBlock Text="{Binding Username}"
+                                        <TextBlock Text="{x:Bind Username}"
                                                    Foreground="Gray"
                                                    FontSize="12"/>
                                     </StackPanel>
@@ -189,7 +196,7 @@
 
                                 <!-- EMAIL -->
                                 <TextBlock Grid.Column="1"
-                                           Text="{Binding Email}"
+                                           Text="{x:Bind Email}"
                                            VerticalAlignment="Center"
                                            Foreground="Gray"
                                            HorizontalAlignment="Center"
@@ -202,7 +209,7 @@
                                         Padding="10,4"
                                         CornerRadius="4"
                                         Background="{ThemeResource SystemAccentColorLight2}">
-                                    <TextBlock Text="{Binding Role}"
+                                    <TextBlock Text="{x:Bind Role}"
                                                FontSize="12"
                                                FontWeight="SemiBold"/>
                                 </Border>
@@ -214,14 +221,14 @@
                                         Padding="10,4"
                                         CornerRadius="4"
                                         Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}">
-                                    <TextBlock Text="{Binding Status}"
+                                    <TextBlock Text="{x:Bind Status}"
                                                FontSize="12"
                                                FontWeight="SemiBold"/>
                                 </Border>
 
                                 <!-- CREATED -->
                                 <TextBlock Grid.Column="4"
-                                           Text="{Binding CreatedAtDisplay}"
+                                           Text="{x:Bind CreatedAtDisplay}"
                                            VerticalAlignment="Center"
                                            Foreground="Gray"
                                            HorizontalAlignment="Center"
@@ -235,16 +242,16 @@
                                             HorizontalAlignment="Center">
                                     <Button Background="Transparent"
                                             BorderThickness="0"
-                                            Tag="{Binding UserId}"
-                                            Click="ViewDetail_Click"
+                                            Command="{x:Bind ViewModel.ViewDetailCommand, ElementName=PageRoot}"
+                                            CommandParameter="{x:Bind UserId}"
                                             ToolTipService.ToolTip="View Details">
                                         <FontIcon Glyph="&#xE890;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontSize="16"/>
                                     </Button>
 
                                     <Button Background="Transparent"
                                             BorderThickness="0"
-                                            Tag="{Binding UserId}"
-                                            Click="ToggleStatus_Click"
+                                            Command="{x:Bind ViewModel.ToggleStatusCommand, ElementName=PageRoot}"
+                                            CommandParameter="{x:Bind UserId}"
                                             ToolTipService.ToolTip="Lock/Unlock">
                                         <FontIcon Glyph="&#xE72E;" Foreground="Orange" FontSize="16"/>
                                     </Button>
@@ -255,10 +262,10 @@
                 </ListView>
 
                 <!-- Loading -->
-                <ProgressRing x:Name="LoadingRing"
+                <ProgressRing
                               Grid.Row="1"
-                              IsActive="False"
-                              Visibility="Collapsed"
+                              IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}"
+                              Visibility="{x:Bind ViewModel.IsLoading, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                               HorizontalAlignment="Center"
                               VerticalAlignment="Center"/>
             </Grid>
@@ -270,14 +277,18 @@
                     HorizontalAlignment="Right"
                     Spacing="12"
                     Padding="40,0,40,20">
-            <Button x:Name="PrevBtn" Content="◀" Click="Prev_Click"/>
+            <Button Content="◀"
+                    Command="{x:Bind ViewModel.PrevCommand}"
+                    IsEnabled="{x:Bind ViewModel.CanPrev, Mode=OneWay}"/>
             <TextBlock VerticalAlignment="Center">
                 <Run Text="Page "/>
-                <Run x:Name="PageRun" Text="1" FontWeight="Bold"/>
+                <Run Text="{x:Bind ViewModel.CurrentPage, Mode=OneWay}" FontWeight="Bold"/>
                 <Run Text=" / "/>
-                <Run x:Name="TotalPagesRun" Text="1" FontWeight="Bold"/>
+                <Run Text="{x:Bind ViewModel.TotalPages, Mode=OneWay}" FontWeight="Bold"/>
             </TextBlock>
-            <Button x:Name="NextBtn" Content="▶" Click="Next_Click"/>
+            <Button Content="▶"
+                    Command="{x:Bind ViewModel.NextCommand}"
+                    IsEnabled="{x:Bind ViewModel.CanNext, Mode=OneWay}"/>
         </StackPanel>
     </Grid>
 </Page>
